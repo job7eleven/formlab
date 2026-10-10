@@ -9,11 +9,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&display=swap">
 <style>
-/* Layout: one-column phone instrument — camera stage on top, metric dial grid, controls, then records. Dark single look (gym/treadmill use). */
+/* Layout: one-column phone instrument — camera stage, run setup, live dials, result + replay, records. Dark single look for gym use. */
 :root{
-  --bg:#0f1417; --panel:#172026; --line:#26333b; --fg:#e8eef1; --muted:#8fa1ab;
-  --accent:#c6f432;          /* record / primary */
-  --left:#ffa24a; --right:#43cdf5; --warn:#ffcf5a; --bad:#ff6b6b;
+  --bg:#0f1417; --panel:#172026; --panel2:#1d2830; --line:#26333b; --fg:#e8eef1; --muted:#8fa1ab;
+  --accent:#c6f432; --left:#ffa24a; --right:#43cdf5; --warn:#ffcf5a; --bad:#ff6b6b; --good:#7fe08f;
   --num:"Barlow Condensed","Roboto Condensed","Arial Narrow",system-ui,sans-serif;
   --body:system-ui,-apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
   color-scheme:dark;
@@ -29,35 +28,32 @@ h1 small{font-size:15px;color:var(--muted);font-weight:500;margin-left:6px}
 .ver{font-family:var(--num);color:var(--accent);font-size:16px;border:1px solid var(--accent);padding:0 8px;border-radius:4px}
 h2{font-size:15px;margin:0;color:var(--muted);font-weight:600;letter-spacing:.06em}
 
-/* stage */
-.stage{position:relative;background:#000;border-radius:10px;overflow:hidden;aspect-ratio:3/4;max-height:70vh;width:100%;display:flex;align-items:center;justify-content:center;border:1px solid var(--line)}
+.stage{position:relative;background:#000;border-radius:10px;overflow:hidden;aspect-ratio:3/4;max-height:72vh;width:100%;display:flex;align-items:center;justify-content:center;border:1px solid var(--line)}
 .stage canvas{max-width:100%;max-height:100%;display:block}
 .stage video{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
 .hud{position:absolute;top:8px;left:8px;right:8px;display:flex;flex-wrap:wrap;gap:6px;pointer-events:none}
-.chip{font-size:12.5px;padding:2px 8px;border-radius:99px;background:rgba(15,20,23,.75);border:1px solid var(--line);color:var(--fg);font-variant-numeric:tabular-nums}
-.chip.ok{border-color:#3e7a4a;color:#a6f0b4}.chip.warn{border-color:#7a6524;color:var(--warn)}.chip.rec{border-color:var(--bad);color:#fff;background:rgba(160,30,30,.8)}
+.chip{font-size:12.5px;padding:2px 8px;border-radius:99px;background:rgba(15,20,23,.78);border:1px solid var(--line);color:var(--fg);font-variant-numeric:tabular-nums}
+.chip.ok{border-color:#3e7a4a;color:#a6f0b4}.chip.warn{border-color:#7a6524;color:var(--warn)}.chip.rec{border-color:var(--bad);color:#fff;background:rgba(160,30,30,.85)}.chip.wait{border-color:var(--accent);color:var(--accent)}
+.phase{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);font-family:var(--num);font-size:22px;font-weight:600;padding:2px 14px;border-radius:8px;background:rgba(15,20,23,.82);border:1px solid var(--line);white-space:nowrap;font-variant-numeric:tabular-nums}
 .legend{position:absolute;bottom:8px;left:8px;display:flex;gap:10px;font-size:12px;pointer-events:none;background:rgba(15,20,23,.6);padding:2px 8px;border-radius:6px}
 .legend b{display:inline-block;width:10px;height:3px;vertical-align:middle;margin-right:4px}
 .placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--muted);text-align:center;padding:24px}
 .placeholder svg{opacity:.55}
-.count{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--num);font-size:140px;font-weight:700;color:var(--accent);background:rgba(0,0,0,.35)}
+.count{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--num);font-size:150px;font-weight:700;color:var(--accent);background:rgba(0,0,0,.3);pointer-events:none}
 
-/* metrics */
-.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
 .m{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0}
 .m .k{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.m .v{font-family:var(--num);font-weight:600;font-size:30px;line-height:1.1;font-variant-numeric:tabular-nums}
-.m .v span{font-size:15px;color:var(--muted);margin-left:2px;font-weight:500}
-.m .lr{font-size:12px;font-variant-numeric:tabular-nums;color:var(--muted)}
-.m .lr i{font-style:normal}.m .lr .l{color:var(--left)}.m .lr .r{color:var(--right)}
-@media (max-width:380px){.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.m .v{font-family:var(--num);font-weight:600;font-size:28px;line-height:1.1;font-variant-numeric:tabular-nums}
+.m .v span{font-size:14px;color:var(--muted);margin-left:2px;font-weight:500}
+@media (max-width:420px){.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
-/* controls */
 .controls{display:flex;flex-wrap:wrap;gap:8px}
 button,.btn{font:inherit;font-weight:600;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--fg);padding:10px 14px;cursor:pointer;min-height:44px}
 button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 button.primary{background:var(--accent);color:#11170a;border-color:var(--accent)}
 button.stop{background:var(--bad);border-color:var(--bad);color:#fff}
+button.on{border-color:var(--accent);color:var(--accent)}
 button:disabled{opacity:.45;cursor:not-allowed}
 .grow{flex:1 1 140px}
 .settings{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px}
@@ -66,18 +62,33 @@ input,select{font:inherit;color:var(--fg);background:var(--bg);border:1px solid 
 .vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
 .filebtn{display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--fg)}
 label:focus-within .filebtn{outline:2px solid var(--accent);outline-offset:2px}
+.plan{grid-column:1/-1;font-size:13px;color:var(--fg);background:var(--panel2);border-radius:6px;padding:8px 10px;font-variant-numeric:tabular-nums}
+.plan b{color:var(--accent);font-weight:600}
 .msg{font-size:14px;padding:10px 12px;border-radius:8px;background:#2a2312;border:1px solid #6b5520;color:#ffe2a0}
 .msg.err{background:#2c1515;border-color:#7a2a2a;color:#ffc2c2}
+.msg.ok{background:#14261a;border-color:#2f6b3d;color:#bdf5c8}
 
-/* summary + records */
-.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
 .tbl{overflow-x:auto}
 table{border-collapse:collapse;width:100%;font-size:13.5px;font-variant-numeric:tabular-nums}
 th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
 th{color:var(--muted);font-weight:600}
 td.n{font-family:var(--num);font-size:16px}
 .ref{color:var(--muted);font-size:12.5px}
-.rec-item{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.note{font-size:12.5px;color:var(--muted);margin:0}
+.tag{display:inline-block;font-size:11.5px;padding:0 6px;border-radius:4px;border:1px solid var(--line);color:var(--muted);margin-left:4px}
+
+/* replay */
+.rp-stage{position:relative;background:#0a0e10;border:1px solid var(--line);border-radius:8px;overflow:hidden;display:flex;justify-content:center}
+.rp-stage canvas{display:block;max-width:100%;max-height:60vh}
+.rp-read{display:flex;flex-wrap:wrap;gap:2px 14px;font-size:13px;font-variant-numeric:tabular-nums;color:var(--fg)}
+.rp-ctrl{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.rp-ctrl button{min-height:40px;padding:6px 12px}
+.rp-ctrl select{width:auto;min-height:40px}
+.rp-ctrl input[type=range]{flex:1 1 200px;min-height:auto;padding:0;accent-color:var(--accent)}
+.chart{width:100%;display:block;background:var(--panel2);border-radius:6px}
+
+.rec-item{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding:10px 0;border-bottom:1px solid var(--line)}
 .rec-item:last-child{border-bottom:0}
 .rec-item .info{flex:1 1 200px;min-width:0}
 .rec-item .info b{font-family:var(--num);font-size:18px;font-weight:600}
@@ -87,7 +98,6 @@ details{background:var(--panel);border:1px solid var(--line);border-radius:10px;
 summary{cursor:pointer;font-weight:600}
 details ol{padding-left:20px;margin:8px 0 0}
 details li{margin:4px 0}
-.note{font-size:12.5px;color:var(--muted)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -95,18 +105,19 @@ details li{margin:4px 0}
 <div class="wrap">
   <header>
     <h1>跑姿記錄器<small>Run Form</small></h1>
-    <span class="ver" id="ver">v1</span>
+    <span class="ver" id="ver">v2</span>
   </header>
 
   <div class="stage" id="stage">
     <video id="video" playsinline muted></video>
-    <canvas id="canvas" width="720" height="960"></canvas>
+    <canvas id="canvas" width="540" height="960"></canvas>
     <div class="placeholder" id="ph">
       <svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><circle cx="38" cy="10" r="5"/><path d="M36 17l-6 16 10 8-4 15M30 33l-12 6M34 22l10 6 8-2M30 33l-4 10-12 4"/></svg>
-      <div>按「開啟攝影機」開始。<br>手機架在跑步機側面約 2–3 公尺，全身入鏡。</div>
+      <div>按「開啟攝影機」，用輔助線把手機架好。<br>手機在跑步機正側面約 2–3 公尺，全身入鏡。</div>
     </div>
     <div class="hud" id="hud"></div>
     <div class="legend"><span><b style="background:var(--left)"></b>左側</span><span><b style="background:var(--right)"></b>右側</span></div>
+    <div class="phase" id="phase" hidden></div>
     <div class="count" id="count" hidden></div>
   </div>
 
@@ -115,508 +126,738 @@ details li{margin:4px 0}
   <div class="controls">
     <button id="btnCam" class="grow">開啟攝影機</button>
     <button id="btnFlip" disabled>切換鏡頭</button>
-    <button id="btnRec" class="primary grow" disabled>開始記錄</button>
+    <button id="btnGuide" class="on" aria-pressed="true">輔助線</button>
+  </div>
+
+  <section class="settings" aria-label="本次設定">
+    <label for="inHeight">身高（cm）<input id="inHeight" type="number" inputmode="numeric" min="120" max="220" value="170"></label>
+    <label for="inWait">開始前等待（不記錄）<select id="inWait"><option value="0">不等待</option><option value="10">10 秒</option><option value="30">30 秒</option><option value="60" selected>1 分鐘</option><option value="90">1 分 30 秒</option><option value="120">2 分鐘</option></select></label>
+    <label for="inDur">記錄時長（時間到自動存檔）<select id="inDur"><option value="30">30 秒</option><option value="60">1 分鐘</option><option value="120" selected>2 分鐘</option><option value="180">3 分鐘</option><option value="300">5 分鐘</option></select></label>
+    <label for="inModel">AI 模型<select id="inModel"><option value="lite" selected>輕量（建議，較快）</option><option value="full">標準（較準、較慢）</option></select></label>
+    <label for="inBeep">提示音<select id="inBeep"><option value="1" selected>開</option><option value="0">關</option></select></label>
+    <label for="inFile">分析手機影片檔（選用）<span class="btn filebtn">選擇影片…</span><input id="inFile" type="file" accept="video/*" class="vh"></label>
+    <div class="plan" id="plan"></div>
+  </section>
+
+  <div class="controls">
+    <button id="btnRec" class="primary grow" disabled>開始</button>
   </div>
 
   <section class="metrics" aria-label="即時指標（最近 10 秒）">
-    <div class="m"><div class="k">步頻</div><div class="v" id="mCad">--<span>步/分</span></div><div class="lr" id="mSteps">步數 0</div></div>
-    <div class="m"><div class="k">垂直振幅</div><div class="v" id="mOsc">--<span>cm</span></div><div class="lr">骨盆上下起伏</div></div>
-    <div class="m"><div class="k">觸地膝角</div><div class="v" id="mKnee">--<span>°</span></div><div class="lr" id="mKneeLR"><i class="l">左 --</i> · <i class="r">右 --</i></div></div>
-    <div class="m"><div class="k">跨步距</div><div class="v" id="mOver">--<span>cm</span></div><div class="lr" id="mOverLR"><i class="l">左 --</i> · <i class="r">右 --</i></div></div>
-    <div class="m"><div class="k">軀幹前傾</div><div class="v" id="mTrunk">--<span>°</span></div><div class="lr">向前為正</div></div>
-    <div class="m"><div class="k">手肘角度</div><div class="v" id="mElb">--<span>°</span></div><div class="lr" id="mElbLR"><i class="l">左 --</i> · <i class="r">右 --</i></div></div>
+    <div class="m"><div class="k">步頻</div><div class="v" id="mCad">--<span>步/分</span></div></div>
+    <div class="m"><div class="k">垂直振幅</div><div class="v" id="mOsc">--<span>cm</span></div></div>
+    <div class="m"><div class="k">軀幹前傾</div><div class="v" id="mTrunk">--<span>°</span></div></div>
+    <div class="m"><div class="k">步數</div><div class="v" id="mSteps">0<span>步</span></div></div>
   </section>
-  <p class="note" style="margin:-6px 0 0">即時數值為最近 10 秒平均。距離以身高換算，屬估算值。</p>
-
-  <section class="settings" aria-label="設定">
-    <label for="inHeight">身高（cm）<input id="inHeight" type="number" inputmode="numeric" min="120" max="220" value="170"></label>
-    <label for="inModel">AI 模型<select id="inModel"><option value="full">標準（較準）</option><option value="lite">輕量（較快）</option></select></label>
-    <label for="inCount">開始前倒數<select id="inCount"><option value="0">不倒數</option><option value="5">5 秒</option><option value="10" selected>10 秒</option><option value="20">20 秒</option></select></label>
-    <label for="inFile">分析手機影片檔（選用）<span class="btn filebtn">選擇影片…</span><input id="inFile" type="file" accept="video/*" class="vh"></label>
-  </section>
+  <p class="note" style="margin-top:-6px">即時數值是最近 10 秒的粗估；記錄結束後會用整段資料重新精算。</p>
 
   <section class="card" id="sumCard" hidden>
     <h2>本次結果</h2>
     <div id="sumBody"></div>
   </section>
 
+  <section class="card" id="rpCard" hidden>
+    <h2>回放檢視</h2>
+    <div class="rp-stage"><canvas id="rpCanvas" width="540" height="720"></canvas></div>
+    <div class="rp-read" id="rpRead"></div>
+    <div class="rp-ctrl">
+      <button id="rpPrev" aria-label="上一格">◀︎ 格</button>
+      <button id="rpPlay">播放</button>
+      <button id="rpNext" aria-label="下一格">格 ▶︎</button>
+      <button id="rpPrevStep" aria-label="上一步">上一步</button>
+      <button id="rpNextStep" aria-label="下一步">下一步</button>
+      <select id="rpSpeed" aria-label="播放速度"><option value="0.25">0.25×</option><option value="0.5" selected>0.5×</option><option value="1">1×</option></select>
+    </div>
+    <div class="rp-ctrl"><input id="rpSlider" type="range" min="0" max="0" value="0" aria-label="時間軸"></div>
+    <canvas class="chart" id="rpChart" height="300"></canvas>
+    <canvas class="chart" id="rpOverview" height="90"></canvas>
+    <p class="note">上圖：目前時間前後 2.5 秒的骨盆高度與膝角；實線＝觸地，點線＝離地。下圖：整段每一步的步頻，點一下可跳到該處。</p>
+  </section>
+
   <section class="card">
     <h2>已存紀錄（只存在這支手機）</h2>
-    <div id="recList"><p class="note" style="margin:0">還沒有紀錄。按「開始記錄」跑一段後按「停止」，紀錄會出現在這裡，可下載成 ZIP（內含 CSV 與摘要）。</p></div>
+    <div id="recList"><p class="note">還沒有紀錄。按「開始」後，等待時間過去會自動開始記錄，時長到了自動停止並存檔。</p></div>
   </section>
 
   <details>
     <summary>拍攝方式與注意事項</summary>
     <ol>
-      <li>手機直立或橫放在腳架上，鏡頭對著跑步機<b>正側面</b>，距離約 2–3 公尺，從頭到腳全身入鏡，腳下留一點空間。</li>
-      <li>先輸入身高，距離類數值（cm）會用它換算。</li>
-      <li>按「開始記錄」後有倒數，上跑步機跑穩再開始計算；建議每段 1–3 分鐘。</li>
-      <li>光線充足、避免逆光；穿著和背景有對比的衣服效果較好。</li>
-      <li>本程式<b>不錄影、不上傳</b>：畫面只在手機上即時分析，只保存關節座標與計算結果。</li>
-      <li>單機側拍是 2D 分析，左右方向的偏移量無法量測；步頻最可靠，距離與角度為估算。</li>
+      <li>手機架在跑步機<b>正側面</b> 2–3 公尺，高度約在腰部；打開「輔助線」，讓傾斜顯示綠色（±1° 內），腳底落在地面帶上，人物高度佔畫面 55–85%。</li>
+      <li>設定「開始前等待」讓自己先跑進穩定狀態；「記錄時長」到了會自動停止並把 CSV 存到手機的「下載」資料夾。</li>
+      <li>前鏡頭畫面會鏡射顯示，但數據用原始畫面計算，左右是正確的。</li>
+      <li>畫面左上角 fps 建議 25 以上；不足時用輕量模型、拉近光線。</li>
+      <li>本程式<b>不錄影、不上傳</b>：只保存關節座標與計算結果。</li>
+      <li>單機側拍是 2D 分析：步頻最可靠；角度、距離、觸地時間是估算，離鏡頭較遠那隻腳的數值較不準。</li>
     </ol>
   </details>
   <p class="note">參考範圍為一般跑者常見值，僅供自我觀察，不構成教練或醫療建議。</p>
 </div>
 
 <script>
-/* ===================== RunAnalyzer (pure, no DOM) ===================== */
-(function(){
-const LM = {nose:0,lEar:7,rEar:8,lSh:11,rSh:12,lEl:13,rEl:14,lWr:15,rWr:16,lHip:23,rHip:24,lKn:25,rKn:26,lAn:27,rAn:28,lHe:29,rHe:30,lFt:31,rFt:32};
-const LEG_RATIO = 0.491;   // thigh+shank ≈ 0.491 × height (Winter anthropometry)
-function ang(a,b,c){ // angle at b, degrees
-  const v1x=a.x-b.x,v1y=a.y-b.y,v2x=c.x-b.x,v2y=c.y-b.y;
-  const d=Math.hypot(v1x,v1y)*Math.hypot(v2x,v2y); if(!d) return NaN;
-  return Math.acos(Math.max(-1,Math.min(1,(v1x*v2x+v1y*v2y)/d)))*180/Math.PI;
-}
-const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
-const mid=(a,b)=>({x:(a.x+b.x)/2,y:(a.y+b.y)/2});
-const mean=a=>a.length?a.reduce((s,x)=>s+x,0)/a.length:NaN;
-const median=a=>{if(!a.length)return NaN;const s=[...a].sort((x,y)=>x-y),m=s.length>>1;return s.length%2?s[m]:(s[m-1]+s[m])/2};
-const sd=a=>{if(a.length<2)return NaN;const m=mean(a);return Math.sqrt(a.reduce((s,x)=>s+(x-m)**2,0)/(a.length-1))};
+/* ===================== Run Form core (pure, no DOM) — v2 ===================== */
+(function(G){
+const LEG_RATIO=0.491;           // thigh+shank ≈ 0.491 × body height (Winter)
+const NLM=33, LMW=7, ROW=1+NLM*LMW; // stored row: t_ms + 33×(x,y,z,vis,wx,wy,wz)
+const BODY=[0,7,8,11,12,13,14,15,16,23,24,25,26,27,28,29,30,31,32];
+const NAMES=['nose','left_eye_inner','left_eye','left_eye_outer','right_eye_inner','right_eye','right_eye_outer','left_ear','right_ear','mouth_left','mouth_right','left_shoulder','right_shoulder','left_elbow','right_elbow','left_wrist','right_wrist','left_pinky','right_pinky','left_index','right_index','left_thumb','right_thumb','left_hip','right_hip','left_knee','right_knee','left_ankle','right_ankle','left_heel','right_heel','left_foot_index','right_foot_index'];
+const SIDE={L:{sh:11,el:13,wr:15,hip:23,kn:25,an:27,he:29,ft:31},R:{sh:12,el:14,wr:16,hip:24,kn:26,an:28,he:30,ft:32}};
 
-class RunAnalyzer{
-  constructor(opts={}){ this.heightCm=opts.heightCm||170; this.reset(); }
-  reset(){ this.F=[]; this.steps=[]; this.scan=0; this.lastPeak=-1; this.dirEma=0; this.legs=[]; this.Lpx=NaN; }
-  get dir(){ return this.dirEma>=0?1:-1; }
-  get cmPerPx(){ return this.Lpx>0 ? LEG_RATIO*this.heightCm/this.Lpx : NaN; }
-  /** lm: array of 33 {x,y,z,visibility} normalized; W,H pixel size; t seconds. Returns per-frame derived object or null */
-  push(t, lm, W, H){
-    if(!lm){ return null; }
+const mean=a=>{let s=0,c=0;for(const x of a)if(Number.isFinite(x)){s+=x;c++;}return c?s/c:NaN;};
+const median=a=>{const s=a.filter(Number.isFinite).sort((x,y)=>x-y);if(!s.length)return NaN;const m=s.length>>1;return s.length%2?s[m]:(s[m-1]+s[m])/2;};
+const pct=(a,p)=>{const s=a.filter(Number.isFinite).sort((x,y)=>x-y);if(!s.length)return NaN;const i=Math.min(s.length-1,Math.max(0,Math.round(p*(s.length-1))));return s[i];};
+const sd=a=>{const b=a.filter(Number.isFinite);if(b.length<2)return NaN;const m=mean(b);return Math.sqrt(b.reduce((s,x)=>s+(x-m)**2,0)/(b.length-1));};
+const agg=a=>{const b=a.filter(Number.isFinite);return {mean:mean(b),sd:sd(b),min:b.length?Math.min(...b):NaN,max:b.length?Math.max(...b):NaN,n:b.length};};
+function ang(ax,ay,bx,by,cx,cy){const v1x=ax-bx,v1y=ay-by,v2x=cx-bx,v2y=cy-by;const d=Math.hypot(v1x,v1y)*Math.hypot(v2x,v2y);if(!d)return NaN;return Math.acos(Math.max(-1,Math.min(1,(v1x*v2x+v1y*v2y)/d)))*180/Math.PI;}
+const sig=x=>1/(1+Math.exp(-x));
+
+/* ---------- live (online) analyzer: approximate numbers while running ---------- */
+class LiveAnalyzer{
+  constructor(h){this.heightCm=h||170;this.reset();}
+  reset(){this.F=[];this.steps=[];this.scan=0;this.lastPeak=-1;this.dirVotes=0;this.legs=[];this.Lpx=NaN;}
+  get dir(){return this.dirVotes>=0?1:-1;}
+  get cmPerPx(){return this.Lpx>0?LEG_RATIO*this.heightCm/this.Lpx:NaN;}
+  push(t,lm,W,H){
     const P=i=>({x:lm[i].x*W,y:lm[i].y*H,v:lm[i].visibility??1});
-    const need=[LM.lSh,LM.rSh,LM.lHip,LM.rHip,LM.lKn,LM.rKn,LM.lAn,LM.rAn];
-    const vis=mean(need.map(i=>P(i).v));
-    if(vis<0.45) return {t,valid:false,vis};
-    const p={}; for(const k in LM) p[k]=P(LM[k]);
-    const hip=mid(p.lHip,p.rHip), sh=mid(p.lSh,p.rSh);
-    // facing direction from feet (toe ahead of heel), fallback nose vs ears
-    let f=((p.lFt.x-p.lHe.x)+(p.rFt.x-p.rHe.x))/2;
-    if(Math.abs(f)<2){ f=p.nose.x-mid(p.lEar,p.rEar).x; }
-    this.dirEma=this.dirEma*0.97+Math.sign(f)*0.03;
-    // leg length (pixels) rolling median
-    const leg=(dist(p.lHip,p.lKn)+dist(p.lKn,p.lAn)+dist(p.rHip,p.rKn)+dist(p.rKn,p.rAn))/2;
-    this.legs.push(leg); if(this.legs.length>240) this.legs.shift();
-    this.Lpx=median(this.legs);
+    const core=[11,12,23,24,25,26,27,28].map(P); if(mean(core.map(p=>p.v))<0.45) return {t,valid:false};
+    const p={};for(const i of BODY)p[i]=P(i);
+    const hip={x:(p[23].x+p[24].x)/2,y:(p[23].y+p[24].y)/2},sh={x:(p[11].x+p[12].x)/2,y:(p[11].y+p[12].y)/2};
+    const f=((p[31].x-p[29].x)+(p[32].x-p[30].x))/2; if(Math.abs(f)>2) this.dirVotes=Math.max(-300,Math.min(300,this.dirVotes+Math.sign(f)));
+    const leg=(Math.hypot(p[23].x-p[25].x,p[23].y-p[25].y)+Math.hypot(p[25].x-p[27].x,p[25].y-p[27].y)+Math.hypot(p[24].x-p[26].x,p[24].y-p[26].y)+Math.hypot(p[26].x-p[28].x,p[26].y-p[28].y))/2;
+    this.legs.push(leg);if(this.legs.length>240)this.legs.shift();this.Lpx=median(this.legs);
     const d=this.dir;
-    const fr={t,valid:true,vis,hip,sh,
-      ankL:p.lAn,ankR:p.rAn,
-      kneeL:ang(p.lHip,p.lKn,p.lAn),kneeR:ang(p.rHip,p.rKn,p.rAn),
-      elbL:ang(p.lSh,p.lEl,p.lWr),elbR:ang(p.rSh,p.rEl,p.rWr),
-      trunk:Math.atan2(d*(sh.x-hip.x),hip.y-sh.y)*180/Math.PI};
-    this.F.push(fr);
-    this._detect(t);
-    // trim buffer (keep 4 s)
-    if(this.F.length>600 && this.F[0].t < t-4){ const cut=this.F.findIndex(x=>x.t>=t-4); if(cut>0){ this.F.splice(0,cut); this.scan=Math.max(0,this.scan-cut); this.lastPeak=this.lastPeak-cut; } }
+    const fr={t,valid:true,hip,ankL:p[27],ankR:p[28],
+      kneeL:ang(p[23].x,p[23].y,p[25].x,p[25].y,p[27].x,p[27].y),kneeR:ang(p[24].x,p[24].y,p[26].x,p[26].y,p[28].x,p[28].y),
+      trunk:Math.atan2(d*(sh.x-hip.x),hip.y-sh.y)*180/Math.PI,bodyH:Math.max(p[29].y,p[30].y,p[31].y,p[32].y)-p[0].y};
+    this.F.push(fr);this._detect(t);
+    if(this.F.length>400&&this.F[0].t<t-4){const c=this.F.findIndex(x=>x.t>=t-4);if(c>0){this.F.splice(0,c);this.scan=Math.max(0,this.scan-c);this.lastPeak-=c;}}
     return fr;
   }
   _detect(tNow){
-    const F=this.F, W=0.12, MIN_INT=0.22;
-    const sm=k=>{const a=F[Math.max(0,k-1)].hip.y,b=F[k].hip.y,c=F[Math.min(F.length-1,k+1)].hip.y;return (a+b+c)/3;};
-    while(this.scan<F.length && F[this.scan].t<=tNow-W){
-      const k=this.scan++; const tk=F[k].t; const yk=sm(k);
-      let isMax=true;
-      for(let j=k-1;j>=0&&F[j].t>=tk-W;j--){ if(sm(j)>=yk){isMax=false;break;} }
-      if(isMax) for(let j=k+1;j<F.length&&F[j].t<=tk+W;j++){ if(sm(j)>yk){isMax=false;break;} }
-      if(!isMax) continue;
-      const prev=this.lastPeak>=0?F[this.lastPeak]:null;
-      if(prev && tk-prev.t<MIN_INT) continue;
-      // prominence vs highest body position in the preceding 0.35 s
-      let ymin=Infinity; for(let j=k;j>=0&&F[j].t>=tk-0.35;j--) ymin=Math.min(ymin,sm(j));
-      const prom=yk-ymin;
-      if(!(prom>=0.015*this.Lpx)) continue;
-      this._step(k,prev,prom);
-      this.lastPeak=k;
+    const F=this.F,W=0.12;const sm=k=>(F[Math.max(0,k-1)].hip.y+2*F[k].hip.y+F[Math.min(F.length-1,k+1)].hip.y)/4;
+    while(this.scan<F.length&&F[this.scan].t<=tNow-W){
+      const k=this.scan++,tk=F[k].t,yk=sm(k);let ok=true;
+      for(let j=k-1;j>=0&&F[j].t>=tk-W;j--)if(sm(j)>=yk){ok=false;break;}
+      if(ok)for(let j=k+1;j<F.length&&F[j].t<=tk+W;j++)if(sm(j)>yk){ok=false;break;}
+      if(!ok)continue;const prev=this.lastPeak>=0?F[this.lastPeak]:null;
+      if(prev&&tk-prev.t<0.22)continue;
+      let ymin=Infinity;for(let j=k;j>=0&&F[j].t>=tk-0.35;j--)ymin=Math.min(ymin,sm(j));
+      if(!(yk-ymin>=0.012*this.Lpx))continue;
+      const f=F[k],cm=this.cmPerPx,iv=prev?tk-prev.t:NaN;
+      let hi=Infinity;for(let j=Math.max(0,prev?F.indexOf(prev):k-8);j<=k;j++)hi=Math.min(hi,F[j].hip.y);
+      const side=f.ankL.y>=f.ankR.y?'L':'R';
+      const st={t:tk,side,cadence:iv>0&&iv<0.6?60/iv:NaN,osc:prev&&iv<0.6?(f.hip.y-hi)*cm:NaN,knee:side==='L'?f.kneeL:f.kneeR,trunk:f.trunk};
+      this.steps.push(st);this.lastPeak=k;if(this.onStep)this.onStep(st);
     }
   }
-  _step(k,prev,prom){
-    const F=this.F, f=F[k], d=this.dir, cm=this.cmPerPx;
-    const side=f.ankL.y>=f.ankR.y?'L':'R';
-    const ank=fr=>side==='L'?fr.ankL:fr.ankR;
-    const ground=ank(f).y, tol=0.04*this.Lpx;
-    let j=k; while(j-1>=0 && f.t-F[j-1].t<=0.3 && ank(F[j-1]).y>=ground-tol) j--;
-    const s=F[j];
-    const knee=side==='L'?s.kneeL:s.kneeR;
-    const over=d*(ank(s).x-s.hip.x)*cm;
-    const from=prev?F.indexOf(prev):Math.max(0,k-8);
-    const seg=F.slice(Math.max(0,from),k+1);
-    let ymin=Infinity; for(const x of seg) ymin=Math.min(ymin,x.hip.y);
-    const osc=(f.hip.y-ymin)*cm;
-    const interval=prev?f.t-prev.t:NaN;
-    const step={n:this.steps.length+1,t:f.t,tStrike:s.t,side,
-      cadence:interval>0&&interval<0.6?60/interval:NaN,
-      kneeStrike:knee,overstrideCm:over,vertOscCm:prev&&interval<0.6?osc:NaN,
-      trunkDeg:mean(seg.map(x=>x.trunk)),elbowL:mean(seg.map(x=>x.elbL)),elbowR:mean(seg.map(x=>x.elbR))};
-    this.steps.push(step);
-    if(this.onStep) this.onStep(step);
-  }
-  stats(windowSec){
-    const S=windowSec&&this.steps.length?this.steps.filter(s=>s.t>=this.steps[this.steps.length-1].t-windowSec):this.steps;
-    const pick=(arr,k)=>arr.map(s=>s[k]).filter(Number.isFinite);
-    const L=S.filter(s=>s.side==='L'),R=S.filter(s=>s.side==='R');
-    const ints=[]; for(let i=1;i<S.length;i++){const dt=S[i].t-S[i-1].t; if(dt>0&&dt<0.6) ints.push(dt);}
-    const agg=a=>({mean:mean(a),sd:sd(a),min:a.length?Math.min(...a):NaN,max:a.length?Math.max(...a):NaN,n:a.length});
-    return {steps:S.length,
-      cadence:{...agg(pick(S,'cadence')),rate:ints.length?60/mean(ints):NaN},
-      vertOscCm:agg(pick(S,'vertOscCm')),
-      kneeStrike:agg(pick(S,'kneeStrike')),kneeL:agg(pick(L,'kneeStrike')),kneeR:agg(pick(R,'kneeStrike')),
-      overstrideCm:agg(pick(S,'overstrideCm')),overL:agg(pick(L,'overstrideCm')),overR:agg(pick(R,'overstrideCm')),
-      trunkDeg:agg(pick(S,'trunkDeg')),elbowL:agg(pick(S,'elbowL')),elbowR:agg(pick(S,'elbowR')),
-      stepsL:L.length,stepsR:R.length};
+  stats(win){
+    const S=this.steps.filter(s=>!win||s.t>=(this.steps.at(-1)?.t??0)-win);
+    const iv=[];for(let i=1;i<S.length;i++){const d=S[i].t-S[i-1].t;if(d>0&&d<0.6)iv.push(d);}
+    return {steps:S.length,cadence:iv.length?60/mean(iv):NaN,osc:mean(S.map(s=>s.osc).filter(x=>x<25)),trunk:mean(S.map(s=>s.trunk))};
   }
 }
-window.RunAnalyzer=RunAnalyzer;
-})();
+
+/* ---------- offline (whole-session) analysis ---------- */
+function analyzeSession(flat,info){
+  const n=Math.floor(flat.length/ROW),W=info.W,H=info.H,heightCm=info.heightCm||170;
+  const T=new Float64Array(n);for(let i=0;i<n;i++)T[i]=flat[i*ROW]/1000;
+  const raw=(i,k,c)=>flat[i*ROW+1+k*LMW+c];
+  const X={},Y={},V={};
+  for(const k of BODY){X[k]=new Float64Array(n);Y[k]=new Float64Array(n);V[k]=new Float64Array(n);
+    for(let i=0;i<n;i++){X[k][i]=raw(i,k,0)*W;Y[k][i]=raw(i,k,1)*H;V[k][i]=raw(i,k,3);}}
+  // 1) validity
+  const core=[11,12,23,24,25,26,27,28];
+  const valid=new Uint8Array(n);
+  for(let i=0;i<n;i++){let s=0,ok=true;for(const k of core){if(!Number.isFinite(X[k][i])){ok=false;break;}s+=V[k][i];}valid[i]=ok&&s/core.length>=0.45?1:0;}
+  // 2) rough leg length for thresholds
+  const legRaw=[];for(let i=0;i<n;i++)if(valid[i])for(const s of ['L','R']){const q=SIDE[s];legRaw.push(Math.hypot(X[q.hip][i]-X[q.kn][i],Y[q.hip][i]-Y[q.kn][i])+Math.hypot(X[q.kn][i]-X[q.an][i],Y[q.kn][i]-Y[q.an][i]));}
+  let Lpx=median(legRaw);
+  // 3) spike removal: a point that jumps away and comes straight back (vs. mean of neighbours)
+  const thr=0.15*Lpx;let outliers=0;
+  for(const k of BODY)for(const A of [X[k],Y[k]]){
+    const src=Float64Array.from(A);
+    for(let i=1;i<n-1;i++){if(!valid[i]||!valid[i-1]||!valid[i+1])continue;
+      const pred=(src[i-1]+src[i+1])/2,nb=Math.abs(src[i+1]-src[i-1]);
+      if(Math.abs(src[i]-pred)>thr+0.5*nb){A[i]=pred;outliers++;}}
+  }
+  // frames where the whole body jumps (e.g. swapped detection): mark invalid
+  for(let i=1;i<n-1;i++){if(!valid[i])continue;const hx=(X[23][i]+X[24][i])/2,hy=(Y[23][i]+Y[24][i])/2;
+    const px=(X[23][i-1]+X[24][i-1])/2,py=(Y[23][i-1]+Y[24][i-1])/2,nx=(X[23][i+1]+X[24][i+1])/2,ny=(Y[23][i+1]+Y[24][i+1])/2;
+    if(valid[i-1]&&valid[i+1]&&Math.hypot(hx-(px+nx)/2,hy-(py+ny)/2)>0.25*Lpx)valid[i]=0;}
+  // 4) fill short gaps (≤4 frames) by interpolation
+  let gapsFilled=0;
+  for(let i=0;i<n;i++){if(valid[i])continue;let j=i;while(j<n&&!valid[j])j++;
+    if(i>0&&j<n&&j-i<=4){for(const k of BODY)for(const A of [X[k],Y[k]])for(let m=i;m<j;m++){const f=(T[m]-T[i-1])/(T[j]-T[i-1]);A[m]=A[i-1]+f*(A[j]-A[i-1]);}
+      for(let m=i;m<j;m++)valid[m]=1;gapsFilled+=j-i;}
+    i=j;}
+  // 5) smoothing [1,2,1]/4 within valid runs
+  for(const k of BODY)for(const A of [X[k],Y[k]]){const s=Float64Array.from(A);
+    for(let i=1;i<n-1;i++)if(valid[i]&&valid[i-1]&&valid[i+1])A[i]=(s[i-1]+2*s[i]+s[i+1])/4;}
+  // 6) direction (whole session) & near side
+  const dv=[];for(let i=0;i<n;i++)if(valid[i]){const f=((X[31][i]-X[29][i])+(X[32][i]-X[30][i]))/2;if(Math.abs(f)>1)dv.push(Math.sign(f));}
+  let dsum=dv.reduce((a,b)=>a+b,0);
+  if(Math.abs(dsum)<dv.length*0.2){const ev=[];for(let i=0;i<n;i++)if(valid[i])ev.push(Math.sign(X[0][i]-(X[7][i]+X[8][i])/2));dsum=ev.reduce((a,b)=>a+b,0);}
+  const dir=dsum>=0?1:-1;
+  const visOf=s=>{const q=SIDE[s];const a=[];for(let i=0;i<n;i++)if(valid[i])for(const k of [q.el,q.wr,q.kn,q.an,q.he,q.ft])a.push(V[k][i]);return mean(a);};
+  const visL=visOf('L'),visR=visOf('R');const near=visR>=visL?'R':'L',far=near==='R'?'L':'R';
+  // 7) scale from near leg
+  const NQ=SIDE[near],FQ=SIDE[far];const legN=[];
+  for(let i=0;i<n;i++)if(valid[i])legN.push(Math.hypot(X[NQ.hip][i]-X[NQ.kn][i],Y[NQ.hip][i]-Y[NQ.kn][i])+Math.hypot(X[NQ.kn][i]-X[NQ.an][i],Y[NQ.kn][i]-Y[NQ.an][i]));
+  Lpx=median(legN);const cm=LEG_RATIO*heightCm/Lpx;
+  // 8) per-frame derived
+  const pelvis=new Float64Array(n),knee={L:new Float64Array(n),R:new Float64Array(n)},elb={L:new Float64Array(n),R:new Float64Array(n)},trunk=new Float64Array(n),hipX=new Float64Array(n);
+  const low={L:new Float64Array(n),R:new Float64Array(n)};
+  for(let i=0;i<n;i++){
+    if(!valid[i]){pelvis[i]=trunk[i]=hipX[i]=NaN;for(const s of ['L','R']){knee[s][i]=elb[s][i]=low[s][i]=NaN;}continue;}
+    pelvis[i]=(Y[23][i]+Y[24][i])/2;hipX[i]=(X[23][i]+X[24][i])/2;
+    const sx=(X[11][i]+X[12][i])/2,sy=(Y[11][i]+Y[12][i])/2;
+    trunk[i]=Math.atan2(dir*(sx-hipX[i]),pelvis[i]-sy)*180/Math.PI;
+    for(const s of ['L','R']){const q=SIDE[s];
+      knee[s][i]=ang(X[q.hip][i],Y[q.hip][i],X[q.kn][i],Y[q.kn][i],X[q.an][i],Y[q.an][i]);
+      elb[s][i]=ang(X[q.sh][i],Y[q.sh][i],X[q.el][i],Y[q.el][i],X[q.wr][i],Y[q.wr][i]);
+      low[s][i]=Math.max(Y[q.he][i],Y[q.ft][i]);}
+  }
+  // 9) step candidates = lowest body position (pelvis y max) — extra smoothing for detection
+  const ps=Float64Array.from(pelvis);for(let pass=0;pass<2;pass++){const s=Float64Array.from(ps);for(let i=1;i<n-1;i++)if(valid[i-1]&&valid[i]&&valid[i+1])ps[i]=(s[i-1]+2*s[i]+s[i+1])/4;}
+  const HALF=0.12,MIN_INT=0.22;const cand=[];
+  for(let i=0;i<n;i++){if(!valid[i])continue;let ok=true,lmin=Infinity,rmin=Infinity;
+    for(let j=i-1;j>=0&&T[i]-T[j]<=0.3;j--){if(!valid[j]){ok=false;break;}if(T[i]-T[j]<=HALF&&ps[j]>=ps[i]){ok=false;break;}lmin=Math.min(lmin,ps[j]);}
+    if(!ok)continue;
+    for(let j=i+1;j<n&&T[j]-T[i]<=0.3;j++){if(!valid[j]){ok=false;break;}if(T[j]-T[i]<=HALF&&ps[j]>ps[i]){ok=false;break;}rmin=Math.min(rmin,ps[j]);}
+    if(!ok)continue;const prom=ps[i]-Math.max(lmin,rmin);if(prom>=0.012*Lpx)cand.push({i,prom});}
+  cand.sort((a,b)=>b.prom-a.prom);const acc=[];
+  for(const c of cand){if(acc.every(a=>Math.abs(T[a.i]-T[c.i])>=MIN_INT))acc.push(c);}
+  acc.sort((a,b)=>a.i-b.i);
+  // fill single missed steps: a gap ≈ 2× the typical interval gets its best local low point
+  {const iv=[];for(let k=1;k<acc.length;k++)iv.push(T[acc[k].i]-T[acc[k-1].i]);const med=median(iv.filter(x=>x<0.6));
+   if(med>0){const add=[];for(let k=1;k<acc.length;k++){const a=acc[k-1].i,b=acc[k].i,g=T[b]-T[a];
+     if(g<1.6*med||g>2.6*med)continue;let best=-1;
+     for(let i=a+1;i<b;i++){if(!valid[i]||T[i]-T[a]<0.6*med||T[b]-T[i]<0.6*med)continue;
+       if(!(ps[i]>=ps[i-1]&&ps[i]>=ps[i+1]))continue;if(best<0||ps[i]>ps[best])best=i;}
+     if(best>0)add.push({i:best,prom:0,filled:true});}
+   acc.push(...add);acc.sort((a,b)=>a.i-b.i);}}
+  // 10) stance side by Viterbi (alternation prior + foot-on-ground evidence)
+  const gN=pct(Array.from(low[near]),0.9),gF=pct(Array.from(low[far]),0.9);
+  const em=acc.map(a=>{const dN=Math.max(0,gN-low[near][a.i]),dF=Math.max(0,gF-low[far][a.i]);
+    const pN=Math.min(0.98,Math.max(0.02,sig((0.07*Lpx-dN)/(0.025*Lpx)))),pF=Math.min(0.98,Math.max(0.02,sig((0.07*Lpx-dF)/(0.025*Lpx))));
+    return [Math.log(pN)+0.5*Math.log(1-pF),Math.log(1-pN)+0.5*Math.log(pF)];});
+  const m=acc.length,score=[],back=[];
+  if(m){score.push(em[0].slice());back.push([0,0]);
+    for(let k=1;k<m;k++){const iv=T[acc[k].i]-T[acc[k-1].i];const alt=iv<=0.55?0.92:0.5;const lt=[Math.log(1-alt),Math.log(alt)];// [same,switch]
+      const s=[0,0],b=[0,0];for(const st of [0,1]){const fromSame=score[k-1][st]+lt[0],fromOther=score[k-1][1-st]+lt[1];
+        if(fromSame>=fromOther){s[st]=fromSame;b[st]=st;}else{s[st]=fromOther;b[st]=1-st;}s[st]+=em[k][st];}
+      score.push(s);back.push(b);}
+  }
+  const state=new Array(m);if(m){state[m-1]=score[m-1][0]>=score[m-1][1]?0:1;for(let k=m-1;k>0;k--)state[k-1]=back[k][state[k]];}
+  // 11) per-step metrics — label-free foot tracking (MediaPipe often swaps legs in side view)
+  const steps=[],events=new Map();
+  const addEv=(i,e)=>events.set(i,(events.get(i)?events.get(i)+'|':'')+e);
+  const tPeak=acc.map(a=>{const i=a.i;if(i<1||i>=n-1||!valid[i-1]||!valid[i+1])return T[i];
+    const y0=ps[i-1],y1=ps[i],y2=ps[i+1],den=y0-2*y1+y2;if(!(Math.abs(den)>1e-9))return T[i];
+    const d=Math.max(-0.5,Math.min(0.5,0.5*(y0-y2)/den));return T[i]+d*(T[i+1]-T[i-1])/2;});
+  // Zeni-style events on a treadmill: strike = most anterior heel, toe-off = most posterior toe (relative to pelvis)
+  const track1=(i,step,win,key,sign,start)=>{ // follow one foot from midstance; return extreme of sign*d*(pt.x-hip.x)
+    let cur=start,j=i,best={j:i,side:cur,v:-Infinity},ser=[];
+    const val=(s,jj)=>sign*dir*(X[SIDE[s][key]][jj]-hipX[jj]);
+    while(true){const v=val(cur,j);ser.push([j,v,cur]);if(v>best.v)best={j,side:cur,v};
+      const nj=j+step;if(nj<0||nj>=n||!valid[nj]||Math.abs(T[nj]-T[i])>win)break;
+      const px=X[SIDE[cur].he][j],py=Y[SIDE[cur].he][j];
+      cur=['L','R'].reduce((b,s)=>{const d=Math.hypot(X[SIDE[s].he][nj]-px,Y[SIDE[s].he][nj]-py);return d<b.d?{s,d}:b;},{s:cur,d:Infinity}).s;j=nj;}
+    const atEdge=best.j===ser[ser.length-1][0]&&ser.length>1&&Math.abs(T[best.j]-T[i])>=win-0.06;
+    // sub-frame refinement
+    let t=T[best.j];const jm=best.j-1,jp=best.j+1;
+    if(jm>=0&&jp<n&&valid[jm]&&valid[jp]){const y0=val(best.side,jm),y1=best.v,y2=val(best.side,jp),den=y0-2*y1+y2;
+      if(den<0){const d=Math.max(-0.5,Math.min(0.5,0.5*(y0-y2)/den));t=T[best.j]+d*(T[jp]-T[jm])/2;}}
+    return {j:best.j,side:best.side,t,ok:!atEdge&&best.j!==i};
+  };
+  const track=(i,step,win,key,sign)=>{ // try both feet; the swing foot peaks at i itself and is rejected
+    const r=['L','R'].map(s=>track1(i,step,win,key,sign,s)).filter(x=>x.ok);
+    if(!r.length)return {ok:false,j:i,side:low.L[i]>=low.R[i]?'L':'R',t:NaN};
+    r.sort((a,b)=>Math.abs(T[a.j]-T[i])-Math.abs(T[b.j]-T[i]));return r[0];
+  };
+  for(let k=0;k<m;k++){
+    const i=acc[k].i,isNear=state[k]===0,side=isNear?near:far;
+    const B=track(i,-1,0.3,'he',+1),F=track(i,+1,0.35,'ft',-1);
+    const tStrike=B.ok?B.t:NaN,tOff=F.ok?F.t:NaN;
+    const a=B.j,b=F.j,cs=B.side,contact=tOff-tStrike;
+    const prevT=k>0?tPeak[k-1]:NaN,iv=tPeak[k]-prevT,cont=iv>0&&iv<=0.6,prev=k>0?acc[k-1].i:-1;
+    let hi=Infinity;if(cont)for(let j=prev;j<=i;j++)if(Number.isFinite(pelvis[j]))hi=Math.min(hi,pelvis[j]);
+    const seg=[];for(let j=cont?prev:Math.max(0,i-8);j<=i;j++)seg.push(j);
+    const ok=Number.isFinite(tStrike);
+    const st={n:k+1,i,t:tPeak[k],side,near:isNear,ia:a,ib:b,
+      tStrike,tOff,contactMs:contact>0.08&&contact<0.5?contact*1000:NaN,
+      cadence:cont?60/iv:NaN,
+      kneeStrike:ok?knee[cs][a]:NaN,
+      overstrideCm:ok?dir*(X[SIDE[cs].an][a]-hipX[a])*cm:NaN,
+      vertOscCm:cont?(pelvis[i]-hi)*cm:NaN,
+      trunkDeg:mean(seg.map(j=>trunk[j])),elbowNear:mean(seg.map(j=>elb[near][j])),
+      strikeFound:ok};
+    const bad=[];
+    if(Number.isFinite(st.vertOscCm)&&st.vertOscCm>20)bad.push('osc');
+    if(Math.abs(st.overstrideCm)>60)bad.push('over');
+    if(st.kneeStrike<100)bad.push('knee');
+    if(Math.abs(st.trunkDeg)>30)bad.push('trunk');
+    if(st.cadence>260||st.cadence<110)bad.push('cad');
+    st.quality=bad.length?'outlier':(ok?(isNear?'ok':'far'):'weak');
+    st.flags=bad.join(',');
+    steps.push(st);
+    addEv(i,'mid_'+side);if(ok)addEv(a,'strike_'+side);if(Number.isFinite(tOff))addEv(b,'off_'+side);
+  }
+  // 12) stats
+  const good=steps.filter(s=>s.quality!=='outlier');
+  const allOK=good.filter(s=>s.strikeFound),nearOK=allOK.filter(s=>s.near),farOK=allOK.filter(s=>!s.near);
+  let nSeg=0,durSeg=0;{let k0=0;for(let k=1;k<=m;k++){if(k===m||T[acc[k].i]-T[acc[k-1].i]>0.6){if(k-1>k0){nSeg+=k-1-k0;durSeg+=T[acc[k-1].i]-T[acc[k0].i];}k0=k;}}}
+  const P=(arr,key)=>arr.map(s=>s[key]);
+  let alt=0;for(let k=1;k<m;k++)if(state[k]===state[k-1])alt++;
+  const validFrac=valid.reduce((a,b)=>a+b,0)/Math.max(1,n);
+  const stats={steps:m,stepsL:steps.filter(s=>s.side==='L').length,stepsR:steps.filter(s=>s.side==='R').length,
+    cadence:durSeg>0?60*nSeg/durSeg:NaN,cadenceStep:agg(P(good,'cadence')),
+    vertOscCm:agg(P(good,'vertOscCm')),trunkDeg:agg(P(good,'trunkDeg')),elbowNear:agg(P(good,'elbowNear')),
+    knee:agg(P(allOK,'kneeStrike')),over:agg(P(allOK,'overstrideCm')),contact:agg(P(allOK,'contactMs')),kneeNear:agg(P(nearOK,'kneeStrike')),kneeFar:agg(P(farOK,'kneeStrike')),
+    overNear:agg(P(nearOK,'overstrideCm')),overFar:agg(P(farOK,'overstrideCm')),
+    contactNear:agg(P(nearOK,'contactMs')),contactFar:agg(P(farOK,'contactMs')),
+    outlierSteps:steps.length-good.length,sameSidePairs:alt,validFrac,outlierPoints:outliers,gapsFilled};
+  return {n,T,X,Y,V,valid,pelvis,knee,elb,trunk,dir,near,far,visL,visR,Lpx,cmPerPx:cm,steps,events,stats};
+}
+
+/* ---------- CSV export (single file) ---------- */
+function buildCSV(flat,res,meta){
+  const pad=n=>String(n).padStart(2,'0');
+  const isoLocal=ms=>{const d=new Date(ms),o=-d.getTimezoneOffset(),s=o>=0?'+':'-',oa=Math.abs(o);
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}.${String(d.getMilliseconds()).padStart(3,'0')}${s}${pad(oa/60|0)}:${pad(oa%60)}`;};
+  const stepAt=new Map();for(const s of res.steps)stepAt.set(s.i,s);
+  const head=['session_id','frame','t_s','t_epoch_ms','t_local','height_cm','model','run_dir','near_side','valid',
+    'pelvis_y_cm','knee_L_deg','knee_R_deg','elbow_L_deg','elbow_R_deg','trunk_deg','event',
+    'step_n','step_side','step_quality','cadence_spm','knee_strike_deg','overstride_cm','vert_osc_cm','contact_ms'];
+  for(const k of BODY)head.push(`${NAMES[k]}_x`,`${NAMES[k]}_y`,`${NAMES[k]}_z`,`${NAMES[k]}_vis`,`${NAMES[k]}_wx`,`${NAMES[k]}_wy`,`${NAMES[k]}_wz`);
+  const out=[head.join(',')];
+  const f=(v,d)=>Number.isFinite(v)?v.toFixed(d):'';
+  const p0=pct(Array.from(res.pelvis),0.5);
+  const runDir=res.dir>0?'right':'left';
+  for(let i=0;i<res.n;i++){
+    const ep=Math.round(meta.epoch0+res.T[i]*1000),s=stepAt.get(i),v=res.valid[i];
+    const row=[meta.sessionId,i,res.T[i].toFixed(3),Math.round(ep),isoLocal(ep),meta.heightCm,meta.model,runDir,res.near,v,
+      v?f((res.pelvis[i]-p0)*res.cmPerPx,2):'',v?f(res.knee.L[i],1):'',v?f(res.knee.R[i],1):'',v?f(res.elb.L[i],1):'',v?f(res.elb.R[i],1):'',v?f(res.trunk[i],1):'',
+      res.events.get(i)||'',
+      s?s.n:'',s?s.side:'',s?s.quality:'',s?f(s.cadence,1):'',s?f(s.kneeStrike,1):'',s?f(s.overstrideCm,1):'',s?f(s.vertOscCm,1):'',s?f(s.contactMs,0):''];
+    const o=i*ROW+1;
+    for(const k of BODY){const b=o+k*LMW;for(let c=0;c<7;c++)row.push(f(flat[b+c],4));}
+    out.push(row.join(','));
+  }
+  return '﻿'+out.join('\n');
+}
+
+G.RunCore={ROW,NLM,LMW,BODY,NAMES,SIDE,LEG_RATIO,LiveAnalyzer,analyzeSession,buildCSV,mean,median,agg};
+})(typeof window!=='undefined'?window:globalThis);
+
 </script>
 
 <script type="module">
-/* ===================== App ===================== */
-const APP_VER='v1';
+const APP_VER='v2';
 const MP_VER='0.10.21';
 const MP_BASE=`https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MP_VER}`;
 const MODEL_URL={
   full:'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/1/pose_landmarker_full.task',
   lite:'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task'};
-const NAMES=['nose','left_eye_inner','left_eye','left_eye_outer','right_eye_inner','right_eye','right_eye_outer','left_ear','right_ear','mouth_left','mouth_right','left_shoulder','right_shoulder','left_elbow','right_elbow','left_wrist','right_wrist','left_pinky','right_pinky','left_index','right_index','left_thumb','right_thumb','left_hip','right_hip','left_knee','right_knee','left_ankle','right_ankle','left_heel','right_heel','left_foot_index','right_foot_index'];
+const C=window.RunCore, ROW=C.ROW;
 const EDGES=[[11,12,'c'],[11,23,'l'],[12,24,'r'],[23,24,'c'],[11,13,'l'],[13,15,'l'],[12,14,'r'],[14,16,'r'],[23,25,'l'],[25,27,'l'],[27,29,'l'],[29,31,'l'],[27,31,'l'],[24,26,'r'],[26,28,'r'],[28,30,'r'],[30,32,'r'],[28,32,'r'],[0,11,'c'],[0,12,'c']];
-
 const $=id=>document.getElementById(id);
 const video=$('video'),canvas=$('canvas'),ctx=canvas.getContext('2d');
 const css=getComputedStyle(document.documentElement);
-const COL={l:css.getPropertyValue('--left').trim(),r:css.getPropertyValue('--right').trim(),c:'#e8eef1',acc:css.getPropertyValue('--accent').trim()};
+const COL={l:css.getPropertyValue('--left').trim(),r:css.getPropertyValue('--right').trim(),c:'#e8eef1',acc:css.getPropertyValue('--accent').trim(),good:css.getPropertyValue('--good').trim(),warn:css.getPropertyValue('--warn').trim()};
 $('ver').textContent=APP_VER;
 
-let vision=null,landmarker=null,modelKind=null,stream=null,facing='environment',running=false,mode=null; // mode: 'cam'|'file'
-let lastDetTs=0,prevHip=null,fpsT=[],wakeLock=null;
-let analyzer=new RunAnalyzer({heightCm:+$('inHeight').value||170});
-let rec=null; // {start, frames:[Float32Array rows], steps:[], meta}
-const ROW=1+6+33*7; // t + 6 derived + 33*(x,y,z,v,wx,wy,wz)
+let vision=null,landmarker=null,modelKind=null,stream=null,facing='environment',running=false,mode=null;
+let lastDetTs=0,prevHip=null,fpsT=[],wakeLock=null,guides=true,lastLive=null;
+let live=new C.LiveAnalyzer(+$('inHeight').value||170);
+let sess=null; // {phase:'wait'|'rec', waitEnd, recStart(ms clock), dur, buf, n, epoch0, ...}
+const fmt=(v,d=0)=>Number.isFinite(v)?v.toFixed(d):'--';
+const fmtDur=s=>{s=Math.max(0,Math.round(s));return `${s/60|0}:${String(s%60).padStart(2,'0')}`;};
+function showMsg(t,kind){const m=$('msg');m.textContent=t||'';m.className='msg'+(kind?' '+kind:'');m.hidden=!t;}
 
-function showMsg(text,err){const m=$('msg');m.textContent=text;m.className='msg'+(err?' err':'');m.hidden=!text;}
-function fmt(v,d=0){return Number.isFinite(v)?v.toFixed(d):'--';}
+/* ---------- plan line ---------- */
+function renderPlan(){
+  const w=+$('inWait').value,d=+$('inDur').value;
+  const mb=(d*30*0.85/1000).toFixed(1);
+  $('plan').innerHTML=`流程：按「開始」→ 等待 <b>${w?fmtDur(w):'0'}</b>（不記錄）→ 記錄 <b>${fmtDur(d)}</b> → 自動停止並存檔（約 ${mb} MB CSV）`;
+}
+['inWait','inDur'].forEach(id=>$(id).addEventListener('change',renderPlan));renderPlan();
+$('inHeight').addEventListener('change',()=>{live.heightCm=+$('inHeight').value||170;});
+
+/* ---------- audio ---------- */
+let actx=null;
+function beep(freq=880,dur=0.12,vol=0.25){ if($('inBeep').value!=='1'||!actx) return;
+  const o=actx.createOscillator(),g=actx.createGain();o.frequency.value=freq;o.connect(g);g.connect(actx.destination);
+  const t=actx.currentTime;g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.001,t+dur);o.start(t);o.stop(t+dur+0.02);}
+
+/* ---------- tilt (device level) ---------- */
+let tilt=null;
+window.addEventListener('devicemotion',e=>{const a=e.accelerationIncludingGravity;if(!a||a.x==null)return;
+  const g=Math.atan2(a.x,a.y)*180/Math.PI; const roll=((g%90)+135)%90-45;
+  const pitch=Math.atan2(a.z,Math.hypot(a.x,a.y))*180/Math.PI;
+  tilt={roll:tilt?tilt.roll*0.8+roll*0.2:roll,pitch:tilt?tilt.pitch*0.8+pitch*0.2:pitch};});
 
 /* ---------- model ---------- */
 async function ensureModel(){
   const kind=$('inModel').value;
   if(landmarker&&modelKind===kind) return landmarker;
-  showMsg('正在載入 AI 模型（第一次約 5–10 MB，請稍候）…');
-  if(!vision){
-    const mp=await import(`${MP_BASE}/vision_bundle.mjs`);
-    window.__mp=mp;
-    vision=await mp.FilesetResolver.forVisionTasks(`${MP_BASE}/wasm`);
-  }
+  showMsg('正在載入 AI 模型（第一次需下載約 6–10 MB）…');
+  if(!vision){const mp=await import(`${MP_BASE}/vision_bundle.mjs`);window.__mp=mp;vision=await mp.FilesetResolver.forVisionTasks(`${MP_BASE}/wasm`);}
   const {PoseLandmarker}=window.__mp;
   if(landmarker){try{landmarker.close();}catch(e){}}
   const opts=d=>({baseOptions:{modelAssetPath:MODEL_URL[kind],delegate:d},runningMode:'VIDEO',numPoses:2,minPoseDetectionConfidence:0.5,minPosePresenceConfidence:0.5,minTrackingConfidence:0.5});
-  try{ landmarker=await PoseLandmarker.createFromOptions(vision,opts('GPU')); }
-  catch(e){ console.warn('GPU failed, using CPU',e); landmarker=await PoseLandmarker.createFromOptions(vision,opts('CPU')); }
-  modelKind=kind; showMsg('');
-  return landmarker;
+  try{landmarker=await PoseLandmarker.createFromOptions(vision,opts('GPU'));}
+  catch(e){console.warn('GPU failed, CPU',e);landmarker=await PoseLandmarker.createFromOptions(vision,opts('CPU'));}
+  modelKind=kind;showMsg('');return landmarker;
 }
-$('inModel').addEventListener('change',()=>{ if(running) ensureModel().catch(e=>showMsg('模型載入失敗：'+e.message,true)); });
-$('inHeight').addEventListener('change',()=>{ analyzer.heightCm=+$('inHeight').value||170; });
+$('inModel').addEventListener('change',()=>{if(running&&!sess)ensureModel().catch(e=>showMsg('模型載入失敗：'+e.message,'err'));});
 
 /* ---------- camera ---------- */
 async function startCamera(){
-  if(!navigator.mediaDevices?.getUserMedia){ showMsg('這個網址無法使用攝影機。請用 https:// 開頭的網址，並用 Chrome 開啟。',true); return; }
+  if(!navigator.mediaDevices?.getUserMedia){showMsg('這個網址無法使用攝影機。請用 https:// 開頭的網址，並用 Chrome 開啟。','err');return;}
   try{
-    await ensureModel();
-    stopSource();
-    stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:facing,width:{ideal:1280},height:{ideal:720},frameRate:{ideal:60}}});
-    video.srcObject=stream; video.src=''; await video.play();
+    await ensureModel(); stopSource();
+    stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:facing,width:{ideal:960},height:{ideal:540},frameRate:{ideal:30}}});
+    video.srcObject=stream; await video.play();
     mode='cam'; begin();
     $('btnCam').textContent='關閉攝影機'; $('btnFlip').disabled=false; $('btnRec').disabled=false;
-    try{ wakeLock=await navigator.wakeLock?.request('screen'); }catch(e){}
-  }catch(e){
-    console.error(e);
-    showMsg(e.name==='NotAllowedError'?'攝影機權限被拒絕。請到瀏覽器網址列左側的設定，允許此網站使用攝影機，再重新整理。':'無法開啟攝影機或載入模型：'+(e.message||e),true);
-  }
+    try{wakeLock=await navigator.wakeLock?.request('screen');}catch(e){}
+    if(typeof DeviceMotionEvent!=='undefined'&&typeof DeviceMotionEvent.requestPermission==='function'){try{await DeviceMotionEvent.requestPermission();}catch(e){}}
+  }catch(e){console.error(e);
+    showMsg(e.name==='NotAllowedError'?'攝影機權限被拒絕。請在網址列左側的網站設定允許攝影機，再重新整理。':'無法開啟攝影機或載入模型：'+(e.message||e),'err');}
 }
 function stopSource(){
   running=false;
   if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
-  video.pause(); video.srcObject=null;
+  video.pause();video.srcObject=null;
   if(video.src){URL.revokeObjectURL(video.src);video.removeAttribute('src');video.load();}
   try{wakeLock?.release();}catch(e){} wakeLock=null;
 }
 function stopCamera(){
-  if(rec) stopRecording();
-  stopSource(); mode=null;
-  $('btnCam').textContent='開啟攝影機'; $('btnFlip').disabled=true; $('btnRec').disabled=true;
-  $('ph').hidden=false; $('hud').innerHTML='';
+  if(sess) abortSession();
+  stopSource();mode=null;
+  $('btnCam').textContent='開啟攝影機';$('btnFlip').disabled=true;$('btnRec').disabled=true;
+  $('ph').hidden=false;$('hud').innerHTML='';
 }
-$('btnCam').onclick=()=>{ (mode==='cam')?stopCamera():startCamera(); };
-$('btnFlip').onclick=()=>{ facing=facing==='environment'?'user':'environment'; startCamera(); };
-document.addEventListener('visibilitychange',async()=>{ if(document.visibilityState==='visible'&&mode==='cam'&&!wakeLock){try{wakeLock=await navigator.wakeLock?.request('screen');}catch(e){}} });
+$('btnCam').onclick=()=>{(mode==='cam')?stopCamera():startCamera();};
+$('btnFlip').onclick=()=>{if(sess)return;facing=facing==='environment'?'user':'environment';startCamera();};
+$('btnGuide').onclick=()=>{guides=!guides;$('btnGuide').classList.toggle('on',guides);$('btnGuide').setAttribute('aria-pressed',guides);};
+document.addEventListener('visibilitychange',async()=>{if(document.visibilityState==='visible'&&mode==='cam'&&!wakeLock){try{wakeLock=await navigator.wakeLock?.request('screen');}catch(e){}}});
 
 /* ---------- video file ---------- */
 $('inFile').addEventListener('change',async e=>{
-  const file=e.target.files[0]; if(!file) return;
+  const file=e.target.files[0];if(!file)return;
   try{
-    await ensureModel();
-    if(mode==='cam') stopCamera();
-    stopSource();
-    video.srcObject=null; video.src=URL.createObjectURL(file); video.muted=true; video.playbackRate=0.5;
+    await ensureModel(); if(mode==='cam')stopCamera(); stopSource();
+    video.src=URL.createObjectURL(file);video.muted=true;video.playbackRate=0.5;
     await new Promise((ok,bad)=>{video.onloadedmetadata=ok;video.onerror=()=>bad(new Error('無法讀取此影片格式'));});
-    analyzer=new RunAnalyzer({heightCm:+$('inHeight').value||170}); bindAnalyzer();
-    mode='file'; startRecording(0,'file'); await video.play(); begin();
-    showMsg('正在以 0.5 倍速分析影片，播完會自動產生結果。影片不會上傳或另存。');
-    video.onended=()=>{ if(rec) stopRecording(); running=false; mode=null; showMsg(''); };
-  }catch(err){ showMsg('影片分析失敗：'+err.message,true); }
+    live=new C.LiveAnalyzer(+$('inHeight').value||170);bindLive();
+    mode='file';facing='environment';
+    const epoch0=(file.lastModified||Date.now())-video.duration*1000;
+    sess=newSession(video.duration+1,{source:'file',epoch0,fileName:file.name});sess.phase='rec';sess.recStart=0;
+    await video.play();begin();
+    showMsg('正在以 0.5 倍速分析影片，播完會自動存檔。影片不會上傳或另存。');
+    video.onended=()=>{if(sess)finishSession();running=false;mode=null;};
+  }catch(err){showMsg('影片分析失敗：'+err.message,'err');}
   e.target.value='';
 });
 
 /* ---------- main loop ---------- */
 function begin(){
-  $('ph').hidden=true; running=true; prevHip=null; fpsT=[];
-  const hasRVFC='requestVideoFrameCallback' in HTMLVideoElement.prototype;
-  const tick=(now,meta)=>{
-    if(!running) return;
-    processFrame(mode==='file'&&meta?meta.mediaTime:(mode==='file'?video.currentTime:performance.now()/1000));
-    hasRVFC?video.requestVideoFrameCallback(tick):requestAnimationFrame(tick);
-  };
-  hasRVFC?video.requestVideoFrameCallback(tick):requestAnimationFrame(tick);
+  $('ph').hidden=true;running=true;prevHip=null;fpsT=[];
+  const rv='requestVideoFrameCallback' in HTMLVideoElement.prototype;
+  const tick=(now,meta)=>{if(!running)return;
+    let clock; // ms
+    if(mode==='file') clock=(meta?meta.mediaTime:video.currentTime)*1000;
+    else clock=(meta&&meta.captureTime)?meta.captureTime:(meta&&meta.expectedDisplayTime)?meta.expectedDisplayTime:performance.now();
+    processFrame(clock);
+    rv?video.requestVideoFrameCallback(tick):requestAnimationFrame(tick);};
+  rv?video.requestVideoFrameCallback(tick):requestAnimationFrame(tick);
 }
-
 function pickMain(res,W,H){
-  const poses=res.landmarks||[]; if(!poses.length) return -1;
-  let best=-1,bestScore=-1;
-  poses.forEach((lm,i)=>{
-    let x0=1,y0=1,x1=0,y1=0; for(const p of lm){x0=Math.min(x0,p.x);y0=Math.min(y0,p.y);x1=Math.max(x1,p.x);y1=Math.max(y1,p.y);}
-    let score=(x1-x0)*W*(y1-y0)*H;
-    if(prevHip){ const hx=(lm[23].x+lm[24].x)/2*W,hy=(lm[23].y+lm[24].y)/2*H; const dd=Math.hypot(hx-prevHip.x,hy-prevHip.y)/Math.max(W,H); score*=1/(1+8*dd); }
-    if(score>bestScore){bestScore=score;best=i;}
-  });
+  const poses=res.landmarks||[];if(!poses.length)return -1;let best=-1,bs=-1;
+  poses.forEach((lm,i)=>{let x0=1,y0=1,x1=0,y1=0;for(const p of lm){x0=Math.min(x0,p.x);y0=Math.min(y0,p.y);x1=Math.max(x1,p.x);y1=Math.max(y1,p.y);}
+    let sc=(x1-x0)*W*(y1-y0)*H;
+    if(prevHip){const hx=(lm[23].x+lm[24].x)/2*W,hy=(lm[23].y+lm[24].y)/2*H;sc*=1/(1+8*Math.hypot(hx-prevHip.x,hy-prevHip.y)/Math.max(W,H));}
+    if(sc>bs){bs=sc;best=i;}});
   return best;
 }
-
-let lastFrame=null;
-function processFrame(t){
-  const W=video.videoWidth,H=video.videoHeight; if(!W||!H) return;
+const trail=[];let flash=null;
+function processFrame(clock){
+  const W=video.videoWidth,H=video.videoHeight;if(!W||!H)return;
   if(canvas.width!==W||canvas.height!==H){canvas.width=W;canvas.height=H;}
-  let ts=performance.now(); if(ts<=lastDetTs) ts=lastDetTs+1; lastDetTs=ts;
-  let res; try{ res=landmarker.detectForVideo(video,ts); }catch(e){ console.warn(e); return; }
+  let ts=performance.now();if(ts<=lastDetTs)ts=lastDetTs+1;lastDetTs=ts;
+  let res;try{res=landmarker.detectForVideo(video,ts);}catch(e){console.warn(e);return;}
+  const mirror=mode==='cam'&&facing==='user';
+  ctx.setTransform(mirror?-1:1,0,0,1,mirror?W:0,0);
   ctx.drawImage(video,0,0,W,H);
-  const now=performance.now(); fpsT.push(now); while(fpsT.length&&fpsT[0]<now-1000) fpsT.shift();
-  const i=pickMain(res,W,H);
-  let fr=null, lm=null, wl=null;
-  if(i>=0){
-    lm=res.landmarks[i]; wl=res.worldLandmarks?.[i];
+  const now=performance.now();fpsT.push(now);while(fpsT.length&&fpsT[0]<now-1000)fpsT.shift();
+  const i=pickMain(res,W,H);let fr=null,lm=null,wl=null;
+  if(i>=0){lm=res.landmarks[i];wl=res.worldLandmarks?.[i];
     prevHip={x:(lm[23].x+lm[24].x)/2*W,y:(lm[23].y+lm[24].y)/2*H};
-    fr=analyzer.push(t,lm,W,H);
-    drawPose(lm,W,H,res.landmarks.length);
-  }
-  if(rec && rec.started) recordFrame(t,fr,lm,wl);
-  drawTrail(W,H);
-  updateHud(i>=0,fr,res.landmarks?.length||0);
-  lastFrame=fr;
+    fr=live.push(clock/1000,lm,W,H);drawPose(lm,W,H);}
+  drawTrail(W);
+  ctx.setTransform(1,0,0,1,0,0);
+  if(guides)drawGuides(W,H,fr);
+  lastLive=fr;
+  if(sess)sessionFrame(clock,lm,wl,W,H);
+  updateHud(i>=0,fr,res.landmarks?.length||0,W,H);
 }
-
-const trail=[];
-function drawPose(lm,W,H,n){
-  const lw=Math.max(3,W/180);
-  ctx.lineCap='round';
-  for(const [a,b,s] of EDGES){
-    if((lm[a].visibility??1)<0.3||(lm[b].visibility??1)<0.3) continue;
-    ctx.strokeStyle=COL[s]; ctx.lineWidth=lw;
-    ctx.beginPath(); ctx.moveTo(lm[a].x*W,lm[a].y*H); ctx.lineTo(lm[b].x*W,lm[b].y*H); ctx.stroke();
-  }
-  for(let k=11;k<33;k++){ if(k>16&&k<23) continue; const p=lm[k]; if((p.visibility??1)<0.3) continue;
-    ctx.fillStyle=k%2?COL.l:COL.r; ctx.beginPath(); ctx.arc(p.x*W,p.y*H,lw*1.1,0,7); ctx.fill(); }
-  const hx=(lm[23].x+lm[24].x)/2*W,hy=(lm[23].y+lm[24].y)/2*H;
-  trail.push({x:hx,y:hy,t:performance.now()});
+function drawPose(lm,W,H){
+  const lw=Math.max(3,W/170);ctx.lineCap='round';
+  for(const [a,b,s] of EDGES){if((lm[a].visibility??1)<0.3||(lm[b].visibility??1)<0.3)continue;
+    ctx.strokeStyle=COL[s];ctx.lineWidth=lw;ctx.beginPath();ctx.moveTo(lm[a].x*W,lm[a].y*H);ctx.lineTo(lm[b].x*W,lm[b].y*H);ctx.stroke();}
+  for(const k of [11,12,13,14,15,16,23,24,25,26,27,28,29,30,31,32]){const p=lm[k];if((p.visibility??1)<0.3)continue;
+    ctx.fillStyle=k%2?COL.l:COL.r;ctx.beginPath();ctx.arc(p.x*W,p.y*H,lw*1.1,0,7);ctx.fill();}
+  trail.push({x:(lm[23].x+lm[24].x)/2*W,y:(lm[23].y+lm[24].y)/2*H,t:performance.now()});
 }
-function drawTrail(W,H){
-  const now=performance.now(); while(trail.length&&trail[0].t<now-2000) trail.shift();
-  if(trail.length<2) return;
-  ctx.strokeStyle=COL.acc; ctx.lineWidth=Math.max(2,W/320); ctx.globalAlpha=.8;
-  ctx.beginPath(); trail.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y)); ctx.stroke(); ctx.globalAlpha=1;
-  // flash on step
-  if(flash&&now-flash.t<250){ ctx.fillStyle=flash.side==='L'?COL.l:COL.r; ctx.beginPath(); ctx.arc(flash.x,flash.y,W/40,0,7); ctx.fill(); }
+function drawTrail(W){
+  const now=performance.now();while(trail.length&&trail[0].t<now-2000)trail.shift();
+  if(trail.length>1){ctx.strokeStyle=COL.acc;ctx.lineWidth=Math.max(2,W/300);ctx.globalAlpha=.8;ctx.beginPath();trail.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));ctx.stroke();ctx.globalAlpha=1;}
+  if(flash&&now-flash.t<250){ctx.fillStyle=flash.side==='L'?COL.l:COL.r;ctx.beginPath();ctx.arc(flash.x,flash.y,W/40,0,7);ctx.fill();}
 }
-let flash=null;
-
-function updateHud(found,fr,n){
-  const fps=fpsT.length;
+function drawGuides(W,H,fr){
+  const u=Math.max(1,W/400);
+  ctx.save();ctx.lineWidth=u;ctx.setLineDash([8*u,6*u]);ctx.strokeStyle='rgba(255,255,255,.45)';
+  ctx.beginPath();ctx.moveTo(W/2,0);ctx.lineTo(W/2,H);ctx.moveTo(0,H/2);ctx.lineTo(W,H/2);ctx.stroke();
+  ctx.setLineDash([]);ctx.strokeStyle='rgba(255,255,255,.18)';ctx.beginPath();
+  for(const f of [1/3,2/3]){ctx.moveTo(W*f,0);ctx.lineTo(W*f,H);ctx.moveTo(0,H*f);ctx.lineTo(W,H*f);}ctx.stroke();
+  // ground band (feet should land here) & head line
+  ctx.fillStyle='rgba(198,244,50,.10)';ctx.fillRect(0,H*0.86,W,H*0.08);
+  ctx.strokeStyle='rgba(198,244,50,.6)';ctx.beginPath();ctx.moveTo(0,H*0.9);ctx.lineTo(W,H*0.9);ctx.stroke();
+  ctx.strokeStyle='rgba(198,244,50,.35)';ctx.setLineDash([4*u,6*u]);ctx.beginPath();ctx.moveTo(0,H*0.12);ctx.lineTo(W,H*0.12);ctx.stroke();ctx.setLineDash([]);
+  ctx.font=`${Math.round(13*u)}px system-ui`;ctx.fillStyle='rgba(198,244,50,.85)';ctx.fillText('腳底',8*u,H*0.9-6*u);ctx.fillText('頭頂附近',8*u,H*0.12-6*u);
+  // horizon from device tilt
+  if(tilt){const ok=Math.abs(tilt.roll)<=1;const r=-tilt.roll*Math.PI/180,L=W*0.35;
+    ctx.strokeStyle=ok?COL.good:COL.warn;ctx.lineWidth=3*u;ctx.beginPath();
+    ctx.moveTo(W/2-L*Math.cos(r),H/2-L*Math.sin(r));ctx.lineTo(W/2+L*Math.cos(r),H/2+L*Math.sin(r));ctx.stroke();
+    ctx.beginPath();ctx.arc(W/2,H/2,6*u,0,7);ctx.stroke();}
+  ctx.restore();
+}
+function updateHud(found,fr,n,W,H){
   const chips=[];
-  if(!found) chips.push('<span class="chip warn">找不到人物</span>');
-  else if(fr&&!fr.valid) chips.push('<span class="chip warn">請全身入鏡（腳要在畫面內）</span>');
+  if(!found)chips.push('<span class="chip warn">找不到人物</span>');
+  else if(fr&&!fr.valid)chips.push('<span class="chip warn">請全身入鏡（腳要在畫面內）</span>');
   else chips.push('<span class="chip ok">偵測中</span>');
-  chips.push(`<span class="chip">${fps} fps</span>`);
-  if(n>1) chips.push(`<span class="chip">畫面中 ${n} 人，鎖定最大者</span>`);
-  if(rec&&rec.started){ const s=(mode==='file'?(lastT()-rec.t0):(performance.now()-rec.wall)/1000); chips.push(`<span class="chip rec">● 記錄中 ${fmtDur(s)}</span>`); }
-  if(fps&&fps<20&&mode==='cam') chips.push('<span class="chip warn">速度偏慢，可改用輕量模型</span>');
+  const fps=fpsT.length;chips.push(`<span class="chip ${fps&&fps<20&&mode==='cam'?'warn':''}">${fps} fps</span>`);
+  if(fr&&fr.valid&&guides){const pc=fr.bodyH/H*100;const ok=pc>=55&&pc<=85;chips.push(`<span class="chip ${ok?'ok':'warn'}">人物高度 ${pc.toFixed(0)}%${ok?'':pc<55?'（太小，靠近一點）':'（太大，退後一點）'}</span>`);}
+  if(guides&&tilt){const ok=Math.abs(tilt.roll)<=1;chips.push(`<span class="chip ${ok?'ok':'warn'}">左右傾斜 ${Math.abs(tilt.roll).toFixed(1)}°</span>`);
+    chips.push(`<span class="chip ${Math.abs(tilt.pitch)<=5?'ok':'warn'}">前後仰角 ${Math.abs(tilt.pitch).toFixed(1)}°</span>`);}
+  if(n>1)chips.push(`<span class="chip">畫面中 ${n} 人，鎖定最大者</span>`);
+  if(mode==='cam'&&facing==='user')chips.push('<span class="chip">前鏡頭（鏡射顯示）</span>');
   $('hud').innerHTML=chips.join('');
 }
-function lastT(){ return lastFrame?lastFrame.t:0; }
-function fmtDur(s){ s=Math.max(0,s|0); return `${(s/60|0)}:${String(s%60).padStart(2,'0')}`; }
 
-/* ---------- live metrics ---------- */
-function bindAnalyzer(){
-  analyzer.onStep=st=>{
-    const f=analyzer.F[analyzer.F.length-1];
-    if(f){ const a=st.side==='L'?f.ankL:f.ankR; flash={t:performance.now(),side:st.side,x:a.x,y:a.y}; }
-    if(rec&&rec.started) rec.steps.push(st);
-    renderLive();
-  };
-}
-bindAnalyzer();
-function renderLive(){
-  const s=analyzer.stats(10);
-  const set=(id,v,unit,d=0)=>{$(id).innerHTML=`${fmt(v,d)}<span>${unit}</span>`;};
-  set('mCad',s.cadence.rate,'步/分'); set('mOsc',s.vertOscCm.mean,'cm',1); set('mKnee',s.kneeStrike.mean,'°');
-  set('mOver',s.overstrideCm.mean,'cm'); set('mTrunk',s.trunkDeg.mean,'°',1);
-  set('mElb',(s.elbowL.mean+s.elbowR.mean)/2,'°');
-  $('mSteps').textContent=`步數 ${rec&&rec.started?rec.steps.length:analyzer.steps.length}`;
-  $('mKneeLR').innerHTML=`<i class="l">左 ${fmt(s.kneeL.mean)}</i> · <i class="r">右 ${fmt(s.kneeR.mean)}</i>`;
-  $('mOverLR').innerHTML=`<i class="l">左 ${fmt(s.overL.mean)}</i> · <i class="r">右 ${fmt(s.overR.mean)}</i>`;
-  $('mElbLR').innerHTML=`<i class="l">左 ${fmt(s.elbowL.mean)}</i> · <i class="r">右 ${fmt(s.elbowR.mean)}</i>`;
-}
+/* ---------- live dials ---------- */
+function bindLive(){live.onStep=st=>{const f=live.F[live.F.length-1];if(f){const a=st.side==='L'?f.ankL:f.ankR;flash={t:performance.now(),side:st.side,x:a.x,y:a.y};}renderLive();};}
+bindLive();
+function renderLive(){const s=live.stats(10);
+  $('mCad').innerHTML=`${fmt(s.cadence)}<span>步/分</span>`;$('mOsc').innerHTML=`${fmt(s.osc,1)}<span>cm</span>`;
+  $('mTrunk').innerHTML=`${fmt(s.trunk,1)}<span>°</span>`;$('mSteps').innerHTML=`${sess&&sess.phase==='rec'?sess.steps:live.steps.length}<span>步</span>`;}
 
-/* ---------- recording ---------- */
-$('btnRec').onclick=()=>{ rec?stopRecording():startRecording(+$('inCount').value,'camera'); };
-function startRecording(countdown,source){
-  rec={started:false,frames:[],steps:[],source,t0:null,wall:0};
-  $('btnRec').textContent='停止'; $('btnRec').className='stop grow';
-  const go=()=>{
-    analyzer.reset(); analyzer.heightCm=+$('inHeight').value||170;
-    rec.started=true; rec.wall=performance.now(); rec.date=new Date(); $('count').hidden=true; renderLive();
-  };
-  if(!countdown){ go(); return; }
-  let n=countdown; const el=$('count'); el.hidden=false; el.textContent=n;
-  rec.timer=setInterval(()=>{ n--; if(n<=0){clearInterval(rec.timer);go();} else el.textContent=n; },1000);
+/* ---------- session (wait → record → auto stop) ---------- */
+function newSession(durSec,extra={}){
+  const cap=Math.ceil((durSec+5)*40);
+  return {phase:'wait',dur:durSec,buf:new Float32Array(cap*ROW),cap,n:0,steps:0,recStart:null,W:0,H:0,beeped:{},
+    heightCm:+$('inHeight').value||170,model:$('inModel').value,facing,date:new Date(),source:'camera',...extra};
 }
-function recordFrame(t,fr,lm,wl){
-  if(rec.t0===null) rec.t0=t;
-  const row=new Float32Array(ROW).fill(NaN);
-  row[0]=(t-rec.t0)*1000;
-  if(fr&&fr.valid){ row[1]=fr.kneeL;row[2]=fr.kneeR;row[3]=fr.elbL;row[4]=fr.elbR;row[5]=fr.trunk;row[6]=fr.hip.y*analyzer.cmPerPx; }
-  if(lm) for(let k=0;k<33;k++){ const o=7+k*7,p=lm[k]; row[o]=p.x;row[o+1]=p.y;row[o+2]=p.z;row[o+3]=p.visibility??NaN;
-    if(wl){const w=wl[k];row[o+4]=w.x;row[o+5]=w.y;row[o+6]=w.z;} }
-  rec.frames.push(row);
+$('btnRec').onclick=()=>{
+  if(sess){ if(sess.phase==='rec'){finishSession(true);} else abortSession(); return; }
+  try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();actx.resume();}catch(e){}
+  const w=+$('inWait').value,d=+$('inDur').value;
+  sess=newSession(d);sess.waitEnd=performance.now()+w*1000;
+  if(w===0){sess.phase='rec';beep(1320,0.5);}
+  $('btnRec').textContent=w?'取消':'提前結束並存檔';$('btnRec').className='stop grow';
+  setRunLock(true);showMsg('');
+};
+function setRunLock(on){['inWait','inDur','inModel','inHeight','inFile','btnFlip'].forEach(id=>$(id).disabled=on);}
+function abortSession(){sess=null;$('phase').hidden=true;$('count').hidden=true;resetRecBtn();showMsg('已取消，這次沒有記錄。');}
+function resetRecBtn(){$('btnRec').textContent='開始';$('btnRec').className='primary grow';setRunLock(false);}
+function sessionFrame(clock,lm,wl,W,H){
+  const s=sess,now=performance.now();
+  if(s.phase==='wait'){
+    const left=(s.waitEnd-now)/1000;
+    $('phase').hidden=false;$('phase').textContent=`等待中，${fmtDur(Math.ceil(left))} 後開始記錄`;$('phase').style.color='var(--accent)';
+    const sec=Math.ceil(left);
+    if(sec<=5&&sec>0){$('count').hidden=false;$('count').textContent=sec;if(sec<=3&&!s.beeped[sec]){s.beeped[sec]=1;beep(880,0.12);}} else $('count').hidden=true;
+    if(left<=0){s.phase='rec';$('count').hidden=true;beep(1320,0.5);$('btnRec').textContent='提前結束並存檔';}
+    return;
+  }
+  if(s.recStart===null){s.recStart=clock;s.epoch0=s.epoch0??(performance.timeOrigin+clock);s.W=W;s.H=H;live.reset();live.heightCm=s.heightCm;}
+  const t=clock-s.recStart;
+  if(s.n<s.cap){const o=s.n*ROW,b=s.buf;b.fill(NaN,o,o+ROW);b[o]=t;
+    if(lm)for(let k=0;k<33;k++){const p=lm[k],q=o+1+k*7;b[q]=p.x;b[q+1]=p.y;b[q+2]=p.z;b[q+3]=p.visibility??NaN;if(wl){const w=wl[k];b[q+4]=w.x;b[q+5]=w.y;b[q+6]=w.z;}}
+    s.n++;}
+  s.steps=live.steps.length;
+  const left=s.dur-t/1000;
+  if(mode==='cam'){$('phase').hidden=false;$('phase').textContent=`● 記錄中 剩 ${fmtDur(left)}`;$('phase').style.color='#fff';}
+  else{$('phase').hidden=false;$('phase').textContent=`● 分析影片 ${fmtDur(t/1000)}`;}
+  if(mode==='cam'&&left<=0)finishSession(false);
 }
-async function stopRecording(){
-  if(!rec) return; clearInterval(rec.timer); $('count').hidden=true;
-  $('btnRec').textContent='開始記錄'; $('btnRec').className='primary grow';
-  const r=rec; rec=null;
-  if(!r.started||r.frames.length<10){ showMsg('記錄時間太短，沒有保存。'); return; }
-  const stats=analyzer.stats(0);
-  const durS=r.frames[r.frames.length-1][0]/1000;
-  const meta={app:'跑姿記錄器',version:APP_VER,date:r.date.toISOString(),source:r.source,heightCm:analyzer.heightCm,model:modelKind,
-    videoWidth:video.videoWidth,videoHeight:video.videoHeight,frames:r.frames.length,durationSec:+durS.toFixed(2),
-    avgFps:+(r.frames.length/Math.max(durS,0.001)).toFixed(1),runningDirection:analyzer.dir>0?'畫面向右':'畫面向左',
-    cmPerPx:analyzer.cmPerPx,legLengthPx:analyzer.Lpx};
-  const steps=r.steps.map(s=>({...s,t:+(s.t-(r.t0??0)).toFixed(3),tStrike:+(s.tStrike-(r.t0??0)).toFixed(3)}));
-  const flat=new Float32Array(r.frames.length*ROW); r.frames.forEach((row,i)=>flat.set(row,i*ROW));
-  const session={id:Date.now(),meta,stats,steps,frames:flat.buffer,row:ROW};
-  renderSummary(session);
-  try{ await dbPut(session); await renderRecords(); }catch(e){ showMsg('無法存到手機（瀏覽器儲存空間受限），請直接下載。',true); window.__unsaved=session; }
+async function finishSession(early){
+  const s=sess;if(!s)return;sess=null;$('phase').hidden=true;$('count').hidden=true;resetRecBtn();
+  beep(990,0.15);setTimeout(()=>beep(990,0.15),220);
+  if(s.n<20||s.buf[(s.n-1)*ROW]<3000){showMsg('記錄時間太短（少於 3 秒），沒有保存。');return;}
+  showMsg('正在整段精算並存檔…');
+  await new Promise(r=>setTimeout(r,30));
+  const flat=s.buf.slice(0,s.n*ROW);
+  const durSec=flat[(s.n-1)*ROW]/1000;
+  const d=s.date,p=n=>String(n).padStart(2,'0');
+  const sessionId=`${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`;
+  const meta={app:'跑姿記錄器',version:APP_VER,sessionId,date:d.toISOString(),epoch0:s.epoch0,source:s.source,fileName:s.fileName||'',
+    heightCm:s.heightCm,model:s.model,facing:s.facing,W:s.W||video.videoWidth,H:s.H||video.videoHeight,frames:s.n,durationSec:+durSec.toFixed(2),
+    avgFps:+(s.n/Math.max(durSec,0.001)).toFixed(1),plannedSec:s.dur,early:!!early,tz:Intl.DateTimeFormat().resolvedOptions().timeZone};
+  let res;try{res=C.analyzeSession(flat,{W:meta.W,H:meta.H,heightCm:meta.heightCm});}catch(e){console.error(e);showMsg('精算失敗：'+e.message,'err');return;}
+  meta.nearSide=res.near;meta.runDir=res.dir>0?'right':'left';meta.cmPerPx=res.cmPerPx;
+  const session={id:Date.now(),meta,stats:res.stats,flat:flat.buffer};
+  const saved=downloadCSV(session,res);
+  try{await dbPut(session);await renderRecords();}catch(e){console.warn(e);}
+  renderSummary(session,res);openReplay(session,res);
+  showMsg(saved?`已存檔：${saved}（手機「下載」資料夾）。`:'自動下載被瀏覽器擋下，請按「下載 CSV」。',saved?'ok':'');
 }
 
 /* ---------- summary ---------- */
-const REF={cadence:'常見 160–185',osc:'常見 6–10',knee:'常見 155–165（微彎）',over:'越接近 0 越好',trunk:'常見 5–10',elb:'常見 80–100'};
-function renderSummary(s){
-  const st=s.stats, m=s.meta;
-  const row=(name,a,unit,d,ref,lr)=>`<tr><td>${name}</td><td class="n">${fmt(a.mean,d)} ${unit}</td><td class="n">±${fmt(a.sd,d)}</td><td>${lr||''}</td><td class="ref">${ref}</td></tr>`;
-  const lr=(l,r,d=0)=>`<span style="color:var(--left)">左 ${fmt(l.mean,d)}</span> / <span style="color:var(--right)">右 ${fmt(r.mean,d)}</span>`;
+const REF={cad:'常見 160–185',osc:'常見 6–10',knee:'常見 155–165',over:'越接近 0 越好',trunk:'常見 5–10',contact:'常見 200–300',elb:'常見 80–100'};
+function renderSummary(s,res){
+  const st=s.stats,m=s.meta,near=m.nearSide==='R'?'右':'左',far=m.nearSide==='R'?'左':'右';
+  const row=(name,a,unit,d,ref,nf)=>`<tr><td>${name}</td><td class="n">${fmt(a.mean,d)} ${unit}</td><td class="n">±${fmt(a.sd,d)}</td><td>${nf||''}</td><td class="ref">${ref}</td></tr>`;
+  const nf=(a,b,d=0)=>`近側(${near}) ${fmt(a.mean,d)} / 遠側(${far}) ${fmt(b.mean,d)}`;
+  const lowFps=m.avgFps<25;
   $('sumBody').innerHTML=`
-    <div class="note">${new Date(m.date).toLocaleString('zh-TW')} · ${fmtDur(m.durationSec)} · ${st.steps} 步（左 ${st.stepsL} / 右 ${st.stepsR}）· 平均 ${m.avgFps} fps</div>
+    <p class="note">${new Date(m.date).toLocaleString('zh-TW')} · 記錄 ${fmtDur(m.durationSec)}${m.early?'（提前結束）':''} · ${st.steps} 步（左 ${st.stepsL} / 右 ${st.stepsR}）· 平均 ${m.avgFps} fps · 跑向${m.runDir==='right'?'畫面右':'畫面左'}、近側為${near}側</p>
     <div class="tbl"><table>
-      <tr><th>指標</th><th>平均</th><th>變異</th><th>左 / 右</th><th>參考</th></tr>
-      ${row('步頻',{mean:st.cadence.rate,sd:st.cadence.sd},'步/分',0,REF.cadence)}
+      <tr><th>指標</th><th>平均</th><th>變異</th><th>近側 / 遠側</th><th>參考</th></tr>
+      ${row('步頻',{mean:st.cadence,sd:st.cadenceStep.sd},'步/分',0,REF.cad)}
       ${row('垂直振幅',st.vertOscCm,'cm',1,REF.osc)}
-      ${row('觸地膝角',st.kneeStrike,'°',0,REF.knee,lr(st.kneeL,st.kneeR))}
-      ${row('跨步距',st.overstrideCm,'cm',0,REF.over,lr(st.overL,st.overR))}
+      ${row('觸地膝角',st.knee,'°',0,REF.knee,nf(st.kneeNear,st.kneeFar))}
+      ${row('跨步距',st.over,'cm',0,REF.over,nf(st.overNear,st.overFar))}
+      ${row('觸地時間',st.contact,'ms',0,REF.contact+(lowFps?'<span class="tag">fps 不足，僅供參考</span>':''),nf(st.contactNear,st.contactFar))}
       ${row('軀幹前傾',st.trunkDeg,'°',1,REF.trunk)}
-      ${row('手肘角度',{mean:(st.elbowL.mean+st.elbowR.mean)/2,sd:NaN},'°',0,REF.elb,lr(st.elbowL,st.elbowR))}
+      ${row('手肘角度（近側）',st.elbowNear,'°',0,REF.elb)}
     </table></div>
-    <div class="controls"><button id="dlNow" class="primary">下載這次數據（ZIP）</button></div>`;
+    <p class="note">資料品質：有效畫面 ${(st.validFrac*100).toFixed(0)}% · 異常步伐剔除 ${st.outlierSteps} 步 · 左右交替修正後連續同側 ${st.sameSidePairs} 次</p>
+    <div class="controls"><button id="dlNow">下載 CSV</button><button id="rpNow" class="primary">回放檢視</button></div>`;
   $('sumCard').hidden=false;
-  $('dlNow').onclick=()=>downloadSession(s);
+  $('dlNow').onclick=()=>downloadCSV(s,res);
+  $('rpNow').onclick=()=>{openReplay(s,res);$('rpCard').scrollIntoView({behavior:'smooth'});};
+}
+
+/* ---------- CSV ---------- */
+function downloadCSV(s,res){
+  res=res||C.analyzeSession(new Float32Array(s.flat),{W:s.meta.W,H:s.meta.H,heightCm:s.meta.heightCm});
+  const csv=C.buildCSV(new Float32Array(s.flat),res,s.meta);
+  const name=`runform_${s.meta.sessionId}_${s.meta.heightCm}cm_${Math.round(s.meta.durationSec)}s.csv`;
+  try{const url=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));const a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);return name;}
+  catch(e){console.warn(e);return null;}
 }
 
 /* ---------- IndexedDB ---------- */
-function db(){ return new Promise((ok,bad)=>{ const r=indexedDB.open('runform',1); r.onupgradeneeded=()=>r.result.createObjectStore('sessions',{keyPath:'id'}); r.onsuccess=()=>ok(r.result); r.onerror=()=>bad(r.error); }); }
-async function dbPut(s){ const d=await db(); return new Promise((ok,bad)=>{const tx=d.transaction('sessions','readwrite');tx.objectStore('sessions').put(s);tx.oncomplete=ok;tx.onerror=()=>bad(tx.error);}); }
-async function dbAll(){ const d=await db(); return new Promise((ok,bad)=>{const q=d.transaction('sessions').objectStore('sessions').getAll();q.onsuccess=()=>ok(q.result);q.onerror=()=>bad(q.error);}); }
-async function dbDel(id){ const d=await db(); return new Promise((ok,bad)=>{const tx=d.transaction('sessions','readwrite');tx.objectStore('sessions').delete(id);tx.oncomplete=ok;tx.onerror=()=>bad(tx.error);}); }
+function db(){return new Promise((ok,bad)=>{const r=indexedDB.open('runform',2);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains('sessions'))r.result.createObjectStore('sessions',{keyPath:'id'});};r.onsuccess=()=>ok(r.result);r.onerror=()=>bad(r.error);});}
+async function dbPut(s){const d=await db();return new Promise((ok,bad)=>{const tx=d.transaction('sessions','readwrite');tx.objectStore('sessions').put(s);tx.oncomplete=ok;tx.onerror=()=>bad(tx.error);});}
+async function dbAll(){const d=await db();return new Promise((ok,bad)=>{const q=d.transaction('sessions').objectStore('sessions').getAll();q.onsuccess=()=>ok(q.result);q.onerror=()=>bad(q.error);});}
+async function dbDel(id){const d=await db();return new Promise((ok,bad)=>{const tx=d.transaction('sessions','readwrite');tx.objectStore('sessions').delete(id);tx.oncomplete=ok;tx.onerror=()=>bad(tx.error);});}
 async function renderRecords(){
-  let all=[]; try{ all=await dbAll(); }catch(e){ return; }
-  if(!all.length) return;
-  all.sort((a,b)=>b.id-a.id);
-  const box=$('recList'); box.innerHTML='';
+  let all=[];try{all=(await dbAll()).filter(s=>s.meta&&s.meta.version==='v2');}catch(e){return;}
+  if(!all.length)return;all.sort((a,b)=>b.id-a.id);
+  const box=$('recList');box.innerHTML='';
   for(const s of all){
-    const d=document.createElement('div'); d.className='rec-item';
-    d.innerHTML=`<div class="info"><b>${fmt(s.stats.cadence.rate)} 步/分 · ${s.stats.steps} 步</b><div>${new Date(s.meta.date).toLocaleString('zh-TW')} · ${fmtDur(s.meta.durationSec)} · ${s.meta.source==='file'?'影片檔':'攝影機'}</div></div>`;
-    const bView=document.createElement('button'); bView.textContent='查看'; bView.onclick=()=>{renderSummary(s);$('sumCard').scrollIntoView({behavior:'smooth'});};
-    const bDl=document.createElement('button'); bDl.textContent='下載'; bDl.onclick=()=>downloadSession(s);
-    const bDel=document.createElement('button'); bDel.textContent='刪除';
-    bDel.onclick=async()=>{ if(bDel.dataset.c){ await dbDel(s.id); d.remove(); if(!box.children.length) box.innerHTML='<p class="note" style="margin:0">沒有紀錄。</p>'; } else { bDel.dataset.c=1; bDel.textContent='確定刪除？'; bDel.className='stop'; setTimeout(()=>{delete bDel.dataset.c;bDel.textContent='刪除';bDel.className='';},3000);} };
-    d.append(bView,bDl,bDel); box.append(d);
+    const d=document.createElement('div');d.className='rec-item';
+    d.innerHTML=`<div class="info"><b>${fmt(s.stats.cadence)} 步/分 · ${s.stats.steps} 步</b><div>${new Date(s.meta.date).toLocaleString('zh-TW')} · ${fmtDur(s.meta.durationSec)} · ${s.meta.avgFps} fps · ${s.meta.source==='file'?'影片檔':'攝影機'}</div></div>`;
+    const load=()=>C.analyzeSession(new Float32Array(s.flat),{W:s.meta.W,H:s.meta.H,heightCm:s.meta.heightCm});
+    const b1=document.createElement('button');b1.textContent='回放';b1.onclick=()=>{const r=load();renderSummary(s,r);openReplay(s,r);$('rpCard').scrollIntoView({behavior:'smooth'});};
+    const b2=document.createElement('button');b2.textContent='下載';b2.onclick=()=>downloadCSV(s);
+    const b3=document.createElement('button');b3.textContent='刪除';
+    b3.onclick=async()=>{if(b3.dataset.c){await dbDel(s.id);d.remove();if(!box.children.length)box.innerHTML='<p class="note">沒有紀錄。</p>';}
+      else{b3.dataset.c=1;b3.textContent='確定刪除？';b3.className='stop';setTimeout(()=>{delete b3.dataset.c;b3.textContent='刪除';b3.className='';},3000);}};
+    d.append(b1,b2,b3);box.append(d);
   }
 }
 renderRecords();
 
-/* ---------- export ---------- */
-function framesCSV(s){
-  const f=new Float32Array(s.frames), R=s.row, n=f.length/R;
-  const head=['t_ms','knee_angle_L','knee_angle_R','elbow_angle_L','elbow_angle_R','trunk_lean_deg','pelvis_y_cm'];
-  for(const nm of NAMES) head.push(`${nm}_x`,`${nm}_y`,`${nm}_z`,`${nm}_vis`,`${nm}_wx`,`${nm}_wy`,`${nm}_wz`);
-  const out=[head.join(',')];
-  const dec=[1,2,2,2,2,2,2];
-  for(let i=0;i<n;i++){ const a=new Array(R); for(let j=0;j<R;j++){ const v=f[i*R+j]; a[j]=Number.isFinite(v)?(j<7?v.toFixed(dec[j]):v.toFixed(4)):''; } out.push(a.join(',')); }
-  return out.join('\n');
+/* ---------- replay ---------- */
+const RP={s:null,res:null,i:0,playing:false,last:0};
+const rpC=$('rpCanvas'),rx=rpC.getContext('2d'),chC=$('rpChart'),cx=chC.getContext('2d'),ovC=$('rpOverview'),ox=ovC.getContext('2d');
+function openReplay(s,res){
+  RP.s=s;RP.res=res;RP.i=0;RP.playing=false;$('rpPlay').textContent='播放';
+  const W=s.meta.W,H=s.meta.H;
+  // crop box around the runner (all valid frames)
+  const xs=[],ys=[];for(let i=0;i<res.n;i+=2){if(!res.valid[i])continue;for(const k of C.BODY){xs.push(res.X[k][i]);ys.push(res.Y[k][i]);}}
+  const q=(a,p)=>{const b=a.filter(Number.isFinite).sort((u,v)=>u-v);return b[Math.max(0,Math.min(b.length-1,Math.round(p*(b.length-1))))];};
+  const x0=q(xs,0.005),x1=q(xs,0.995),y0=q(ys,0.003),y1=q(ys,0.997);
+  const pad=0.08*(y1-y0);RP.box={x0:x0-pad,y0:y0-pad,w:(x1-x0)+2*pad,h:(y1-y0)+2*pad};
+  const ar=RP.box.w/RP.box.h;rpC.height=720;rpC.width=Math.round(Math.max(360,Math.min(900,720*ar)));
+  RP.ground=C.median(Array.from({length:res.n},(_,i)=>res.valid[i]?Math.max(res.Y[29][i],res.Y[30][i],res.Y[31][i],res.Y[32][i]):NaN).filter(Number.isFinite).sort((a,b)=>a-b).slice(-Math.ceil(res.n*0.2)));
+  $('rpSlider').max=res.n-1;$('rpSlider').value=0;
+  $('rpCard').hidden=false;sizeCharts();drawReplay();
 }
-function stepsCSV(s){
-  const cols=['n','t','tStrike','side','cadence','kneeStrike','overstrideCm','vertOscCm','trunkDeg','elbowL','elbowR'];
-  const head=['step','t_mid_s','t_strike_s','side','cadence_spm','knee_at_strike_deg','overstride_cm','vertical_osc_cm','trunk_lean_deg','elbow_L_deg','elbow_R_deg'];
-  return [head.join(',')].concat(s.steps.map(x=>cols.map(c=>{const v=x[c];return typeof v==='number'?(Number.isFinite(v)?+v.toFixed(3):''):v;}).join(','))).join('\n');
+function sizeCharts(){const w=Math.round(chC.clientWidth*devicePixelRatio)||700;chC.width=w;chC.height=Math.round(300*devicePixelRatio);ovC.width=w;ovC.height=Math.round(90*devicePixelRatio);}
+window.addEventListener('resize',()=>{if(RP.res){sizeCharts();drawReplay();}});
+function drawReplay(){
+  const {res,s}=RP;if(!res)return;const i=RP.i,W=rpC.width,H=rpC.height,b=RP.box,sc=H/b.h;
+  const P=(k)=>[(res.X[k][i]-b.x0)*sc,(res.Y[k][i]-b.y0)*sc];
+  rx.fillStyle='#0a0e10';rx.fillRect(0,0,W,H);
+  // ground
+  const gy=(RP.ground-b.y0)*sc;rx.strokeStyle='rgba(198,244,50,.4)';rx.lineWidth=2;rx.beginPath();rx.moveTo(0,gy);rx.lineTo(W,gy);rx.stroke();
+  // hip trail ±0.6 s
+  rx.strokeStyle='rgba(198,244,50,.7)';rx.lineWidth=2;rx.beginPath();let st=false;
+  for(let j=Math.max(0,i-18);j<=i;j++){if(!res.valid[j]){st=false;continue;}const x=((res.X[23][j]+res.X[24][j])/2-b.x0)*sc,y=((res.Y[23][j]+res.Y[24][j])/2-b.y0)*sc;st?rx.lineTo(x,y):rx.moveTo(x,y);st=true;}rx.stroke();
+  if(res.valid[i]){
+    const near=res.near;
+    const order=near==='R'?['l','c','r']:['r','c','l']; // far side first
+    for(const side of order)for(const [a,c,sd] of EDGES){if(sd!==side)continue;const [x1,y1]=P(a),[x2,y2]=P(c);
+      const isFar=(sd==='l'&&near==='R')||(sd==='r'&&near==='L');
+      rx.globalAlpha=isFar?0.55:1;rx.strokeStyle=COL[sd];rx.lineWidth=isFar?4:6;rx.lineCap='round';rx.beginPath();rx.moveTo(x1,y1);rx.lineTo(x2,y2);rx.stroke();}
+    rx.globalAlpha=1;const [hx,hy]=P(0);rx.fillStyle=COL.c;rx.beginPath();rx.arc(hx,hy,10,0,7);rx.fill();
+  } else {rx.fillStyle='#8fa1ab';rx.font='16px system-ui';rx.fillText('此格未偵測到人物',16,H/2);}
+  const ev=res.events.get(i)||'';
+  if(ev.includes('strike')){rx.fillStyle='rgba(198,244,50,.9)';rx.font='bold 22px system-ui';rx.fillText('觸地',W-80,40);}
+  const stp=res.steps.filter(x=>x.t<=res.T[i]+0.001).at(-1);
+  const sideName=x=>x==='L'?'左':'右';
+  $('rpRead').innerHTML=`<span>${res.T[i].toFixed(2)} s · 第 ${i+1}/${res.n} 格</span>
+    <span>膝角 左 ${fmt(res.knee.L[i])}° / 右 ${fmt(res.knee.R[i])}°</span>
+    <span>軀幹前傾 ${fmt(res.trunk[i],1)}°</span>
+    ${stp?`<span>最近一步 #${stp.n}（${sideName(stp.side)}腳）步頻 ${fmt(stp.cadence)}、觸地膝角 ${fmt(stp.kneeStrike)}°、跨步距 ${fmt(stp.overstrideCm)} cm</span>`:''}`;
+  $('rpSlider').value=i;drawCharts();
 }
-function readme(s){
-  return `跑姿記錄器 ${s.meta.version} 匯出說明
-frames.csv  每一格畫面一列。t_ms=毫秒；*_x,*_y 為畫面比例座標(0–1，左上為原點)；*_z 為相對深度；*_vis 為可信度；*_wx,wy,wz 為以髖部為原點的 3D 公尺座標(AI 推估)。
-            knee/elbow 角度為關節內角(180=伸直)；trunk_lean_deg 向跑步方向前傾為正；pelvis_y_cm 為骨盆高度位置(向下為正，僅相對值有意義)。
-steps.csv   每一步一列。t_mid=骨盆最低點(支撐中期)；t_strike=估計觸地時間；side=L/R；overstride_cm=觸地時腳踝在髖部前方的水平距離。
-summary.json 本次設定與統計摘要。
-注意：單機側拍 2D 分析；距離以身高 ${s.meta.heightCm} cm 換算(大腿+小腿≈身高×0.491)，屬估算。
-`;
+function drawCharts(){
+  const {res}=RP,i=RP.i,W=chC.width,H=chC.height,dpr=devicePixelRatio;
+  cx.fillStyle='#1d2830';cx.fillRect(0,0,W,H);
+  const t0=res.T[i]-2.5,t1=res.T[i]+2.5,X=t=>(t-t0)/(t1-t0)*W;
+  const pad=10*dpr,h1=H*0.42,h2=H*0.42,top2=H*0.52;
+  // events
+  for(const st of res.steps){
+    for(const [t,dash] of [[st.tStrike,[]],[st.tOff,[4*dpr,4*dpr]]]){if(!Number.isFinite(t)||t<t0||t>t1)continue;
+      cx.strokeStyle=st.side==='L'?COL.l:COL.r;cx.globalAlpha=.6;cx.setLineDash(dash);cx.lineWidth=1.5*dpr;cx.beginPath();cx.moveTo(X(t),0);cx.lineTo(X(t),H);cx.stroke();}}
+  cx.setLineDash([]);cx.globalAlpha=1;
+  const j0=res.T.findIndex(t=>t>=t0),series=(arr,top,hh,lo,hi,col,inv)=>{cx.strokeStyle=col;cx.lineWidth=2*dpr;cx.beginPath();let on=false;
+    for(let j=Math.max(0,j0);j<res.n&&res.T[j]<=t1;j++){const v=arr[j];if(!Number.isFinite(v)){on=false;continue;}let r=(v-lo)/(hi-lo);if(inv)r=1-r;const y=top+pad+(1-r)*(hh-2*pad);on?cx.lineTo(X(res.T[j]),y):cx.moveTo(X(res.T[j]),y);on=true;}cx.stroke();};
+  // pelvis (cm, up = up)
+  let lo=Infinity,hi=-Infinity;for(let j=Math.max(0,j0);j<res.n&&res.T[j]<=t1;j++){const v=res.pelvis[j];if(Number.isFinite(v)){lo=Math.min(lo,v);hi=Math.max(hi,v);}}
+  if(hi>lo)series(res.pelvis,0,h1,lo,hi,'#e8eef1',true);
+  series(res.knee.L,top2,h2,60,185,COL.l);series(res.knee.R,top2,h2,60,185,COL.r);
+  cx.fillStyle='#8fa1ab';cx.font=`${12*dpr}px system-ui`;cx.fillText('骨盆高度',6*dpr,14*dpr);
+  if(hi>lo)cx.fillText(`振幅範圍 ${((hi-lo)*res.cmPerPx).toFixed(1)} cm`,80*dpr,14*dpr);
+  cx.fillText('膝角（60°–185°）',6*dpr,top2+14*dpr);
+  cx.strokeStyle='#c6f432';cx.lineWidth=1.5*dpr;cx.beginPath();cx.moveTo(W/2,0);cx.lineTo(W/2,H);cx.stroke();
+  // overview
+  const OW=ovC.width,OH=ovC.height,T=res.T[res.n-1]||1;ox.fillStyle='#1d2830';ox.fillRect(0,0,OW,OH);
+  ox.strokeStyle='rgba(255,255,255,.12)';for(const v of [150,175,200]){const y=OH-(v-120)/(230-120)*OH;ox.beginPath();ox.moveTo(0,y);ox.lineTo(OW,y);ox.stroke();ox.fillStyle='#8fa1ab';ox.font=`${10*dpr}px system-ui`;ox.fillText(v,2*dpr,y-2*dpr);}
+  for(const st of res.steps){if(!Number.isFinite(st.cadence))continue;const x=st.t/T*OW,y=OH-(Math.max(120,Math.min(230,st.cadence))-120)/(110)*OH;
+    ox.fillStyle=st.quality==='outlier'?'#ff6b6b':(st.side==='L'?COL.l:COL.r);ox.beginPath();ox.arc(x,y,2.2*dpr,0,7);ox.fill();}
+  ox.strokeStyle='#c6f432';ox.lineWidth=2*dpr;const px=res.T[i]/T*OW;ox.beginPath();ox.moveTo(px,0);ox.lineTo(px,OH);ox.stroke();
 }
-async function downloadSession(s){
-  const enc=new TextEncoder();
-  const files=[
-    ['summary.json',enc.encode(JSON.stringify({meta:s.meta,stats:s.stats},null,2))],
-    ['steps.csv',enc.encode('﻿'+stepsCSV(s))],
-    ['frames.csv',enc.encode('﻿'+framesCSV(s))],
-    ['README.txt',enc.encode(readme(s))]];
-  const blob=zip(files);
-  const d=new Date(s.meta.date); const p=n=>String(n).padStart(2,'0');
-  const name=`run_${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}.zip`;
-  const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=name; document.body.append(a); a.click(); a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url),5000);
-}
-/* minimal ZIP (store, no compression) */
-const CRC=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0;}return t;})();
-function crc32(b){let c=0xFFFFFFFF;for(let i=0;i<b.length;i++)c=CRC[(c^b[i])&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0;}
-function zip(files){
-  const enc=new TextEncoder(),parts=[],cen=[];let off=0;
-  const now=new Date(),dt=((now.getHours()<<11)|(now.getMinutes()<<5)|(now.getSeconds()>>1)),dd=(((now.getFullYear()-1980)<<9)|((now.getMonth()+1)<<5)|now.getDate());
-  for(const [name,data] of files){
-    const nm=enc.encode(name),crc=crc32(data);
-    const h=new DataView(new ArrayBuffer(30));
-    h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x0800,true);h.setUint16(8,0,true);h.setUint16(10,dt,true);h.setUint16(12,dd,true);
-    h.setUint32(14,crc,true);h.setUint32(18,data.length,true);h.setUint32(22,data.length,true);h.setUint16(26,nm.length,true);h.setUint16(28,0,true);
-    parts.push(h.buffer,nm,data);
-    const c=new DataView(new ArrayBuffer(46));
-    c.setUint32(0,0x02014b50,true);c.setUint16(4,20,true);c.setUint16(6,20,true);c.setUint16(8,0x0800,true);c.setUint16(10,0,true);c.setUint16(12,dt,true);c.setUint16(14,dd,true);
-    c.setUint32(16,crc,true);c.setUint32(20,data.length,true);c.setUint32(24,data.length,true);c.setUint16(28,nm.length,true);c.setUint32(42,off,true);
-    cen.push(c.buffer,nm);
-    off+=30+nm.length+data.length;
-  }
-  const cenSize=cen.reduce((s,b)=>s+(b.byteLength??b.length),0);
-  const e=new DataView(new ArrayBuffer(22));
-  e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,cenSize,true);e.setUint32(16,off,true);
-  return new Blob([...parts,...cen,e.buffer],{type:'application/zip'});
-}
-window.__app={zip,framesCSV,stepsCSV,renderSummary,get analyzer(){return analyzer;}};
+$('rpSlider').addEventListener('input',e=>{RP.i=+e.target.value;drawReplay();});
+$('rpPrev').onclick=()=>{RP.i=Math.max(0,RP.i-1);drawReplay();};
+$('rpNext').onclick=()=>{RP.i=Math.min(RP.res.n-1,RP.i+1);drawReplay();};
+$('rpPrevStep').onclick=()=>{const t=RP.res.T[RP.i];const s=RP.res.steps.filter(x=>Number.isFinite(x.tStrike)&&x.tStrike<t-0.01).at(-1);if(s){RP.i=s.ia;drawReplay();}};
+$('rpNextStep').onclick=()=>{const t=RP.res.T[RP.i];const s=RP.res.steps.find(x=>Number.isFinite(x.tStrike)&&x.tStrike>t+0.01);if(s){RP.i=s.ia;drawReplay();}};
+ovC.addEventListener('click',e=>{const r=ovC.getBoundingClientRect(),f=(e.clientX-r.left)/r.width,t=f*RP.res.T[RP.res.n-1];RP.i=Math.max(0,RP.res.T.findIndex(x=>x>=t));drawReplay();});
+$('rpPlay').onclick=()=>{RP.playing=!RP.playing;$('rpPlay').textContent=RP.playing?'暫停':'播放';RP.last=performance.now();RP.clock=RP.res.T[RP.i];if(RP.playing)requestAnimationFrame(rpTick);};
+function rpTick(now){if(!RP.playing)return;const sp=+$('rpSpeed').value;RP.clock+=(now-RP.last)/1000*sp;RP.last=now;
+  while(RP.i<RP.res.n-1&&RP.res.T[RP.i+1]<=RP.clock)RP.i++;
+  if(RP.i>=RP.res.n-1){RP.playing=false;$('rpPlay').textContent='播放';}
+  drawReplay();if(RP.playing)requestAnimationFrame(rpTick);}
+
+window.__app={RP,openReplay,renderSummary,finishSession,get sess(){return sess;}};
 </script>
 </body>
 </html>
