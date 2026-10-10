@@ -1,0 +1,622 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f1417">
+<title>跑姿記錄器</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&display=swap">
+<style>
+/* Layout: one-column phone instrument — camera stage on top, metric dial grid, controls, then records. Dark single look (gym/treadmill use). */
+:root{
+  --bg:#0f1417; --panel:#172026; --line:#26333b; --fg:#e8eef1; --muted:#8fa1ab;
+  --accent:#c6f432;          /* record / primary */
+  --left:#ffa24a; --right:#43cdf5; --warn:#ffcf5a; --bad:#ff6b6b;
+  --num:"Barlow Condensed","Roboto Condensed","Arial Narrow",system-ui,sans-serif;
+  --body:system-ui,-apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5}
+body{padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)}
+.wrap{max-width:760px;margin:0 auto;padding-inline:16px;padding-block:12px 40px;display:flex;flex-direction:column;gap:14px}
+header{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+h1{font-family:var(--num);font-weight:700;font-size:28px;letter-spacing:.02em;margin:0}
+h1 small{font-size:15px;color:var(--muted);font-weight:500;margin-left:6px}
+.ver{font-family:var(--num);color:var(--accent);font-size:16px;border:1px solid var(--accent);padding:0 8px;border-radius:4px}
+h2{font-size:15px;margin:0;color:var(--muted);font-weight:600;letter-spacing:.06em}
+
+/* stage */
+.stage{position:relative;background:#000;border-radius:10px;overflow:hidden;aspect-ratio:3/4;max-height:70vh;width:100%;display:flex;align-items:center;justify-content:center;border:1px solid var(--line)}
+.stage canvas{max-width:100%;max-height:100%;display:block}
+.stage video{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.hud{position:absolute;top:8px;left:8px;right:8px;display:flex;flex-wrap:wrap;gap:6px;pointer-events:none}
+.chip{font-size:12.5px;padding:2px 8px;border-radius:99px;background:rgba(15,20,23,.75);border:1px solid var(--line);color:var(--fg);font-variant-numeric:tabular-nums}
+.chip.ok{border-color:#3e7a4a;color:#a6f0b4}.chip.warn{border-color:#7a6524;color:var(--warn)}.chip.rec{border-color:var(--bad);color:#fff;background:rgba(160,30,30,.8)}
+.legend{position:absolute;bottom:8px;left:8px;display:flex;gap:10px;font-size:12px;pointer-events:none;background:rgba(15,20,23,.6);padding:2px 8px;border-radius:6px}
+.legend b{display:inline-block;width:10px;height:3px;vertical-align:middle;margin-right:4px}
+.placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--muted);text-align:center;padding:24px}
+.placeholder svg{opacity:.55}
+.count{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--num);font-size:140px;font-weight:700;color:var(--accent);background:rgba(0,0,0,.35)}
+
+/* metrics */
+.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.m{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0}
+.m .k{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.m .v{font-family:var(--num);font-weight:600;font-size:30px;line-height:1.1;font-variant-numeric:tabular-nums}
+.m .v span{font-size:15px;color:var(--muted);margin-left:2px;font-weight:500}
+.m .lr{font-size:12px;font-variant-numeric:tabular-nums;color:var(--muted)}
+.m .lr i{font-style:normal}.m .lr .l{color:var(--left)}.m .lr .r{color:var(--right)}
+@media (max-width:380px){.metrics{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* controls */
+.controls{display:flex;flex-wrap:wrap;gap:8px}
+button,.btn{font:inherit;font-weight:600;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--fg);padding:10px 14px;cursor:pointer;min-height:44px}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button.primary{background:var(--accent);color:#11170a;border-color:var(--accent)}
+button.stop{background:var(--bad);border-color:var(--bad);color:#fff}
+button:disabled{opacity:.45;cursor:not-allowed}
+.grow{flex:1 1 140px}
+.settings{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px}
+label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+input,select{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px;min-height:40px;width:100%}
+.vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
+.filebtn{display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--fg)}
+label:focus-within .filebtn{outline:2px solid var(--accent);outline-offset:2px}
+.msg{font-size:14px;padding:10px 12px;border-radius:8px;background:#2a2312;border:1px solid #6b5520;color:#ffe2a0}
+.msg.err{background:#2c1515;border-color:#7a2a2a;color:#ffc2c2}
+
+/* summary + records */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.tbl{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13.5px;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--muted);font-weight:600}
+td.n{font-family:var(--num);font-size:16px}
+.ref{color:var(--muted);font-size:12.5px}
+.rec-item{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.rec-item:last-child{border-bottom:0}
+.rec-item .info{flex:1 1 200px;min-width:0}
+.rec-item .info b{font-family:var(--num);font-size:18px;font-weight:600}
+.rec-item .info div{font-size:12.5px;color:var(--muted)}
+.rec-item button{min-height:38px;padding:6px 12px;font-size:14px}
+details{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+summary{cursor:pointer;font-weight:600}
+details ol{padding-left:20px;margin:8px 0 0}
+details li{margin:4px 0}
+.note{font-size:12.5px;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>跑姿記錄器<small>Run Form</small></h1>
+    <span class="ver" id="ver">v1</span>
+  </header>
+
+  <div class="stage" id="stage">
+    <video id="video" playsinline muted></video>
+    <canvas id="canvas" width="720" height="960"></canvas>
+    <div class="placeholder" id="ph">
+      <svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><circle cx="38" cy="10" r="5"/><path d="M36 17l-6 16 10 8-4 15M30 33l-12 6M34 22l10 6 8-2M30 33l-4 10-12 4"/></svg>
+      <div>按「開啟攝影機」開始。<br>手機架在跑步機側面約 2–3 公尺，全身入鏡。</div>
+    </div>
+    <div class="hud" id="hud"></div>
+    <div class="legend"><span><b style="background:var(--left)"></b>左側</span><span><b style="background:var(--right)"></b>右側</span></div>
+    <div class="count" id="count" hidden></div>
+  </div>
+
+  <div id="msg" class="msg" hidden></div>
+
+  <div class="controls">
+    <button id="btnCam" class="grow">開啟攝影機</button>
+    <button id="btnFlip" disabled>切換鏡頭</button>
+    <button id="btnRec" class="primary grow" disabled>開始記錄</button>
+  </div>
+
+  <section class="metrics" aria-label="即時指標（最近 10 秒）">
+    <div class="m"><div class="k">步頻</div><div class="v" id="mCad">--<span>步/分</span></div><div class="lr" id="mSteps">步數 0</div></div>
+    <div class="m"><div class="k">垂直振幅</div><div class="v" id="mOsc">--<span>cm</span></div><div class="lr">骨盆上下起伏</div></div>
+    <div class="m"><div class="k">觸地膝角</div><div class="v" id="mKnee">--<span>°</span></div><div class="lr" id="mKneeLR"><i class="l">左 --</i> · <i class="r">右 --</i></div></div>
+    <div class="m"><div class="k">跨步距</div><div class="v" id="mOver">--<span>cm</span></div><div class="lr" id="mOverLR"><i class="l">左 --</i> · <i class="r">右 --</i></div></div>
+    <div class="m"><div class="k">軀幹前傾</div><div class="v" id="mTrunk">--<span>°</span></div><div class="lr">向前為正</div></div>
+    <div class="m"><div class="k">手肘角度</div><div class="v" id="mElb">--<span>°</span></div><div class="lr" id="mElbLR"><i class="l">左 --</i> · <i class="r">右 --</i></div></div>
+  </section>
+  <p class="note" style="margin:-6px 0 0">即時數值為最近 10 秒平均。距離以身高換算，屬估算值。</p>
+
+  <section class="settings" aria-label="設定">
+    <label for="inHeight">身高（cm）<input id="inHeight" type="number" inputmode="numeric" min="120" max="220" value="170"></label>
+    <label for="inModel">AI 模型<select id="inModel"><option value="full">標準（較準）</option><option value="lite">輕量（較快）</option></select></label>
+    <label for="inCount">開始前倒數<select id="inCount"><option value="0">不倒數</option><option value="5">5 秒</option><option value="10" selected>10 秒</option><option value="20">20 秒</option></select></label>
+    <label for="inFile">分析手機影片檔（選用）<span class="btn filebtn">選擇影片…</span><input id="inFile" type="file" accept="video/*" class="vh"></label>
+  </section>
+
+  <section class="card" id="sumCard" hidden>
+    <h2>本次結果</h2>
+    <div id="sumBody"></div>
+  </section>
+
+  <section class="card">
+    <h2>已存紀錄（只存在這支手機）</h2>
+    <div id="recList"><p class="note" style="margin:0">還沒有紀錄。按「開始記錄」跑一段後按「停止」，紀錄會出現在這裡，可下載成 ZIP（內含 CSV 與摘要）。</p></div>
+  </section>
+
+  <details>
+    <summary>拍攝方式與注意事項</summary>
+    <ol>
+      <li>手機直立或橫放在腳架上，鏡頭對著跑步機<b>正側面</b>，距離約 2–3 公尺，從頭到腳全身入鏡，腳下留一點空間。</li>
+      <li>先輸入身高，距離類數值（cm）會用它換算。</li>
+      <li>按「開始記錄」後有倒數，上跑步機跑穩再開始計算；建議每段 1–3 分鐘。</li>
+      <li>光線充足、避免逆光；穿著和背景有對比的衣服效果較好。</li>
+      <li>本程式<b>不錄影、不上傳</b>：畫面只在手機上即時分析，只保存關節座標與計算結果。</li>
+      <li>單機側拍是 2D 分析，左右方向的偏移量無法量測；步頻最可靠，距離與角度為估算。</li>
+    </ol>
+  </details>
+  <p class="note">參考範圍為一般跑者常見值，僅供自我觀察，不構成教練或醫療建議。</p>
+</div>
+
+<script>
+/* ===================== RunAnalyzer (pure, no DOM) ===================== */
+(function(){
+const LM = {nose:0,lEar:7,rEar:8,lSh:11,rSh:12,lEl:13,rEl:14,lWr:15,rWr:16,lHip:23,rHip:24,lKn:25,rKn:26,lAn:27,rAn:28,lHe:29,rHe:30,lFt:31,rFt:32};
+const LEG_RATIO = 0.491;   // thigh+shank ≈ 0.491 × height (Winter anthropometry)
+function ang(a,b,c){ // angle at b, degrees
+  const v1x=a.x-b.x,v1y=a.y-b.y,v2x=c.x-b.x,v2y=c.y-b.y;
+  const d=Math.hypot(v1x,v1y)*Math.hypot(v2x,v2y); if(!d) return NaN;
+  return Math.acos(Math.max(-1,Math.min(1,(v1x*v2x+v1y*v2y)/d)))*180/Math.PI;
+}
+const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+const mid=(a,b)=>({x:(a.x+b.x)/2,y:(a.y+b.y)/2});
+const mean=a=>a.length?a.reduce((s,x)=>s+x,0)/a.length:NaN;
+const median=a=>{if(!a.length)return NaN;const s=[...a].sort((x,y)=>x-y),m=s.length>>1;return s.length%2?s[m]:(s[m-1]+s[m])/2};
+const sd=a=>{if(a.length<2)return NaN;const m=mean(a);return Math.sqrt(a.reduce((s,x)=>s+(x-m)**2,0)/(a.length-1))};
+
+class RunAnalyzer{
+  constructor(opts={}){ this.heightCm=opts.heightCm||170; this.reset(); }
+  reset(){ this.F=[]; this.steps=[]; this.scan=0; this.lastPeak=-1; this.dirEma=0; this.legs=[]; this.Lpx=NaN; }
+  get dir(){ return this.dirEma>=0?1:-1; }
+  get cmPerPx(){ return this.Lpx>0 ? LEG_RATIO*this.heightCm/this.Lpx : NaN; }
+  /** lm: array of 33 {x,y,z,visibility} normalized; W,H pixel size; t seconds. Returns per-frame derived object or null */
+  push(t, lm, W, H){
+    if(!lm){ return null; }
+    const P=i=>({x:lm[i].x*W,y:lm[i].y*H,v:lm[i].visibility??1});
+    const need=[LM.lSh,LM.rSh,LM.lHip,LM.rHip,LM.lKn,LM.rKn,LM.lAn,LM.rAn];
+    const vis=mean(need.map(i=>P(i).v));
+    if(vis<0.45) return {t,valid:false,vis};
+    const p={}; for(const k in LM) p[k]=P(LM[k]);
+    const hip=mid(p.lHip,p.rHip), sh=mid(p.lSh,p.rSh);
+    // facing direction from feet (toe ahead of heel), fallback nose vs ears
+    let f=((p.lFt.x-p.lHe.x)+(p.rFt.x-p.rHe.x))/2;
+    if(Math.abs(f)<2){ f=p.nose.x-mid(p.lEar,p.rEar).x; }
+    this.dirEma=this.dirEma*0.97+Math.sign(f)*0.03;
+    // leg length (pixels) rolling median
+    const leg=(dist(p.lHip,p.lKn)+dist(p.lKn,p.lAn)+dist(p.rHip,p.rKn)+dist(p.rKn,p.rAn))/2;
+    this.legs.push(leg); if(this.legs.length>240) this.legs.shift();
+    this.Lpx=median(this.legs);
+    const d=this.dir;
+    const fr={t,valid:true,vis,hip,sh,
+      ankL:p.lAn,ankR:p.rAn,
+      kneeL:ang(p.lHip,p.lKn,p.lAn),kneeR:ang(p.rHip,p.rKn,p.rAn),
+      elbL:ang(p.lSh,p.lEl,p.lWr),elbR:ang(p.rSh,p.rEl,p.rWr),
+      trunk:Math.atan2(d*(sh.x-hip.x),hip.y-sh.y)*180/Math.PI};
+    this.F.push(fr);
+    this._detect(t);
+    // trim buffer (keep 4 s)
+    if(this.F.length>600 && this.F[0].t < t-4){ const cut=this.F.findIndex(x=>x.t>=t-4); if(cut>0){ this.F.splice(0,cut); this.scan=Math.max(0,this.scan-cut); this.lastPeak=this.lastPeak-cut; } }
+    return fr;
+  }
+  _detect(tNow){
+    const F=this.F, W=0.12, MIN_INT=0.22;
+    const sm=k=>{const a=F[Math.max(0,k-1)].hip.y,b=F[k].hip.y,c=F[Math.min(F.length-1,k+1)].hip.y;return (a+b+c)/3;};
+    while(this.scan<F.length && F[this.scan].t<=tNow-W){
+      const k=this.scan++; const tk=F[k].t; const yk=sm(k);
+      let isMax=true;
+      for(let j=k-1;j>=0&&F[j].t>=tk-W;j--){ if(sm(j)>=yk){isMax=false;break;} }
+      if(isMax) for(let j=k+1;j<F.length&&F[j].t<=tk+W;j++){ if(sm(j)>yk){isMax=false;break;} }
+      if(!isMax) continue;
+      const prev=this.lastPeak>=0?F[this.lastPeak]:null;
+      if(prev && tk-prev.t<MIN_INT) continue;
+      // prominence vs highest body position in the preceding 0.35 s
+      let ymin=Infinity; for(let j=k;j>=0&&F[j].t>=tk-0.35;j--) ymin=Math.min(ymin,sm(j));
+      const prom=yk-ymin;
+      if(!(prom>=0.015*this.Lpx)) continue;
+      this._step(k,prev,prom);
+      this.lastPeak=k;
+    }
+  }
+  _step(k,prev,prom){
+    const F=this.F, f=F[k], d=this.dir, cm=this.cmPerPx;
+    const side=f.ankL.y>=f.ankR.y?'L':'R';
+    const ank=fr=>side==='L'?fr.ankL:fr.ankR;
+    const ground=ank(f).y, tol=0.04*this.Lpx;
+    let j=k; while(j-1>=0 && f.t-F[j-1].t<=0.3 && ank(F[j-1]).y>=ground-tol) j--;
+    const s=F[j];
+    const knee=side==='L'?s.kneeL:s.kneeR;
+    const over=d*(ank(s).x-s.hip.x)*cm;
+    const from=prev?F.indexOf(prev):Math.max(0,k-8);
+    const seg=F.slice(Math.max(0,from),k+1);
+    let ymin=Infinity; for(const x of seg) ymin=Math.min(ymin,x.hip.y);
+    const osc=(f.hip.y-ymin)*cm;
+    const interval=prev?f.t-prev.t:NaN;
+    const step={n:this.steps.length+1,t:f.t,tStrike:s.t,side,
+      cadence:interval>0&&interval<0.6?60/interval:NaN,
+      kneeStrike:knee,overstrideCm:over,vertOscCm:prev&&interval<0.6?osc:NaN,
+      trunkDeg:mean(seg.map(x=>x.trunk)),elbowL:mean(seg.map(x=>x.elbL)),elbowR:mean(seg.map(x=>x.elbR))};
+    this.steps.push(step);
+    if(this.onStep) this.onStep(step);
+  }
+  stats(windowSec){
+    const S=windowSec&&this.steps.length?this.steps.filter(s=>s.t>=this.steps[this.steps.length-1].t-windowSec):this.steps;
+    const pick=(arr,k)=>arr.map(s=>s[k]).filter(Number.isFinite);
+    const L=S.filter(s=>s.side==='L'),R=S.filter(s=>s.side==='R');
+    const ints=[]; for(let i=1;i<S.length;i++){const dt=S[i].t-S[i-1].t; if(dt>0&&dt<0.6) ints.push(dt);}
+    const agg=a=>({mean:mean(a),sd:sd(a),min:a.length?Math.min(...a):NaN,max:a.length?Math.max(...a):NaN,n:a.length});
+    return {steps:S.length,
+      cadence:{...agg(pick(S,'cadence')),rate:ints.length?60/mean(ints):NaN},
+      vertOscCm:agg(pick(S,'vertOscCm')),
+      kneeStrike:agg(pick(S,'kneeStrike')),kneeL:agg(pick(L,'kneeStrike')),kneeR:agg(pick(R,'kneeStrike')),
+      overstrideCm:agg(pick(S,'overstrideCm')),overL:agg(pick(L,'overstrideCm')),overR:agg(pick(R,'overstrideCm')),
+      trunkDeg:agg(pick(S,'trunkDeg')),elbowL:agg(pick(S,'elbowL')),elbowR:agg(pick(S,'elbowR')),
+      stepsL:L.length,stepsR:R.length};
+  }
+}
+window.RunAnalyzer=RunAnalyzer;
+})();
+</script>
+
+<script type="module">
+/* ===================== App ===================== */
+const APP_VER='v1';
+const MP_VER='0.10.21';
+const MP_BASE=`https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MP_VER}`;
+const MODEL_URL={
+  full:'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/1/pose_landmarker_full.task',
+  lite:'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task'};
+const NAMES=['nose','left_eye_inner','left_eye','left_eye_outer','right_eye_inner','right_eye','right_eye_outer','left_ear','right_ear','mouth_left','mouth_right','left_shoulder','right_shoulder','left_elbow','right_elbow','left_wrist','right_wrist','left_pinky','right_pinky','left_index','right_index','left_thumb','right_thumb','left_hip','right_hip','left_knee','right_knee','left_ankle','right_ankle','left_heel','right_heel','left_foot_index','right_foot_index'];
+const EDGES=[[11,12,'c'],[11,23,'l'],[12,24,'r'],[23,24,'c'],[11,13,'l'],[13,15,'l'],[12,14,'r'],[14,16,'r'],[23,25,'l'],[25,27,'l'],[27,29,'l'],[29,31,'l'],[27,31,'l'],[24,26,'r'],[26,28,'r'],[28,30,'r'],[30,32,'r'],[28,32,'r'],[0,11,'c'],[0,12,'c']];
+
+const $=id=>document.getElementById(id);
+const video=$('video'),canvas=$('canvas'),ctx=canvas.getContext('2d');
+const css=getComputedStyle(document.documentElement);
+const COL={l:css.getPropertyValue('--left').trim(),r:css.getPropertyValue('--right').trim(),c:'#e8eef1',acc:css.getPropertyValue('--accent').trim()};
+$('ver').textContent=APP_VER;
+
+let vision=null,landmarker=null,modelKind=null,stream=null,facing='environment',running=false,mode=null; // mode: 'cam'|'file'
+let lastDetTs=0,prevHip=null,fpsT=[],wakeLock=null;
+let analyzer=new RunAnalyzer({heightCm:+$('inHeight').value||170});
+let rec=null; // {start, frames:[Float32Array rows], steps:[], meta}
+const ROW=1+6+33*7; // t + 6 derived + 33*(x,y,z,v,wx,wy,wz)
+
+function showMsg(text,err){const m=$('msg');m.textContent=text;m.className='msg'+(err?' err':'');m.hidden=!text;}
+function fmt(v,d=0){return Number.isFinite(v)?v.toFixed(d):'--';}
+
+/* ---------- model ---------- */
+async function ensureModel(){
+  const kind=$('inModel').value;
+  if(landmarker&&modelKind===kind) return landmarker;
+  showMsg('正在載入 AI 模型（第一次約 5–10 MB，請稍候）…');
+  if(!vision){
+    const mp=await import(`${MP_BASE}/vision_bundle.mjs`);
+    window.__mp=mp;
+    vision=await mp.FilesetResolver.forVisionTasks(`${MP_BASE}/wasm`);
+  }
+  const {PoseLandmarker}=window.__mp;
+  if(landmarker){try{landmarker.close();}catch(e){}}
+  const opts=d=>({baseOptions:{modelAssetPath:MODEL_URL[kind],delegate:d},runningMode:'VIDEO',numPoses:2,minPoseDetectionConfidence:0.5,minPosePresenceConfidence:0.5,minTrackingConfidence:0.5});
+  try{ landmarker=await PoseLandmarker.createFromOptions(vision,opts('GPU')); }
+  catch(e){ console.warn('GPU failed, using CPU',e); landmarker=await PoseLandmarker.createFromOptions(vision,opts('CPU')); }
+  modelKind=kind; showMsg('');
+  return landmarker;
+}
+$('inModel').addEventListener('change',()=>{ if(running) ensureModel().catch(e=>showMsg('模型載入失敗：'+e.message,true)); });
+$('inHeight').addEventListener('change',()=>{ analyzer.heightCm=+$('inHeight').value||170; });
+
+/* ---------- camera ---------- */
+async function startCamera(){
+  if(!navigator.mediaDevices?.getUserMedia){ showMsg('這個網址無法使用攝影機。請用 https:// 開頭的網址，並用 Chrome 開啟。',true); return; }
+  try{
+    await ensureModel();
+    stopSource();
+    stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:facing,width:{ideal:1280},height:{ideal:720},frameRate:{ideal:60}}});
+    video.srcObject=stream; video.src=''; await video.play();
+    mode='cam'; begin();
+    $('btnCam').textContent='關閉攝影機'; $('btnFlip').disabled=false; $('btnRec').disabled=false;
+    try{ wakeLock=await navigator.wakeLock?.request('screen'); }catch(e){}
+  }catch(e){
+    console.error(e);
+    showMsg(e.name==='NotAllowedError'?'攝影機權限被拒絕。請到瀏覽器網址列左側的設定，允許此網站使用攝影機，再重新整理。':'無法開啟攝影機或載入模型：'+(e.message||e),true);
+  }
+}
+function stopSource(){
+  running=false;
+  if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
+  video.pause(); video.srcObject=null;
+  if(video.src){URL.revokeObjectURL(video.src);video.removeAttribute('src');video.load();}
+  try{wakeLock?.release();}catch(e){} wakeLock=null;
+}
+function stopCamera(){
+  if(rec) stopRecording();
+  stopSource(); mode=null;
+  $('btnCam').textContent='開啟攝影機'; $('btnFlip').disabled=true; $('btnRec').disabled=true;
+  $('ph').hidden=false; $('hud').innerHTML='';
+}
+$('btnCam').onclick=()=>{ (mode==='cam')?stopCamera():startCamera(); };
+$('btnFlip').onclick=()=>{ facing=facing==='environment'?'user':'environment'; startCamera(); };
+document.addEventListener('visibilitychange',async()=>{ if(document.visibilityState==='visible'&&mode==='cam'&&!wakeLock){try{wakeLock=await navigator.wakeLock?.request('screen');}catch(e){}} });
+
+/* ---------- video file ---------- */
+$('inFile').addEventListener('change',async e=>{
+  const file=e.target.files[0]; if(!file) return;
+  try{
+    await ensureModel();
+    if(mode==='cam') stopCamera();
+    stopSource();
+    video.srcObject=null; video.src=URL.createObjectURL(file); video.muted=true; video.playbackRate=0.5;
+    await new Promise((ok,bad)=>{video.onloadedmetadata=ok;video.onerror=()=>bad(new Error('無法讀取此影片格式'));});
+    analyzer=new RunAnalyzer({heightCm:+$('inHeight').value||170}); bindAnalyzer();
+    mode='file'; startRecording(0,'file'); await video.play(); begin();
+    showMsg('正在以 0.5 倍速分析影片，播完會自動產生結果。影片不會上傳或另存。');
+    video.onended=()=>{ if(rec) stopRecording(); running=false; mode=null; showMsg(''); };
+  }catch(err){ showMsg('影片分析失敗：'+err.message,true); }
+  e.target.value='';
+});
+
+/* ---------- main loop ---------- */
+function begin(){
+  $('ph').hidden=true; running=true; prevHip=null; fpsT=[];
+  const hasRVFC='requestVideoFrameCallback' in HTMLVideoElement.prototype;
+  const tick=(now,meta)=>{
+    if(!running) return;
+    processFrame(mode==='file'&&meta?meta.mediaTime:(mode==='file'?video.currentTime:performance.now()/1000));
+    hasRVFC?video.requestVideoFrameCallback(tick):requestAnimationFrame(tick);
+  };
+  hasRVFC?video.requestVideoFrameCallback(tick):requestAnimationFrame(tick);
+}
+
+function pickMain(res,W,H){
+  const poses=res.landmarks||[]; if(!poses.length) return -1;
+  let best=-1,bestScore=-1;
+  poses.forEach((lm,i)=>{
+    let x0=1,y0=1,x1=0,y1=0; for(const p of lm){x0=Math.min(x0,p.x);y0=Math.min(y0,p.y);x1=Math.max(x1,p.x);y1=Math.max(y1,p.y);}
+    let score=(x1-x0)*W*(y1-y0)*H;
+    if(prevHip){ const hx=(lm[23].x+lm[24].x)/2*W,hy=(lm[23].y+lm[24].y)/2*H; const dd=Math.hypot(hx-prevHip.x,hy-prevHip.y)/Math.max(W,H); score*=1/(1+8*dd); }
+    if(score>bestScore){bestScore=score;best=i;}
+  });
+  return best;
+}
+
+let lastFrame=null;
+function processFrame(t){
+  const W=video.videoWidth,H=video.videoHeight; if(!W||!H) return;
+  if(canvas.width!==W||canvas.height!==H){canvas.width=W;canvas.height=H;}
+  let ts=performance.now(); if(ts<=lastDetTs) ts=lastDetTs+1; lastDetTs=ts;
+  let res; try{ res=landmarker.detectForVideo(video,ts); }catch(e){ console.warn(e); return; }
+  ctx.drawImage(video,0,0,W,H);
+  const now=performance.now(); fpsT.push(now); while(fpsT.length&&fpsT[0]<now-1000) fpsT.shift();
+  const i=pickMain(res,W,H);
+  let fr=null, lm=null, wl=null;
+  if(i>=0){
+    lm=res.landmarks[i]; wl=res.worldLandmarks?.[i];
+    prevHip={x:(lm[23].x+lm[24].x)/2*W,y:(lm[23].y+lm[24].y)/2*H};
+    fr=analyzer.push(t,lm,W,H);
+    drawPose(lm,W,H,res.landmarks.length);
+  }
+  if(rec && rec.started) recordFrame(t,fr,lm,wl);
+  drawTrail(W,H);
+  updateHud(i>=0,fr,res.landmarks?.length||0);
+  lastFrame=fr;
+}
+
+const trail=[];
+function drawPose(lm,W,H,n){
+  const lw=Math.max(3,W/180);
+  ctx.lineCap='round';
+  for(const [a,b,s] of EDGES){
+    if((lm[a].visibility??1)<0.3||(lm[b].visibility??1)<0.3) continue;
+    ctx.strokeStyle=COL[s]; ctx.lineWidth=lw;
+    ctx.beginPath(); ctx.moveTo(lm[a].x*W,lm[a].y*H); ctx.lineTo(lm[b].x*W,lm[b].y*H); ctx.stroke();
+  }
+  for(let k=11;k<33;k++){ if(k>16&&k<23) continue; const p=lm[k]; if((p.visibility??1)<0.3) continue;
+    ctx.fillStyle=k%2?COL.l:COL.r; ctx.beginPath(); ctx.arc(p.x*W,p.y*H,lw*1.1,0,7); ctx.fill(); }
+  const hx=(lm[23].x+lm[24].x)/2*W,hy=(lm[23].y+lm[24].y)/2*H;
+  trail.push({x:hx,y:hy,t:performance.now()});
+}
+function drawTrail(W,H){
+  const now=performance.now(); while(trail.length&&trail[0].t<now-2000) trail.shift();
+  if(trail.length<2) return;
+  ctx.strokeStyle=COL.acc; ctx.lineWidth=Math.max(2,W/320); ctx.globalAlpha=.8;
+  ctx.beginPath(); trail.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y)); ctx.stroke(); ctx.globalAlpha=1;
+  // flash on step
+  if(flash&&now-flash.t<250){ ctx.fillStyle=flash.side==='L'?COL.l:COL.r; ctx.beginPath(); ctx.arc(flash.x,flash.y,W/40,0,7); ctx.fill(); }
+}
+let flash=null;
+
+function updateHud(found,fr,n){
+  const fps=fpsT.length;
+  const chips=[];
+  if(!found) chips.push('<span class="chip warn">找不到人物</span>');
+  else if(fr&&!fr.valid) chips.push('<span class="chip warn">請全身入鏡（腳要在畫面內）</span>');
+  else chips.push('<span class="chip ok">偵測中</span>');
+  chips.push(`<span class="chip">${fps} fps</span>`);
+  if(n>1) chips.push(`<span class="chip">畫面中 ${n} 人，鎖定最大者</span>`);
+  if(rec&&rec.started){ const s=(mode==='file'?(lastT()-rec.t0):(performance.now()-rec.wall)/1000); chips.push(`<span class="chip rec">● 記錄中 ${fmtDur(s)}</span>`); }
+  if(fps&&fps<20&&mode==='cam') chips.push('<span class="chip warn">速度偏慢，可改用輕量模型</span>');
+  $('hud').innerHTML=chips.join('');
+}
+function lastT(){ return lastFrame?lastFrame.t:0; }
+function fmtDur(s){ s=Math.max(0,s|0); return `${(s/60|0)}:${String(s%60).padStart(2,'0')}`; }
+
+/* ---------- live metrics ---------- */
+function bindAnalyzer(){
+  analyzer.onStep=st=>{
+    const f=analyzer.F[analyzer.F.length-1];
+    if(f){ const a=st.side==='L'?f.ankL:f.ankR; flash={t:performance.now(),side:st.side,x:a.x,y:a.y}; }
+    if(rec&&rec.started) rec.steps.push(st);
+    renderLive();
+  };
+}
+bindAnalyzer();
+function renderLive(){
+  const s=analyzer.stats(10);
+  const set=(id,v,unit,d=0)=>{$(id).innerHTML=`${fmt(v,d)}<span>${unit}</span>`;};
+  set('mCad',s.cadence.rate,'步/分'); set('mOsc',s.vertOscCm.mean,'cm',1); set('mKnee',s.kneeStrike.mean,'°');
+  set('mOver',s.overstrideCm.mean,'cm'); set('mTrunk',s.trunkDeg.mean,'°',1);
+  set('mElb',(s.elbowL.mean+s.elbowR.mean)/2,'°');
+  $('mSteps').textContent=`步數 ${rec&&rec.started?rec.steps.length:analyzer.steps.length}`;
+  $('mKneeLR').innerHTML=`<i class="l">左 ${fmt(s.kneeL.mean)}</i> · <i class="r">右 ${fmt(s.kneeR.mean)}</i>`;
+  $('mOverLR').innerHTML=`<i class="l">左 ${fmt(s.overL.mean)}</i> · <i class="r">右 ${fmt(s.overR.mean)}</i>`;
+  $('mElbLR').innerHTML=`<i class="l">左 ${fmt(s.elbowL.mean)}</i> · <i class="r">右 ${fmt(s.elbowR.mean)}</i>`;
+}
+
+/* ---------- recording ---------- */
+$('btnRec').onclick=()=>{ rec?stopRecording():startRecording(+$('inCount').value,'camera'); };
+function startRecording(countdown,source){
+  rec={started:false,frames:[],steps:[],source,t0:null,wall:0};
+  $('btnRec').textContent='停止'; $('btnRec').className='stop grow';
+  const go=()=>{
+    analyzer.reset(); analyzer.heightCm=+$('inHeight').value||170;
+    rec.started=true; rec.wall=performance.now(); rec.date=new Date(); $('count').hidden=true; renderLive();
+  };
+  if(!countdown){ go(); return; }
+  let n=countdown; const el=$('count'); el.hidden=false; el.textContent=n;
+  rec.timer=setInterval(()=>{ n--; if(n<=0){clearInterval(rec.timer);go();} else el.textContent=n; },1000);
+}
+function recordFrame(t,fr,lm,wl){
+  if(rec.t0===null) rec.t0=t;
+  const row=new Float32Array(ROW).fill(NaN);
+  row[0]=(t-rec.t0)*1000;
+  if(fr&&fr.valid){ row[1]=fr.kneeL;row[2]=fr.kneeR;row[3]=fr.elbL;row[4]=fr.elbR;row[5]=fr.trunk;row[6]=fr.hip.y*analyzer.cmPerPx; }
+  if(lm) for(let k=0;k<33;k++){ const o=7+k*7,p=lm[k]; row[o]=p.x;row[o+1]=p.y;row[o+2]=p.z;row[o+3]=p.visibility??NaN;
+    if(wl){const w=wl[k];row[o+4]=w.x;row[o+5]=w.y;row[o+6]=w.z;} }
+  rec.frames.push(row);
+}
+async function stopRecording(){
+  if(!rec) return; clearInterval(rec.timer); $('count').hidden=true;
+  $('btnRec').textContent='開始記錄'; $('btnRec').className='primary grow';
+  const r=rec; rec=null;
+  if(!r.started||r.frames.length<10){ showMsg('記錄時間太短，沒有保存。'); return; }
+  const stats=analyzer.stats(0);
+  const durS=r.frames[r.frames.length-1][0]/1000;
+  const meta={app:'跑姿記錄器',version:APP_VER,date:r.date.toISOString(),source:r.source,heightCm:analyzer.heightCm,model:modelKind,
+    videoWidth:video.videoWidth,videoHeight:video.videoHeight,frames:r.frames.length,durationSec:+durS.toFixed(2),
+    avgFps:+(r.frames.length/Math.max(durS,0.001)).toFixed(1),runningDirection:analyzer.dir>0?'畫面向右':'畫面向左',
+    cmPerPx:analyzer.cmPerPx,legLengthPx:analyzer.Lpx};
+  const steps=r.steps.map(s=>({...s,t:+(s.t-(r.t0??0)).toFixed(3),tStrike:+(s.tStrike-(r.t0??0)).toFixed(3)}));
+  const flat=new Float32Array(r.frames.length*ROW); r.frames.forEach((row,i)=>flat.set(row,i*ROW));
+  const session={id:Date.now(),meta,stats,steps,frames:flat.buffer,row:ROW};
+  renderSummary(session);
+  try{ await dbPut(session); await renderRecords(); }catch(e){ showMsg('無法存到手機（瀏覽器儲存空間受限），請直接下載。',true); window.__unsaved=session; }
+}
+
+/* ---------- summary ---------- */
+const REF={cadence:'常見 160–185',osc:'常見 6–10',knee:'常見 155–165（微彎）',over:'越接近 0 越好',trunk:'常見 5–10',elb:'常見 80–100'};
+function renderSummary(s){
+  const st=s.stats, m=s.meta;
+  const row=(name,a,unit,d,ref,lr)=>`<tr><td>${name}</td><td class="n">${fmt(a.mean,d)} ${unit}</td><td class="n">±${fmt(a.sd,d)}</td><td>${lr||''}</td><td class="ref">${ref}</td></tr>`;
+  const lr=(l,r,d=0)=>`<span style="color:var(--left)">左 ${fmt(l.mean,d)}</span> / <span style="color:var(--right)">右 ${fmt(r.mean,d)}</span>`;
+  $('sumBody').innerHTML=`
+    <div class="note">${new Date(m.date).toLocaleString('zh-TW')} · ${fmtDur(m.durationSec)} · ${st.steps} 步（左 ${st.stepsL} / 右 ${st.stepsR}）· 平均 ${m.avgFps} fps</div>
+    <div class="tbl"><table>
+      <tr><th>指標</th><th>平均</th><th>變異</th><th>左 / 右</th><th>參考</th></tr>
+      ${row('步頻',{mean:st.cadence.rate,sd:st.cadence.sd},'步/分',0,REF.cadence)}
+      ${row('垂直振幅',st.vertOscCm,'cm',1,REF.osc)}
+      ${row('觸地膝角',st.kneeStrike,'°',0,REF.knee,lr(st.kneeL,st.kneeR))}
+      ${row('跨步距',st.overstrideCm,'cm',0,REF.over,lr(st.overL,st.overR))}
+      ${row('軀幹前傾',st.trunkDeg,'°',1,REF.trunk)}
+      ${row('手肘角度',{mean:(st.elbowL.mean+st.elbowR.mean)/2,sd:NaN},'°',0,REF.elb,lr(st.elbowL,st.elbowR))}
+    </table></div>
+    <div class="controls"><button id="dlNow" class="primary">下載這次數據（ZIP）</button></div>`;
+  $('sumCard').hidden=false;
+  $('dlNow').onclick=()=>downloadSession(s);
+}
+
+/* ---------- IndexedDB ---------- */
+function db(){ return new Promise((ok,bad)=>{ const r=indexedDB.open('runform',1); r.onupgradeneeded=()=>r.result.createObjectStore('sessions',{keyPath:'id'}); r.onsuccess=()=>ok(r.result); r.onerror=()=>bad(r.error); }); }
+async function dbPut(s){ const d=await db(); return new Promise((ok,bad)=>{const tx=d.transaction('sessions','readwrite');tx.objectStore('sessions').put(s);tx.oncomplete=ok;tx.onerror=()=>bad(tx.error);}); }
+async function dbAll(){ const d=await db(); return new Promise((ok,bad)=>{const q=d.transaction('sessions').objectStore('sessions').getAll();q.onsuccess=()=>ok(q.result);q.onerror=()=>bad(q.error);}); }
+async function dbDel(id){ const d=await db(); return new Promise((ok,bad)=>{const tx=d.transaction('sessions','readwrite');tx.objectStore('sessions').delete(id);tx.oncomplete=ok;tx.onerror=()=>bad(tx.error);}); }
+async function renderRecords(){
+  let all=[]; try{ all=await dbAll(); }catch(e){ return; }
+  if(!all.length) return;
+  all.sort((a,b)=>b.id-a.id);
+  const box=$('recList'); box.innerHTML='';
+  for(const s of all){
+    const d=document.createElement('div'); d.className='rec-item';
+    d.innerHTML=`<div class="info"><b>${fmt(s.stats.cadence.rate)} 步/分 · ${s.stats.steps} 步</b><div>${new Date(s.meta.date).toLocaleString('zh-TW')} · ${fmtDur(s.meta.durationSec)} · ${s.meta.source==='file'?'影片檔':'攝影機'}</div></div>`;
+    const bView=document.createElement('button'); bView.textContent='查看'; bView.onclick=()=>{renderSummary(s);$('sumCard').scrollIntoView({behavior:'smooth'});};
+    const bDl=document.createElement('button'); bDl.textContent='下載'; bDl.onclick=()=>downloadSession(s);
+    const bDel=document.createElement('button'); bDel.textContent='刪除';
+    bDel.onclick=async()=>{ if(bDel.dataset.c){ await dbDel(s.id); d.remove(); if(!box.children.length) box.innerHTML='<p class="note" style="margin:0">沒有紀錄。</p>'; } else { bDel.dataset.c=1; bDel.textContent='確定刪除？'; bDel.className='stop'; setTimeout(()=>{delete bDel.dataset.c;bDel.textContent='刪除';bDel.className='';},3000);} };
+    d.append(bView,bDl,bDel); box.append(d);
+  }
+}
+renderRecords();
+
+/* ---------- export ---------- */
+function framesCSV(s){
+  const f=new Float32Array(s.frames), R=s.row, n=f.length/R;
+  const head=['t_ms','knee_angle_L','knee_angle_R','elbow_angle_L','elbow_angle_R','trunk_lean_deg','pelvis_y_cm'];
+  for(const nm of NAMES) head.push(`${nm}_x`,`${nm}_y`,`${nm}_z`,`${nm}_vis`,`${nm}_wx`,`${nm}_wy`,`${nm}_wz`);
+  const out=[head.join(',')];
+  const dec=[1,2,2,2,2,2,2];
+  for(let i=0;i<n;i++){ const a=new Array(R); for(let j=0;j<R;j++){ const v=f[i*R+j]; a[j]=Number.isFinite(v)?(j<7?v.toFixed(dec[j]):v.toFixed(4)):''; } out.push(a.join(',')); }
+  return out.join('\n');
+}
+function stepsCSV(s){
+  const cols=['n','t','tStrike','side','cadence','kneeStrike','overstrideCm','vertOscCm','trunkDeg','elbowL','elbowR'];
+  const head=['step','t_mid_s','t_strike_s','side','cadence_spm','knee_at_strike_deg','overstride_cm','vertical_osc_cm','trunk_lean_deg','elbow_L_deg','elbow_R_deg'];
+  return [head.join(',')].concat(s.steps.map(x=>cols.map(c=>{const v=x[c];return typeof v==='number'?(Number.isFinite(v)?+v.toFixed(3):''):v;}).join(','))).join('\n');
+}
+function readme(s){
+  return `跑姿記錄器 ${s.meta.version} 匯出說明
+frames.csv  每一格畫面一列。t_ms=毫秒；*_x,*_y 為畫面比例座標(0–1，左上為原點)；*_z 為相對深度；*_vis 為可信度；*_wx,wy,wz 為以髖部為原點的 3D 公尺座標(AI 推估)。
+            knee/elbow 角度為關節內角(180=伸直)；trunk_lean_deg 向跑步方向前傾為正；pelvis_y_cm 為骨盆高度位置(向下為正，僅相對值有意義)。
+steps.csv   每一步一列。t_mid=骨盆最低點(支撐中期)；t_strike=估計觸地時間；side=L/R；overstride_cm=觸地時腳踝在髖部前方的水平距離。
+summary.json 本次設定與統計摘要。
+注意：單機側拍 2D 分析；距離以身高 ${s.meta.heightCm} cm 換算(大腿+小腿≈身高×0.491)，屬估算。
+`;
+}
+async function downloadSession(s){
+  const enc=new TextEncoder();
+  const files=[
+    ['summary.json',enc.encode(JSON.stringify({meta:s.meta,stats:s.stats},null,2))],
+    ['steps.csv',enc.encode('﻿'+stepsCSV(s))],
+    ['frames.csv',enc.encode('﻿'+framesCSV(s))],
+    ['README.txt',enc.encode(readme(s))]];
+  const blob=zip(files);
+  const d=new Date(s.meta.date); const p=n=>String(n).padStart(2,'0');
+  const name=`run_${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}.zip`;
+  const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=name; document.body.append(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),5000);
+}
+/* minimal ZIP (store, no compression) */
+const CRC=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0;}return t;})();
+function crc32(b){let c=0xFFFFFFFF;for(let i=0;i<b.length;i++)c=CRC[(c^b[i])&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0;}
+function zip(files){
+  const enc=new TextEncoder(),parts=[],cen=[];let off=0;
+  const now=new Date(),dt=((now.getHours()<<11)|(now.getMinutes()<<5)|(now.getSeconds()>>1)),dd=(((now.getFullYear()-1980)<<9)|((now.getMonth()+1)<<5)|now.getDate());
+  for(const [name,data] of files){
+    const nm=enc.encode(name),crc=crc32(data);
+    const h=new DataView(new ArrayBuffer(30));
+    h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x0800,true);h.setUint16(8,0,true);h.setUint16(10,dt,true);h.setUint16(12,dd,true);
+    h.setUint32(14,crc,true);h.setUint32(18,data.length,true);h.setUint32(22,data.length,true);h.setUint16(26,nm.length,true);h.setUint16(28,0,true);
+    parts.push(h.buffer,nm,data);
+    const c=new DataView(new ArrayBuffer(46));
+    c.setUint32(0,0x02014b50,true);c.setUint16(4,20,true);c.setUint16(6,20,true);c.setUint16(8,0x0800,true);c.setUint16(10,0,true);c.setUint16(12,dt,true);c.setUint16(14,dd,true);
+    c.setUint32(16,crc,true);c.setUint32(20,data.length,true);c.setUint32(24,data.length,true);c.setUint16(28,nm.length,true);c.setUint32(42,off,true);
+    cen.push(c.buffer,nm);
+    off+=30+nm.length+data.length;
+  }
+  const cenSize=cen.reduce((s,b)=>s+(b.byteLength??b.length),0);
+  const e=new DataView(new ArrayBuffer(22));
+  e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,cenSize,true);e.setUint32(16,off,true);
+  return new Blob([...parts,...cen,e.buffer],{type:'application/zip'});
+}
+window.__app={zip,framesCSV,stepsCSV,renderSummary,get analyzer(){return analyzer;}};
+</script>
+</body>
+</html>
