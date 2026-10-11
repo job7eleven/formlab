@@ -1,0 +1,461 @@
+{
+  "schema": "formlab-goals-1",
+  "goal_id": "pullup_muscle_up_20261011",
+  "sport": "pullup",
+  "title": "引體向上暴力上槓（Muscle Up）初階學習目標",
+  "language": "zh-Hant",
+  "athlete_context": "已可做到 12 下標準引體向上，想進階練至可 Muscle Up 暴力上槓",
+  "sources": [
+    {
+      "ref": "S1",
+      "type": "youtube",
+      "url": "https://www.youtube.com/watch?v=3l1UBD68jB4",
+      "title": "如何做到Muscle Up暴力上槓 (肌力要求/動作要訣/建議練習 ! )",
+      "channel": "Get-GO",
+      "presenter_credentials": "街頭健身教練 / 創作者",
+      "duration": "08:29"
+    }
+  ],
+  "camera_setup": {
+    "view": "side",
+    "distance_m": 3.5,
+    "camera_height": "胸部至單槓高度（約 1.5–1.8 公尺）",
+    "fps_min": 30,
+    "framing": "手機橫向架設，取景框須完整納入起跳站位、單槓槓身、向前擺盪極限與槓上推撐最高點，確保雙手至腳尖全程入鏡",
+    "notes": "主要量測側視面之 C 字軌跡、擺盪傾角與壓胸角度；若欲偵測雙肘對稱性（防 Chicken Wing），可改架設於正前方或 45 度角。"
+  },
+  "phases": [
+    {
+      "id": "phase_swing_knee",
+      "name": "起跳擺盪與爆發提膝",
+      "description": "離槓一步起跳抓槓向前滑插，在前盪去勢已盡瞬間全力提膝借力回盪。",
+      "evidence": {
+        "ref": "S1",
+        "timestamp": "02:40"
+      }
+    },
+    {
+      "id": "phase_c_pull",
+      "name": "C字弧線爆發拉引",
+      "description": "手肘內收、肩胛中性，拉出先遠離單槓再拉近的 C 字弧線，全力爆發拉至胸口以下。",
+      "evidence": {
+        "ref": "S1",
+        "timestamp": "03:20"
+      }
+    },
+    {
+      "id": "phase_transition_dip",
+      "name": "壓胸轉折與直槓推撐",
+      "description": "上半身越過槓頂時迅速前移重心壓胸，順勢完成單槓伏地推撐伸直手臂鎖定。",
+      "evidence": {
+        "ref": "S1",
+        "timestamp": "03:46"
+      }
+    }
+  ],
+  "metrics": [
+    {
+      "id": "swing_forward_lean",
+      "name": "起跳抓槓前傾斜角",
+      "formlab_key": null,
+      "proposed_key": "pullup_swing_lean_deg",
+      "phase": "phase_swing_knee",
+      "definition": "起跳抓槓時軀幹連線相對於鉛錘線向前傾斜的角度",
+      "calc": {
+        "type": "angle",
+        "landmarks": [
+          "left_shoulder",
+          "left_hip",
+          "left_ankle"
+        ],
+        "method": "計算肩-髖-踝連線相對於垂直鉛錘線之角度，取跳起抓槓前插瞬間",
+        "camera_view": "side"
+      },
+      "unit": "deg",
+      "direction": "range",
+      "target": {
+        "beginner": {
+          "min": 15,
+          "max": 25
+        },
+        "advanced": {
+          "min": 18,
+          "max": 22
+        },
+        "ideal": 20
+      },
+      "measurable_2d": "yes",
+      "basis": "stated",
+      "evidence": {
+        "ref": "S1",
+        "timestamp": "02:48",
+        "quote_or_scene": "雙手捉槓，將身體向前插...軀幹微微向前傾斜，約 20 度"
+      },
+      "confidence": "high",
+      "priority": 2,
+      "cue": "前插二十度",
+      "common_errors": [
+        "直接在單槓正下方直上直下起跳，缺少前盪借力動能"
+      ],
+      "correction": "退後單槓約一步距離起跳，讓身體在抓槓瞬間順勢向前插"
+    },
+    {
+      "id": "knee_tuck_angle",
+      "name": "前盪頂點提膝屈髖角",
+      "formlab_key": null,
+      "proposed_key": "pullup_knee_tuck_deg",
+      "phase": "phase_swing_knee",
+      "definition": "在前盪動能耗盡、準備回盪時，大腿拉向胸口的屈髖折疊角度",
+      "calc": {
+        "type": "angle",
+        "landmarks": [
+          "left_shoulder",
+          "left_hip",
+          "left_knee"
+        ],
+        "method": "計算肩-髖-膝夾角，取前盪末端即將回盪瞬間之最小夾角",
+        "camera_view": "side"
+      },
+      "unit": "deg",
+      "direction": "lower_better",
+      "target": {
+        "beginner": {
+          "min": 65,
+          "max": 95
+        },
+        "advanced": {
+          "min": 50,
+          "max": 75
+        },
+        "ideal": 60
+      },
+      "measurable_2d": "yes",
+      "basis": "demonstrated",
+      "evidence": {
+        "ref": "S1",
+        "timestamp": "03:09",
+        "quote_or_scene": "感到去勢已盡，準備回盪時就用力提膝，把膝蓋拉近胸口"
+      },
+      "confidence": "high",
+      "priority": 1,
+      "cue": "到底爆發提膝",
+      "common_errors": [
+        "提膝時機過早或過晚，未能將前盪動能轉化為斜後彈回動量"
+      ],
+      "correction": "意念想像前方有彈簧，前盪觸碰極限瞬間雙膝同步猛力抽向胸前"
+    },
+    {
+      "id": "c_pull_horiz_offset",
+      "name": "C字拉引避槓水平位移",
+      "formlab_key": null,
+      "proposed_key": "pullup_c_curve_offset_cm",
+      "phase": "phase_c_pull",
+      "definition": "爆發拉引過程中，肩膀中心相對單槓手腕點向後方拉開之最大水平距離",
+      "calc": {
+        "type": "distance",
+        "landmarks": [
+          "left_wrist",
+          "left_shoulder"
+        ],
+        "method": "計算手腕與肩膀點位之水平X軸差值，以身高比例換算公分，取拉引前半段之最大距離",
+        "camera_view": "side"
+      },
+      "unit": "cm",
+      "direction": "higher_better",
+      "target": {
+        "beginner": {
+          "min": 25,
+          "max": 40
+        },
+        "advanced": {
+          "min": 35,
+          "max": 50
+        },
+        "ideal": 40
+      },
+      "measurable_2d": "yes",
+      "basis": "demonstrated",
+      "evidence": {
+        "ref": "S1",
+        "timestamp": "03:38",
+        "quote_or_scene": "先同單槓拉開距離，避免身體直接撞上單槓，繼而成功上槓"
+      },
+      "confidence": "medium",
+      "priority": 1,
+      "cue": "先拉開再拉近",
+      "common_errors": [
+        "維持垂直引體軌跡，身體正面直接撞上單槓導致卡在槓下"
+      ],
+      "correction": "手肘往內收，軀幹維持空心（Hollow body），拉出一道後退弧線避開單槓"
+    },
+    {
+      "id": "explosive_pull_height",
+      "name": "爆發拉引相對高度",
+      "formlab_key": null,
+      "proposed_key": "pullup_pull_height_cm",
+      "phase": "phase_c_pull",
+      "definition": "拉引頂峰時單槓手腕點相對於肩膀的垂直位置（手腕越低代表拉得越高）",
+      "calc": {
+        "type": "displacement",
+        "landmarks": [
+          "left_wrist",
+          "left_shoulder",
+          "left_hip"
+        ],
+        "method": "計算手腕Y軸位置相對於肩膀之垂直落差，若手腕低於肩膀即代表拉至胸口位置",
+        "camera_view": "side"
+      },
+      "unit": "cm",
+      "direction": "higher_better",
+      "target": {
+        "beginner": {
+          "min": 10,
+          "max": 20
+        },
+        "advanced": {
+          "min": 20,
+          "max": 35
+        },
+        "ideal": 25
+      },
+      "measurable_2d": "yes",
+      "basis": "stated",
+      "evidence": {
+        "ref": "S1",
+        "timestamp": "07:15",
+        "quote_or_scene": "只要能拉到大概中胸、下胸的位置，就證明爆發力合格，足以完成上槓"
+      },
+      "confidence": "high",
+      "priority": 1,
+      "cue": "爆發拉至下胸",
+      "common_errors": [
+        "僅拉到下巴或鎖骨高度，手腕無空間完成翻轉"
+      ],
+      "correction": "專注以背闊肌與手臂進行爆炸性發力，想像把手肘向後腰猛砸"
+    },
+    {
+      "id": "transition_trunk_lean",
+      "name": "翻槓轉折壓胸前傾角",
+      "formlab_key": null,
+      "proposed_key": "pullup_trunk_lean_deg",
+      "phase": "phase_transition_dip",
+      "definition": "肩膀超越單槓高度時，軀幹向前壓胸傾斜的角度",
+      "calc": {
+        "type": "angle",
+        "landmarks": [
+          "left_shoulder",
+          "left_hip"
+        ],
+        "method": "計算肩-髖連線與垂直鉛錘線之夾角（前傾為正），取肩膀上升越過手腕水平高度瞬間",
+        "camera_view": "side"
+      },
+      "unit": "deg",
+      "direction": "higher_better",
+      "target": {
+        "beginner": {
+          "min": 20,
+          "max": 35
+        },
+        "advanced": {
+          "min": 30,
+          "max": 45
+        },
+        "ideal": 35
+      },
+      "measurable_2d": "yes",
+      "basis": "stated",
+      "evidence": {
+        "ref": "S1",
+        "timestamp": "03:52",
+        "quote_or_scene": "上半身越過單槓之際，將重心前移，簡單來講就是壓胸"
+      },
+      "confidence": "high",
+      "priority": 2,
+      "cue": "過槓迅速壓胸",
+      "common_errors": [
+        "身體保持筆直後仰，重心落在槓後方導致翻不過去"
+      ],
+      "correction": "肩膀一到槓高立即主動將頭部與胸口向前下方傾壓，將重心移至槓上方"
+    },
+    {
+      "id": "dip_lockout_angle",
+      "name": "槓上推撐手肘鎖定角",
+      "formlab_key": null,
+      "proposed_key": "pullup_dip_lockout_deg",
+      "phase": "phase_transition_dip",
+      "definition": "翻槓完成後單槓推撐頂端的手肘伸直角度",
+      "calc": {
+        "type": "angle",
+        "landmarks": [
+          "left_shoulder",
+          "left_elbow",
+          "left_wrist"
+        ],
+        "method": "計算肩-肘-腕三點夾角，取推撐最高點（180 度為完全伸直）",
+        "camera_view": "side"
+      },
+      "unit": "deg",
+      "direction": "range",
+      "target": {
+        "beginner": {
+          "min": 165,
+          "max": 180
+        },
+        "advanced": {
+          "min": 175,
+          "max": 180
+        },
+        "ideal": 180
+      },
+      "measurable_2d": "yes",
+      "basis": "demonstrated",
+      "evidence": {
+        "ref": "S1",
+        "timestamp": "04:02",
+        "quote_or_scene": "只要向上推，做一個 straight bar dip 即可完成動作"
+      },
+      "confidence": "high",
+      "priority": 3,
+      "cue": "推到底肘鎖定",
+      "common_errors": [
+        "翻過槓後手臂微屈未完全鎖定，未完成完整動作行程"
+      ],
+      "correction": "三頭肌完全發力推至最高點，維持身體穩定下落"
+    },
+    {
+      "id": "bilateral_elbow_sync",
+      "name": "雙側翻肘同步時差",
+      "formlab_key": null,
+      "proposed_key": "pullup_elbow_trans_diff_ms",
+      "phase": "phase_transition_dip",
+      "definition": "左右手肘翻越單槓高度的時間差（用於防範單臂硬上 Chicken Wing）",
+      "calc": {
+        "type": "time",
+        "landmarks": [
+          "left_elbow",
+          "right_elbow",
+          "left_wrist",
+          "right_wrist"
+        ],
+        "method": "計算左肘高於手腕瞬間與右肘高於手腕瞬間之時間差絕對值",
+        "camera_view": "45deg"
+      },
+      "unit": "ms",
+      "direction": "lower_better",
+      "target": {
+        "beginner": {
+          "min": 0,
+          "max": 100
+        },
+        "advanced": {
+          "min": 0,
+          "max": 40
+        },
+        "ideal": 0
+      },
+      "measurable_2d": "partial",
+      "basis": "stated",
+      "evidence": {
+        "ref": "S1",
+        "timestamp": "01:54",
+        "quote_or_scene": "chicken wing 單臂上槓會對肩膀構成好大壓力，好容易受傷"
+      },
+      "confidence": "medium",
+      "priority": 1,
+      "cue": "雙肘同步過槓",
+      "common_errors": [
+        "爆發力不足時出現單臂先硬翻上去的單側代償（Chicken Wing）"
+      ],
+      "correction": "雙手對稱發力，若無法同步過槓立即放棄該下，避免肩關節扭傷"
+    }
+  ],
+  "qualitative_points": [
+    {
+      "point": "手腕翻轉與握槓滑動（Wrist Transition）",
+      "cue": "翻腕掌心壓槓",
+      "why_not_measurable": "MediaPipe Pose 點位僅涵蓋手腕與手指端點，單鏡頭 2D 無法解析手掌在鋼管上的摩擦滑動、握法微調與細部握力轉折。",
+      "basis": "demonstrated",
+      "evidence": {
+        "ref": "S1",
+        "timestamp": "03:50"
+      }
+    },
+    {
+      "point": "肩胛維持中性位與手肘向內收（Scapular Neutral & Elbows Inward）",
+      "cue": "手肘內收不挺胸",
+      "why_not_measurable": "影片強調 C 字拉引不同於一般垂直引體向上的挺胸夾背，需維持肩胛中性位與手肘內夾，背部深層肩胛骨運動在側視 2D 畫面中易受遮蔽且缺乏解剖標記。",
+      "basis": "stated",
+      "evidence": {
+        "ref": "S1",
+        "timestamp": "06:18"
+      }
+    },
+    {
+      "point": "前盪踩彈簧之回盪體感（Spring Timing Cue）",
+      "cue": "踩彈簧借回彈",
+      "why_not_measurable": "動量傳遞、肌肉牽張反射（SSC）與前盪頂點的滯空體感屬於內部神經肌肉感知，攝影機僅能量測外在運動學位移，無法捕捉發力體感。",
+      "basis": "stated",
+      "evidence": {
+        "ref": "S1",
+        "timestamp": "04:57"
+      }
+    }
+  ],
+  "drills": [
+    {
+      "name": "起跳提膝擺盪練習（Jumping & Knee-Kick Drill）",
+      "how": "離槓一步起跳前插，在前盪頂點想像前方有彈簧，踩上彈簧借力回盪瞬間將雙膝猛提向胸口，反覆體會斜後方彈回之動能。",
+      "sets_reps": "3–4 組，每組 5–6 次",
+      "evidence": {
+        "ref": "S1",
+        "timestamp": "04:36"
+      }
+    },
+    {
+      "name": "C字爆炸性引體向上（Explosive C-Curve Pull-Up）",
+      "how": "肩寬握距，肩胛中性、手肘內收，用全身力量拉出避槓弧線，全力爆發將單槓拉至中胸或下胸高度。",
+      "sets_reps": "4–5 組，每組 3–5 次（專注於每一下之最高速度）",
+      "evidence": {
+        "ref": "S1",
+        "timestamp": "05:34"
+      }
+    },
+    {
+      "name": "助跳暴力上槓（Jumping Muscle Up）",
+      "how": "挑選高度略高於身高的單槓，屈膝雙腳蹬地起跳，配合雙手爆發拉引，在身體越過單槓瞬間迅速壓胸前傾，完成直槓推撐。",
+      "sets_reps": "3–4 組，每組 3–5 次",
+      "evidence": {
+        "ref": "S1",
+        "timestamp": "07:22"
+      }
+    }
+  ],
+  "realtime_feedback": [
+    {
+      "metric_id": "knee_tuck_angle",
+      "type": "voice_cue",
+      "setting": "偵測到前盪極限點時即時播放語音：提膝！"
+    },
+    {
+      "metric_id": "explosive_pull_height",
+      "type": "beep_on_rep",
+      "setting": "當拉引高度達中胸（手腕低於肩膀 15cm 以上）時發出成功嗶聲"
+    },
+    {
+      "metric_id": "bilateral_elbow_sync",
+      "type": "voice_cue",
+      "setting": "當雙側手肘過槓時差大於 100ms 時發出語音警告：嚴禁單臂硬上"
+    }
+  ],
+  "safety_notes": [
+    "嚴禁單臂先上（Chicken Wing）：力量不足硬上會使單側肩關節承受過大剪切力與扭矩，極易造成肩夾擠或旋轉肌撕裂（影片作者曾因此傷停整整一個月）。",
+    "基礎肌力門檻把關：影片建議需達 13 下標準引體向上與 20 下伏地挺身。使用者具備 12 下標準引體實力已極接近，但切勿在疲勞或代償狀態下硬拉。",
+    "防滑與跌落防護：前盪提膝動量極大，手掌出汗易脫手，強烈建議使用防滑鎂粉，並在單槓下方設置防護緩衝軟墊。"
+  ],
+  "open_questions": [
+    "本影片主要示範新手借力式（Beginner Kipping Muscle Up），未涵蓋體操標準直腿（Strict Muscle Up）或慢速扣腕上槓之技術規格。",
+    "影片未特別強調握槓時是否應微扣手腕（False Grip），初學者若採用純常規正握，常在胸口過槓時因掌心摩擦阻力過大而卡住。"
+  ],
+  "created_by": "Gemini",
+  "created_date": "2026-10-11"
+}
