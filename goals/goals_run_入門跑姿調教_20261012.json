@@ -1,0 +1,706 @@
+{
+  "schema": "formlab-goals-1",
+  "goal_id": "goals_run_入門跑姿調教_20261012",
+  "file_name": "goals_run_入門跑姿調教_20261012.json",
+  "sport": "run",
+  "sport_name": "跑步",
+  "goal_name": "入門跑姿調教",
+  "title": "睿睿不花湖慢跑入門：無傷跑姿建立",
+  "language": "zh-Hant",
+  "session_plan": {
+    "end_trigger": "time",
+    "duration_s": 120,
+    "count_target": null,
+    "max_duration_s": 300,
+    "metronome": true,
+    "metronome_bpm": 170,
+    "basis": "claude_default",
+    "note": "跑步以時間結束；節拍器採目標檔 realtime_feedback 建議值"
+  },
+  "athlete_context": "跟著\"睿睿不花湖\"的跑步入門教學，建立正確的跑姿",
+  "sources": [
+    {
+      "ref": "S1",
+      "type": "youtube",
+      "url": "https://www.youtube.com/watch?v=h3hiHBu3tIE",
+      "title": "一部影片學會「送髖奧義」讓你跑姿超流暢【睿睿不花湖】",
+      "channel": "睿睿不花湖",
+      "presenter_credentials": "全馬跑者 / 慢跑經驗分享創作者",
+      "duration": "10:36"
+    },
+    {
+      "ref": "S2",
+      "type": "youtube",
+      "url": "https://www.youtube.com/watch?v=CtyfRdBbNt0",
+      "title": "一部影片學會「用屁股跑步」！跑得更快、更省力【睿睿不花湖x花蓮】",
+      "channel": "睿睿不花湖",
+      "presenter_credentials": "全馬跑者 / 慢跑經驗分享創作者",
+      "duration": "16:36"
+    },
+    {
+      "ref": "S3",
+      "type": "youtube",
+      "url": "https://www.youtube.com/watch?v=VjlCNbapDHg",
+      "title": "9成跑者搞錯了！膝蓋痛根本不是膝蓋的錯！ 3招幫我解決萬年膝蓋痛【睿睿不花湖】",
+      "channel": "睿睿不花湖",
+      "presenter_credentials": "全馬跑者 / 慢跑經驗分享創作者",
+      "duration": "10:28"
+    },
+    {
+      "ref": "S4",
+      "type": "youtube",
+      "url": "https://www.youtube.com/watch?v=Ck5JxeAThU8",
+      "title": "超強降低心率4部曲｜跑步高手都在偷偷練【睿睿不花湖】",
+      "channel": "睿睿不花湖",
+      "presenter_credentials": "全馬跑者 / 慢跑經驗分享創作者",
+      "duration": "11:31"
+    },
+    {
+      "ref": "S5",
+      "type": "youtube",
+      "url": "https://www.youtube.com/watch?v=Rpt8uaqg39U",
+      "title": "人人都可以步頻180｜超強步頻跑者養成術【睿睿不花湖】",
+      "channel": "睿睿不花湖",
+      "presenter_credentials": "全馬跑者 / 慢跑經驗分享創作者",
+      "duration": "14:27"
+    }
+  ],
+  "camera_setup": {
+    "view": "side",
+    "distance_m": 3.5,
+    "camera_height": "腰部高度（約 90-100 公分）",
+    "fps_min": 30,
+    "framing": "全身側面完整入鏡，頭頂上方與腳底下方保留約 10% 視野緩衝",
+    "notes": "側面視角是精準量測觸地瞬間腳踝相對髖部水平位置（過度跨步）、膝關節角與軀幹前傾角的唯一基準視角。"
+  },
+  "phases": [
+    {
+      "id": "initial_contact",
+      "name": "觸地瞬間",
+      "description": "足部首次接觸地面的瞬間幀",
+      "evidence": {
+        "ref": "S2",
+        "timestamp": "05:12"
+      }
+    },
+    {
+      "id": "midstance",
+      "name": "支撐中期",
+      "description": "身體重心垂直移經支撐腳上方，膝關節微彎緩衝負重",
+      "evidence": {
+        "ref": "S3",
+        "timestamp": "02:16"
+      }
+    },
+    {
+      "id": "toe_off",
+      "name": "推蹬離地",
+      "description": "支撐腳向後送出並完成蹬伸，腳尖即將脫離地面之瞬間",
+      "evidence": {
+        "ref": "S2",
+        "timestamp": "06:00"
+      }
+    },
+    {
+      "id": "swing",
+      "name": "拉提擺盪",
+      "description": "離地腿小腿向上拉提並往前擺過渡至下一步",
+      "evidence": {
+        "ref": "S5",
+        "timestamp": "09:24"
+      }
+    }
+  ],
+  "metrics": [
+    {
+      "id": "cadence",
+      "name": "步頻",
+      "formlab_key": "run_cadence_spm",
+      "proposed_key": "run_cadence_spm",
+      "phase": "whole",
+      "definition": "每分鐘雙腳交替觸地的總步數",
+      "calc": {
+        "type": "frequency",
+        "landmarks": [
+          "left_ankle",
+          "right_ankle"
+        ],
+        "method": "計算雙腳腳踝觸地週期的每分鐘累積次數（步/分）",
+        "camera_view": "side"
+      },
+      "unit": "spm",
+      "direction": "range",
+      "target": {
+        "beginner": {
+          "min": 170,
+          "max": 175
+        },
+        "advanced": {
+          "min": 175,
+          "max": 185
+        },
+        "ideal": 180
+      },
+      "measurable_2d": "yes",
+      "basis": "stated",
+      "evidence": {
+        "ref": "S5",
+        "timestamp": "02:35",
+        "quote_or_scene": "原則上最低最低我會建議不要低於170...把我的步頻調到180，整個跑感完全不一樣"
+      },
+      "confidence": "high",
+      "priority": 1,
+      "cue": "寧掉速不掉步頻",
+      "common_errors": [
+        "步頻過低（<165 spm）導致煞車重、觸地時間長、衝擊力大"
+      ],
+      "correction": "縮小步幅，跟隨節拍器節奏輕快交替雙腳"
+    },
+    {
+      "id": "overstride",
+      "name": "過度跨步水平距離",
+      "formlab_key": "run_overstride_cm",
+      "proposed_key": "run_overstride_cm",
+      "phase": "initial_contact",
+      "definition": "觸地瞬間支撐腳腳踝在同側髖部關節前方的水平投影距離",
+      "calc": {
+        "type": "distance",
+        "landmarks": [
+          "left_hip",
+          "left_ankle",
+          "right_hip",
+          "right_ankle"
+        ],
+        "method": "觸地瞬間取支撐腳 ankle 與同側 hip 的 X 軸差值，以人體比例換算為公分",
+        "camera_view": "side"
+      },
+      "unit": "cm",
+      "direction": "lower_better",
+      "target": {
+        "beginner": {
+          "min": 0,
+          "max": 8
+        },
+        "advanced": {
+          "min": -2,
+          "max": 5
+        },
+        "ideal": 0
+      },
+      "measurable_2d": "yes",
+      "basis": "stated",
+      "evidence": {
+        "ref": "S2",
+        "timestamp": "05:12",
+        "quote_or_scene": "我的落點幾乎完全不用調整，它就在我身體的最下方，我不用再每次擔心我會跨步的問題"
+      },
+      "confidence": "high",
+      "priority": 1,
+      "cue": "落腳在身體正下方",
+      "common_errors": [
+        "刻意往前邁大步，腳踝落在身體重心前方過遠處形成剎車效應"
+      ],
+      "correction": "意念改為腿向後擺並順勢放下，自然落於臀部下方"
+    },
+    {
+      "id": "knee_strike_angle",
+      "name": "觸地膝關節角度",
+      "formlab_key": "run_knee_strike_deg",
+      "proposed_key": "run_knee_strike_deg",
+      "phase": "initial_contact",
+      "definition": "觸地瞬間支撐腳髖-膝-踝三點夾角（180度為完全筆直）",
+      "calc": {
+        "type": "angle",
+        "landmarks": [
+          "left_hip",
+          "left_knee",
+          "left_ankle",
+          "right_hip",
+          "right_knee",
+          "right_ankle"
+        ],
+        "method": "觸地幀計算支撐腳 hip-knee-ankle 之三點夾角",
+        "camera_view": "side"
+      },
+      "unit": "deg",
+      "direction": "range",
+      "target": {
+        "beginner": {
+          "min": 150,
+          "max": 168
+        },
+        "advanced": {
+          "min": 155,
+          "max": 165
+        },
+        "ideal": 160
+      },
+      "measurable_2d": "yes",
+      "basis": "demonstrated",
+      "evidence": {
+        "ref": "S2",
+        "timestamp": "04:32",
+        "quote_or_scene": "示範跨步觸地時膝蓋伸直鎖死衝擊膝關節，正確落地時膝關節具明顯屈曲緩衝弧度"
+      },
+      "confidence": "medium",
+      "priority": 2,
+      "cue": "觸地膝微彎微彈",
+      "common_errors": [
+        "觸地時膝關節完全打直鎖死（接近 180 度），地面反作用力直衝關節軟骨"
+      ],
+      "correction": "放鬆小腿與膝關節，觸地瞬間保持微屈作彈性吸收"
+    },
+    {
+      "id": "trunk_lean_angle",
+      "name": "軀幹前傾角",
+      "formlab_key": "run_trunk_deg",
+      "proposed_key": "run_trunk_deg",
+      "phase": "whole",
+      "definition": "軀幹中軸線（肩部至髖部）相對於鉛垂線之向前傾斜角度",
+      "calc": {
+        "type": "angle",
+        "landmarks": [
+          "left_shoulder",
+          "left_hip",
+          "right_shoulder",
+          "right_hip"
+        ],
+        "method": "計算 shoulder 至同側 hip 連線與垂直鉛垂線之間的夾角（向前為正）",
+        "camera_view": "side"
+      },
+      "unit": "deg",
+      "direction": "range",
+      "target": {
+        "beginner": {
+          "min": 4,
+          "max": 10
+        },
+        "advanced": {
+          "min": 6,
+          "max": 12
+        },
+        "ideal": 8
+      },
+      "measurable_2d": "yes",
+      "basis": "stated",
+      "evidence": {
+        "ref": "S1",
+        "timestamp": "01:53",
+        "quote_or_scene": "重心要比我們腳還要來前面，身體就會不知不覺往前倒...搭配我們的前傾就可以幫你對抗地心引力"
+      },
+      "confidence": "medium",
+      "priority": 2,
+      "cue": "重心前傾借力前進",
+      "common_errors": [
+        "身體後仰直挺，或僅由腰部折曲（假前傾），無法借力地心引力"
+      ],
+      "correction": "從腳踝到肩膀整條軸線微微前傾，以重力引導身體前移"
+    },
+    {
+      "id": "vertical_oscillation",
+      "name": "骨盆垂直振幅",
+      "formlab_key": "run_vert_osc_cm",
+      "proposed_key": "run_vert_osc_cm",
+      "phase": "whole",
+      "definition": "步態週期中髖部在 Y 軸上的最高點與最低點振幅差距",
+      "calc": {
+        "type": "displacement",
+        "landmarks": [
+          "left_hip",
+          "right_hip"
+        ],
+        "method": "取完整步態週期內 hip Y 座標最大值與最小值之位移差，經身高比值換算公分",
+        "camera_view": "side"
+      },
+      "unit": "cm",
+      "direction": "lower_better",
+      "target": {
+        "beginner": {
+          "min": 4,
+          "max": 9
+        },
+        "advanced": {
+          "min": 4,
+          "max": 7
+        },
+        "ideal": 6
+      },
+      "measurable_2d": "yes",
+      "basis": "stated",
+      "evidence": {
+        "ref": "S5",
+        "timestamp": "01:05",
+        "quote_or_scene": "步頻慢的話就像是正方形在滾動每一架都會這樣...高一點的話就像車子輪胎每一架銜接順暢"
+      },
+      "confidence": "medium",
+      "priority": 2,
+      "cue": "像滾輪少彈跳",
+      "common_errors": [
+        "向上跳躍幅度過大，浪費下肢能量並大幅增加落地衝擊"
+      ],
+      "correction": "縮短騰空時間，專注水平推進而非垂直向上推躍"
+    },
+    {
+      "id": "ground_contact_time",
+      "name": "觸地時間",
+      "formlab_key": "run_contact_ms",
+      "proposed_key": "run_contact_ms",
+      "phase": "midstance",
+      "definition": "單腳從初次著地至離地推蹬結束所持續的時間",
+      "calc": {
+        "type": "time",
+        "landmarks": [
+          "left_ankle",
+          "right_ankle",
+          "left_foot_index",
+          "right_foot_index"
+        ],
+        "method": "計算單腳從 initial_contact 到 toe_off 間歷經幀數乘以單幀時間（ms）",
+        "camera_view": "side"
+      },
+      "unit": "ms",
+      "direction": "lower_better",
+      "target": {
+        "beginner": {
+          "min": 230,
+          "max": 280
+        },
+        "advanced": {
+          "min": 190,
+          "max": 240
+        },
+        "ideal": 220
+      },
+      "measurable_2d": "partial",
+      "basis": "stated",
+      "evidence": {
+        "ref": "S5",
+        "timestamp": "01:20",
+        "quote_or_scene": "可以減少我們接觸地面的時間短一點，那相對性撞擊力道就會小一點"
+      },
+      "confidence": "medium",
+      "priority": 3,
+      "cue": "輕觸地面快收腳",
+      "common_errors": [
+        "足部停留地面過久（粘地），造成肌肉被動拉扯疲乏"
+      ],
+      "correction": "意念放在腳觸地後如同踩在熱炭上迅速拉起"
+    },
+    {
+      "id": "elbow_angle",
+      "name": "手肘屈曲角度",
+      "formlab_key": "run_elbow_L_deg",
+      "proposed_key": "run_elbow_L_deg",
+      "phase": "whole",
+      "definition": "擺手時肩-肘-腕三點構成之肘關節角度",
+      "calc": {
+        "type": "angle",
+        "landmarks": [
+          "left_shoulder",
+          "left_elbow",
+          "left_wrist",
+          "right_shoulder",
+          "right_elbow",
+          "right_wrist"
+        ],
+        "method": "計算 shoulder-elbow-wrist 三點夾角於完整擺臂週期的均值",
+        "camera_view": "side"
+      },
+      "unit": "deg",
+      "direction": "range",
+      "target": {
+        "beginner": {
+          "min": 80,
+          "max": 105
+        },
+        "advanced": {
+          "min": 85,
+          "max": 95
+        },
+        "ideal": 90
+      },
+      "measurable_2d": "yes",
+      "basis": "general_knowledge",
+      "evidence": {
+        "ref": "S5",
+        "timestamp": "11:15",
+        "quote_or_scene": "專注在你的擺手上面，寬去連動到手，擺手可以帶動步頻不掉下來"
+      },
+      "confidence": "medium",
+      "priority": 3,
+      "cue": "手肘九十前後擺",
+      "common_errors": [
+        "手臂伸展下垂晃動或前後過度開合，力矩過長破壞擺臂節奏"
+      ],
+      "correction": "手肘固定約 90 度，以肩關節為軸心自然向後拉擺"
+    },
+    {
+      "id": "hip_extension_angle",
+      "name": "後擺推蹬髖伸展角",
+      "formlab_key": null,
+      "proposed_key": "run_hip_extension_deg",
+      "phase": "toe_off",
+      "definition": "推蹬離地瞬間大腿股骨相對於軀幹軸線向後伸展的角度",
+      "calc": {
+        "type": "angle",
+        "landmarks": [
+          "left_shoulder",
+          "left_hip",
+          "left_knee",
+          "right_shoulder",
+          "right_hip",
+          "right_knee"
+        ],
+        "method": "在離地推蹬瞬間計算 shoulder-hip 線與 hip-knee 線之后向夾角（大於180度之外展角度）",
+        "camera_view": "side"
+      },
+      "unit": "deg",
+      "direction": "higher_better",
+      "target": {
+        "beginner": {
+          "min": 5,
+          "max": 15
+        },
+        "advanced": {
+          "min": 10,
+          "max": 20
+        },
+        "ideal": 15
+      },
+      "measurable_2d": "yes",
+      "basis": "demonstrated",
+      "evidence": {
+        "ref": "S2",
+        "timestamp": "04:40",
+        "quote_or_scene": "畫面示範慢跑時腳往後擺動、臀大肌向後送，推蹬時髖部後伸帶動身體位移"
+      },
+      "confidence": "medium",
+      "priority": 2,
+      "cue": "腿往後擺屁股發力",
+      "common_errors": [
+        "只有小腿向下推地而髖部無後伸，全靠股四頭肌與小腿代償"
+      ],
+      "correction": "啟動臀大肌主導後向伸展，順勢將力量向後推傳"
+    }
+  ],
+  "qualitative_points": [
+    {
+      "point": "核心收緊與骨盆中立（「吸-赫」呼吸法）",
+      "cue": "吸赫腹硬骨盆立",
+      "why_not_measurable": "手機 2D 骨架辨識無法量測深層腹橫肌與核心等長收縮張力，亦無法偵測呼吸節奏與腹內壓變化。",
+      "basis": "stated",
+      "evidence": {
+        "ref": "S2",
+        "timestamp": "08:58"
+      }
+    },
+    {
+      "point": "臀大肌與膕繩肌主動發力推動感（用屁股跑步）",
+      "cue": "臀部發力非腿酸",
+      "why_not_measurable": "肌肉主動神經發力與募集感屬於神經本體感覺，2D 運動學關節點位只能記錄位移，無法判斷是主動臀部發力或周邊肌群代償。",
+      "basis": "stated",
+      "evidence": {
+        "ref": "S2",
+        "timestamp": "01:00"
+      }
+    },
+    {
+      "point": "前腳掌蹠骨初接觸至大拇指推蹬滾動軌跡",
+      "cue": "前掌著地拇指蹬",
+      "why_not_measurable": "跑鞋結構遮蔽足底骨骼，且 30 fps 手機視訊解析度與取樣率不足以捕捉足底細微的局部壓力中心（COP）轉移動態。",
+      "basis": "stated",
+      "evidence": {
+        "ref": "S2",
+        "timestamp": "05:40"
+      }
+    },
+    {
+      "point": "對側肩與髖連動旋轉（送髖軸心扭轉）",
+      "cue": "左肩右髖交叉轉",
+      "why_not_measurable": "單一側面 2D 鏡頭投影於矢狀面，軀幹與骨盆在水平面（橫向平面）的軸向旋轉在側視角會產生強烈視角重疊與透視壓縮。",
+      "basis": "stated",
+      "evidence": {
+        "ref": "S1",
+        "timestamp": "04:03"
+      }
+    }
+  ],
+  "drills": [
+    {
+      "name": "競走式誇張送髖走",
+      "how": "收核心夾屁股，誇張做出左肩連動右髖、右肩連動左髖的競走擺動前行",
+      "sets_reps": "跑前進行 100-200 公尺",
+      "evidence": {
+        "ref": "S1",
+        "timestamp": "04:13"
+      }
+    },
+    {
+      "name": "仰臥頂髖臀橋",
+      "how": "平躺雙腿微開一個拳頭，核心與臀大肌出力將髖部往上頂送停留",
+      "sets_reps": "頂髖停留 10 秒後休息 3 秒，重複 10 組",
+      "evidence": {
+        "ref": "S1",
+        "timestamp": "05:50"
+      }
+    },
+    {
+      "name": "扶牆後抬腿喚醒臀部",
+      "how": "單手扶牆、一手摸臀部，以髖為軸向後抬腿停留感受臀部微酸",
+      "sets_reps": "單邊後抬停留 5 秒，每側 5 下",
+      "evidence": {
+        "ref": "S2",
+        "timestamp": "02:30"
+      }
+    },
+    {
+      "name": "單腳站立前後擺盪",
+      "how": "單腳支撐，另一腳前後擺盪，意念放在「前小後大」，向後多擺並順勢放下",
+      "sets_reps": "左右腳各進行 10-15 次",
+      "evidence": {
+        "ref": "S2",
+        "timestamp": "03:30"
+      }
+    },
+    {
+      "name": "洗衣機撿襪子單腳平衡",
+      "how": "單腳站立俯身撿地上的襪子，後腿向後抬高微高於水平線，鍛鍊臀大肌與單腳穩定平衡",
+      "sets_reps": "左右腳各進行 10 次",
+      "evidence": {
+        "ref": "S2",
+        "timestamp": "11:15"
+      }
+    },
+    {
+      "name": "保加利亞分腿蹲（偏臀發力）",
+      "how": "後腳置於長椅，重心向下微偏向後坐，加強臀大肌離心與向心發力",
+      "sets_reps": "左右腳各進行 10 下",
+      "evidence": {
+        "ref": "S2",
+        "timestamp": "12:02"
+      }
+    },
+    {
+      "name": "跑前腳踝強化操",
+      "how": "腿向前伸懸空，大腿放鬆單純腳踝勾腳尖 10 秒，接著大腿出力腳尖下壓點地 10 秒",
+      "sets_reps": "左右腳各重複 3 次",
+      "evidence": {
+        "ref": "S3",
+        "timestamp": "02:30"
+      }
+    },
+    {
+      "name": "弓箭步分腿蹲搭配擺手",
+      "how": "呈前弓後箭姿勢蹲下，核心收緊並持續快速擺手 10 秒後起立",
+      "sets_reps": "左右腳各進行 10 組",
+      "evidence": {
+        "ref": "S3",
+        "timestamp": "07:25"
+      }
+    }
+  ],
+  "realtime_feedback": [
+    {
+      "metric_id": "cadence",
+      "type": "metronome",
+      "setting": "節拍器設為 170 或 175 bpm"
+    },
+    {
+      "metric_id": "overstride",
+      "type": "voice_cue",
+      "setting": "當連續 3 步 overstride_cm > 8cm 時，語音提示「落腳收回身體正下方」"
+    },
+    {
+      "metric_id": "trunk_lean_angle",
+      "type": "voice_cue",
+      "setting": "當軀幹後仰（trunk_deg < 2 deg）時，語音提示「重心微前傾」"
+    }
+  ],
+  "safety_notes": [
+    "步頻提升必須循序漸進，切忌從 160 spm 直接強拉到 180 spm，應以每次增加 5 spm 穩定適應 2-4 週為原則，避免阿基里斯腱與比目魚肌過度代償負擔。",
+    "轉變著地方式時切勿刻意以芭蕾舞姿態踮腳尖跑步，若未具備足夠小腿離心與足弓力量，極易導致阿基里斯腱炎與足底筋膜炎。",
+    "若慢跑中膝關節產生刺痛，應立即停止並檢查是否有過度跨步剎車現象，急性發炎期應先進行滾筒放鬆阿基里斯腱與足底，切忌忍痛強跑。"
+  ],
+  "open_questions": [
+    "S1 教學強調「送髖往前頂」，而 S2 特別提醒「不要大力往前送髖，否則腿又會向前延伸造成跨步，而是把腿往後擺、前腳順勢放下」；兩者在用語上易使初學者混淆，實務上應定位為「重心微前傾帶動骨盆整體向前，但肢體動作重點在後蹬而非刻意向前伸腿」。",
+    "S2 強烈提倡「前腳掌著地」，但初學者若缺乏足踝剛性容易演變為踮腳跑；一般運動科學對大眾入門跑者多建議更容錯的「中足全掌著地（Midfoot Strike）」，此點需視個人足部肌力與跑鞋結構進行調整。"
+  ],
+  "created_by": "Gemini",
+  "created_date": "2026-10-12",
+  "review": {
+    "reviewed_by": "Claude（Cowork）",
+    "review_date": "2026-10-13",
+    "policy": "只標註建議、不修改 Gemini 原始數字（使用者指示）",
+    "renamed_from_goal_id": "run_beginner_form_ruirui_20261012",
+    "general": [
+      "本檔由舊版提示詞產生，缺少 target_basis（目標數字依據）、applies_to（適用側）欄位；依使用者指示「只標註建議、不修改數字」，原數字與依據標示均保留。",
+      "多數目標數字影片並未明講，實際應屬 general_knowledge（Gemini 推估）；標為 stated／demonstrated 且 confidence=high 者，建議視為 medium 參考。"
+    ],
+    "metrics": [
+      {
+        "metric_id": "cadence",
+        "key": "run_cadence_spm",
+        "app_status": "supported",
+        "verdict": "合理",
+        "note": "你 10/10 兩組實測 175、177 步/分，已高於入門區間上限 175，落在進階區間（175–185）。App 會判「達進階」。",
+        "suggestion": "可沿用；入門區間若想涵蓋「175 以上也算達標」，可改用 higher_better（≥170）"
+      },
+      {
+        "metric_id": "overstride",
+        "key": "run_overstride_cm",
+        "app_status": "supported",
+        "verdict": "目標過嚴（量法差異）",
+        "note": "App 的跨步距＝觸地瞬間（腳跟在骨盆最前方）腳踝在「髖中點」前方的水平距離；以此量法一般跑者常見 10–20 cm（你 10/10 兩組實測：15.5、17.1 cm）。照 0–8 cm 會每次都判未達。",
+        "suggestion": "建議入門 ≤ 15 cm、進階 ≤ 10 cm；或保留原值但僅作趨勢觀察"
+      },
+      {
+        "metric_id": "knee_strike_angle",
+        "key": "run_knee_strike_deg",
+        "app_status": "supported",
+        "verdict": "合理",
+        "note": "你 10/10 兩組實測：152°、149°",
+        "suggestion": "可沿用；屬合理的改善方向"
+      },
+      {
+        "metric_id": "trunk_lean_angle",
+        "key": "run_trunk_deg",
+        "app_status": "supported",
+        "verdict": "合理",
+        "note": "你 10/10 兩組實測：2.2°、2.7°",
+        "suggestion": "可沿用"
+      },
+      {
+        "metric_id": "vertical_oscillation",
+        "key": "run_vert_osc_cm",
+        "app_status": "supported",
+        "verdict": "合理",
+        "note": "你 10/10 兩組實測：7.6、5.7 cm",
+        "suggestion": "可沿用"
+      },
+      {
+        "metric_id": "ground_contact_time",
+        "key": "run_contact_ms",
+        "app_status": "supported",
+        "verdict": "需 ≥25 fps 才可信",
+        "note": "App 觸地時間在 18 fps 下兩組差 70 ms（你 10/10 兩組實測：301、229 ms）。",
+        "suggestion": "目標可沿用，但判讀需搭配 fps；fps 不足時僅供參考"
+      },
+      {
+        "metric_id": "elbow_angle",
+        "key": "run_elbow_L_deg",
+        "app_status": "unsupported",
+        "verdict": "App 鍵名不符",
+        "note": "App 指標庫沒有 run_elbow_L_deg（CSV 有逐格左右手肘角，但未列入判讀）；本指標定義為「擺臂週期均值」，對應 record.json 的 run_elbow_near_deg（近側平均）。",
+        "suggestion": "Code 待辦：指標庫新增 run_elbow_near_deg；本檔 key 可改為 run_elbow_near_deg"
+      },
+      {
+        "metric_id": "hip_extension_angle",
+        "key": "run_hip_extension_deg",
+        "app_status": "unsupported",
+        "verdict": "App 尚未支援",
+        "note": "新指標：離地瞬間軀幹線與大腿線的後伸角；側拍可量。",
+        "suggestion": "Code 待辦：可在離地時刻計算，量法需與定義確認（以 180° 為基準的超伸角）"
+      }
+    ]
+  }
+}

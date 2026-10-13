@@ -1,0 +1,456 @@
+{
+  "schema": "formlab-goals-1",
+  "goal_id": "goals_walk_矯正走路姿勢_20261013",
+  "file_name": "goals_walk_矯正走路姿勢_20261013.json",
+  "sport": "walk",
+  "sport_name": "走路",
+  "goal_name": "矯正走路姿勢",
+  "title": "走路姿勢矯正分析目標",
+  "language": "zh-Hant",
+  "session_plan": {
+    "end_trigger": "time",
+    "duration_s": 60,
+    "count_target": null,
+    "max_duration_s": 180,
+    "metronome": true,
+    "metronome_bpm": 110,
+    "basis": "user_confirmed",
+    "note": "2026-10-13 使用者確認：時間 60 秒、開節拍器 110 bpm。建議在跑步機或長廊連續行走，取得穩定的連續步態週期。開節拍器時步頻會跟著拍子，步頻指標改看「能否穩定跟拍」。"
+  },
+  "athlete_context": "略",
+  "sources": [
+    {
+      "ref": "S1",
+      "type": "youtube",
+      "url": "https://youtu.be/68QcHGAqjUA",
+      "title": "「正確走路」好重要！4個步驟 快速矯正你的走路姿勢｜詹珞瑤 物理治療師 Veronica Rehab",
+      "channel": "詹珞瑤",
+      "presenter_credentials": "物理治療師",
+      "duration": "05:41"
+    }
+  ],
+  "camera_setup": {
+    "view": "side",
+    "distance_m": 2.8,
+    "camera_height": "骨盆高度（約 90-100 公分）",
+    "fps_min": 25,
+    "framing": "受測者全身入鏡，側面垂直視野包含頭頂至腳底，水平需涵蓋至少 2 個完整跨步長度。",
+    "notes": "跑步機上定點拍攝為佳；若為地面行走，請受測者等速走過鏡頭視野中央。"
+  },
+  "phases": [
+    {
+      "id": "initial_contact",
+      "name": "觸地瞬間",
+      "description": "前腳腳跟首次接觸地面那一格。",
+      "evidence": {
+        "ref": "S1",
+        "timestamp": "00:43"
+      }
+    },
+    {
+      "id": "terminal_stance",
+      "name": "推蹬末期",
+      "description": "後支撐腳腳跟離地、大腿向後伸展至最遠並準備離地推蹬的瞬間。",
+      "evidence": {
+        "ref": "S1",
+        "timestamp": "02:24"
+      }
+    },
+    {
+      "id": "whole",
+      "name": "完整步態週期",
+      "description": "連續行走期間各步態週期平均表現。",
+      "evidence": {
+        "ref": "S1",
+        "timestamp": "00:00"
+      }
+    }
+  ],
+  "metrics": [
+    {
+      "id": "walk_trunk_deg",
+      "name": "軀幹前傾角",
+      "formlab_key": "run_trunk_deg",
+      "proposed_key": "walk_trunk_deg",
+      "phase": "whole",
+      "applies_to": "bilateral",
+      "definition": "肩中點到髖中點的連線與鉛垂線的夾角。避免軀幹後仰（Sway-back）或駝背。",
+      "calc": {
+        "type": "angle",
+        "landmarks": [
+          "left_shoulder",
+          "right_shoulder",
+          "left_hip",
+          "right_hip"
+        ],
+        "method": "肩中點到髖中點的連線與鉛垂線的夾角，向前傾為正，後仰為負",
+        "camera_view": "side"
+      },
+      "unit": "deg",
+      "direction": "range",
+      "target": {
+        "beginner": {
+          "min": -1.0,
+          "max": 5.0
+        },
+        "advanced": {
+          "min": 0.0,
+          "max": 4.0
+        },
+        "ideal": 2.0
+      },
+      "target_basis": "general_knowledge",
+      "target_note": "影片強調頭部重心應於骨盆正上方，不可骨盆前頂後仰（03:44）；跑步時軀幹多為 4-10 度，步行時接近直立（0-4 度）。",
+      "measurable_2d": "yes",
+      "basis": "demonstrated",
+      "evidence": {
+        "ref": "S1",
+        "timestamp": "03:44",
+        "quote_or_scene": "示範重心偏太後面（Sway back）的錯誤走姿，說明頭頂與身體重心應落在骨盆正上方"
+      },
+      "confidence": "medium",
+      "priority": 1,
+      "cue": "收小腹頭頂天",
+      "common_errors": [
+        "骨盆往前推、軀幹後傾（Sway-back）走法",
+        "低頭駝背導致重心前衝"
+      ],
+      "correction": "微收肚臍與核心，感覺耳際、肩峰與髖關節在垂直線上重疊排列。"
+    },
+    {
+      "id": "walk_hip_extension_deg",
+      "name": "推蹬期髖伸展角",
+      "formlab_key": null,
+      "proposed_key": "walk_hip_extension_deg",
+      "phase": "terminal_stance",
+      "applies_to": "near_side",
+      "definition": "後支撐腿在離地前推蹬瞬間，大腿骨軸線相對軀幹軸線向後伸展的角度。",
+      "calc": {
+        "type": "angle",
+        "landmarks": [
+          "left_shoulder",
+          "left_hip",
+          "left_knee",
+          "right_shoulder",
+          "right_hip",
+          "right_knee"
+        ],
+        "method": "近側軀幹軸（肩-髖）連線與大腿（髖-膝）連線之後伸夾角（以解剖中立位 0 度計算後擺角）",
+        "camera_view": "side"
+      },
+      "unit": "deg",
+      "direction": "range",
+      "target": {
+        "beginner": {
+          "min": 5.0,
+          "max": 18.0
+        },
+        "advanced": {
+          "min": 10.0,
+          "max": 16.0
+        },
+        "ideal": 12.0
+      },
+      "target_basis": "general_knowledge",
+      "target_note": "正常成人行走推蹬時生理髖後伸約 10-15 度。久坐髖屈肌緊繃者後伸常小於 5 度甚至為負。",
+      "measurable_2d": "yes",
+      "basis": "stated",
+      "evidence": {
+        "ref": "S1",
+        "timestamp": "02:24",
+        "quote_or_scene": "推進力盡量要來自大腿後側跟屁股的肌肉往前推，很多人覺得走路是把大腿往前抬"
+      },
+      "confidence": "medium",
+      "priority": 1,
+      "cue": "後腿推臀發力",
+      "common_errors": [
+        "只靠前大腿向前抬腿跨步",
+        "以腰椎過度前凸代償臀肌後伸不足"
+      ],
+      "correction": "後腳即將離地前，意念專注在臀大肌與大腿後側出力將身體往前推。"
+    },
+    {
+      "id": "walk_foot_strike_deg",
+      "name": "觸地瞬間腳跟著地角",
+      "formlab_key": null,
+      "proposed_key": "walk_foot_strike_deg",
+      "phase": "initial_contact",
+      "applies_to": "near_side",
+      "definition": "前腳觸地瞬間，腳底（腳跟至腳趾）與地平面的仰角，確認是否確實由腳跟先著地滾動。",
+      "calc": {
+        "type": "angle",
+        "landmarks": [
+          "left_heel",
+          "left_foot_index",
+          "right_heel",
+          "right_foot_index"
+        ],
+        "method": "觸地瞬間那一格，近側 heel 與 foot_index 連線相對水平地面之夾角（腳尖高於腳跟為正）",
+        "camera_view": "side"
+      },
+      "unit": "deg",
+      "direction": "range",
+      "target": {
+        "beginner": {
+          "min": 8.0,
+          "max": 25.0
+        },
+        "advanced": {
+          "min": 12.0,
+          "max": 22.0
+        },
+        "ideal": 15.0
+      },
+      "target_basis": "general_knowledge",
+      "target_note": "正常步行著地足跟背屈角度約 10-20 度。若腳板整片拍地或拖地，角度會小於 5 度。",
+      "measurable_2d": "yes",
+      "basis": "stated",
+      "evidence": {
+        "ref": "S1",
+        "timestamp": "00:43",
+        "quote_or_scene": "走路的時候要遵循從腳跟滾到腳尖的原理，很扎實地從腳跟踩到腳掌"
+      },
+      "confidence": "medium",
+      "priority": 2,
+      "cue": "腳跟順著地",
+      "common_errors": [
+        "整片腳底像鴨子一樣平踩（拍地走）",
+        "腳尖先著地或拖地前行"
+      ],
+      "correction": "著地前腳踝自然勾起，腳跟輕觸地面後順勢像車輪滾動般過渡至前掌。"
+    },
+    {
+      "id": "walk_arm_swing_deg",
+      "name": "手臂擺動幅度",
+      "formlab_key": null,
+      "proposed_key": "walk_arm_swing_deg",
+      "phase": "whole",
+      "applies_to": "near_side",
+      "definition": "近側手臂在步態週期中前後自然擺動的總活動角度（ROM）。",
+      "calc": {
+        "type": "angle",
+        "landmarks": [
+          "left_shoulder",
+          "left_wrist",
+          "right_shoulder",
+          "right_wrist"
+        ],
+        "method": "近側肩至手腕連線相對鉛垂線夾角，計算步態週期中最大前擺角與最大後擺角之和",
+        "camera_view": "side"
+      },
+      "unit": "deg",
+      "direction": "range",
+      "target": {
+        "beginner": {
+          "min": 20.0,
+          "max": 50.0
+        },
+        "advanced": {
+          "min": 25.0,
+          "max": 45.0
+        },
+        "ideal": 35.0
+      },
+      "target_basis": "general_knowledge",
+      "target_note": "一般自然步行手臂總擺動約 25-45 度；若小於 15 度代表胸椎無旋轉且手臂僵硬。",
+      "measurable_2d": "yes",
+      "basis": "stated",
+      "evidence": {
+        "ref": "S1",
+        "timestamp": "04:39",
+        "quote_or_scene": "如果手臂在走路時並沒有擺動的動作，很有可能是走路姿勢出問題了"
+      },
+      "confidence": "medium",
+      "priority": 2,
+      "cue": "雙臂自然擺",
+      "common_errors": [
+        "雙臂僵硬貼在大腿側不動",
+        "過度刻意向前甩手聳肩"
+      ],
+      "correction": "肩膀放鬆下沉，感受胸椎伴隨步伐自然對角帶動手臂前後擺盪。"
+    },
+    {
+      "id": "run_cadence_spm",
+      "name": "步頻",
+      "formlab_key": "run_cadence_spm",
+      "proposed_key": "walk_cadence_spm",
+      "phase": "whole",
+      "applies_to": "bilateral",
+      "definition": "每分鐘行走的步數，用於掌握步態穩定度與均勻節奏。",
+      "calc": {
+        "type": "frequency",
+        "landmarks": [
+          "left_ankle",
+          "right_ankle"
+        ],
+        "method": "60 ÷ 平均步伐間隔（步/分）",
+        "camera_view": "side"
+      },
+      "unit": "spm",
+      "direction": "range",
+      "target": {
+        "beginner": {
+          "min": 90.0,
+          "max": 120.0
+        },
+        "advanced": {
+          "min": 100.0,
+          "max": 120.0
+        },
+        "ideal": 110.0
+      },
+      "target_basis": "general_knowledge",
+      "target_note": "成年人日常行走平均步頻為 100-115 spm。影片未提及步頻數字，依常模補充。",
+      "measurable_2d": "yes",
+      "basis": "general_knowledge",
+      "evidence": null,
+      "confidence": "low",
+      "priority": 3,
+      "cue": "步頻穩勻走",
+      "common_errors": [
+        "步伐忽快忽慢節奏零碎",
+        "跨過大步導致步頻過低"
+      ],
+      "correction": "配合穩定呼吸，維持節奏均勻的邁步頻率。"
+    }
+  ],
+  "qualitative_points": [
+    {
+      "point": "足底筋膜絞盤機制（Windlass Effect）與第一、二腳趾順暢推離",
+      "cue": "腳趾順推離",
+      "why_not_measurable": "MediaPipe Pose 2D 於足部僅有 heel 與 foot_index 點位，無法捕捉各腳趾個別關節活動度，且手機鏡頭無法測量足底壓力中心（COP）軌跡與筋膜彈性張力。",
+      "basis": "stated",
+      "evidence": {
+        "ref": "S1",
+        "timestamp": "01:54"
+      }
+    },
+    {
+      "point": "臀大肌主動發力推蹬感與深層核心微收",
+      "cue": "屁股用力推",
+      "why_not_measurable": "2D 相機只能記錄外在關節幾何位移（運動學），無法取得肌電圖（EMG）訊號，無法區分動能是來自臀大肌主動發力還是腰椎／骨盆代償。",
+      "basis": "stated",
+      "evidence": {
+        "ref": "S1",
+        "timestamp": "02:24"
+      }
+    },
+    {
+      "point": "胸椎與骨盆之水平對角旋轉連動",
+      "cue": "胸腰自然轉",
+      "why_not_measurable": "側視角（矢狀面）無法精確量測人體橫截面（Transverse plane）的骨盆與胸椎水平軸向旋轉，易產生投影視角壓縮失真。",
+      "basis": "stated",
+      "evidence": {
+        "ref": "S1",
+        "timestamp": "02:51"
+      }
+    }
+  ],
+  "drills": [
+    {
+      "name": "滾動步態分解練習",
+      "how": "原地或慢速前行，刻意從腳跟著地、全腳掌平穩下壓、過渡至前掌腳趾蹬出，感受輪胎滾動感。",
+      "sets_reps": "每組左右各 15 步，進行 3 組",
+      "evidence": {
+        "ref": "S1",
+        "timestamp": "00:50"
+      }
+    },
+    {
+      "name": "大腿前側與髂腰肌伸展",
+      "how": "單腳站立或弓箭步，將後側小腿拉向臀部，感受大腿前側股四頭肌與鼠蹊部伸展，解除久坐造成的緊繃限制。",
+      "sets_reps": "左右兩側各維持 30 秒，進行 3 組",
+      "evidence": {
+        "ref": "S1",
+        "timestamp": "03:00"
+      }
+    },
+    {
+      "name": "靠牆核心微收體態校正",
+      "how": "背部靠牆微收肚臍與小腹，確認後腦杓、肩膀、臀部在一直線上，維持此軀幹中立排列向前邁步。",
+      "sets_reps": "靠牆靜態維持 30 秒後，離牆行走 1 分鐘",
+      "evidence": {
+        "ref": "S1",
+        "timestamp": "03:57"
+      }
+    }
+  ],
+  "realtime_feedback": [
+    {
+      "metric_id": "walk_trunk_deg",
+      "type": "voice_cue",
+      "setting": "當軀幹後傾小於 -1 度超過 3 步時，語音提示：微收小腹，身體立正"
+    },
+    {
+      "metric_id": "walk_hip_extension_deg",
+      "type": "voice_cue",
+      "setting": "當推蹬髖後伸小於 5 度時，語音提示：後腳蹬直，臀肌出力"
+    }
+  ],
+  "safety_notes": [
+    "若患有急性足底筋膜炎或足跟骨刺發作者，請勿過度重力拍擊地面或強力蹬地，應先諮詢物理治療師。",
+    "校正軀幹時切忌以過度挺胸造成腰椎反折（過度前凸），應以肚臍向脊椎微收為核心基準。",
+    "使用手機鏡頭攝影時，請確保地面乾燥無雜物，避免邊看螢幕邊走導致踩空跌倒。"
+  ],
+  "open_questions": [
+    "影片中老師為赤腳與穿著平底休閒鞋示範；若使用者穿著厚底跑鞋、氣墊鞋或有跟鞋，鞋底幾何構造與足跟差（Drop）會改變腳跟著地角（walk_foot_strike_deg）的實際外觀角度，後續可針對鞋款種類微調閾值。",
+    "影片 01:59 提及的『外八走姿（鴨子步）』為額狀面／水平面之足偏角（Foot progression angle），2D 側拍無法評估；若 FormLab 未來新增正面（Front view）視角，可擴充 walk_foot_angle_deg 指標。"
+  ],
+  "created_by": "Gemini",
+  "created_date": "2026-10-13",
+  "review": {
+    "reviewed_by": "Claude（Cowork）",
+    "review_date": "2026-10-13",
+    "policy": "只標註建議、不修改 Gemini 原始數字（使用者指示）",
+    "renamed_from_goal_id": "goals_walk_gait_correction_20261013",
+    "general": [
+      "新動作：App V3 沒有 walk 項目，目前 App 選單看不到這份目標，App 可判讀 0／5。需由 Code 新增「走路」項目（待辦 U9）。",
+      "本檔由 10/13 版提示詞產生，已有 target_basis、applies_to；目標數字全部標 general_knowledge、confidence 多為 medium，標示合理。",
+      "athlete_context 為「略」，建議補上你的程度與目的（例如：一般成人、改善久坐後的走路姿勢）。",
+      "走路不能直接套用跑步分析：跑步以「骨盆最低點」切步，但走路的骨盆在支撐中期是最高點；跑步的異常步伐過濾會剔除步頻 < 110 的步伐，走路常落在 100–120，會被大量誤剔。Zeni 觸地／離地法原本就是為走路設計，可直接沿用。",
+      "跑步機定點拍攝最穩定；地面行走時，2.8 m 距離的畫面寬度可能不到 2 個完整跨步，有效步數會偏少。"
+    ],
+    "metrics": [
+      {
+        "metric_id": "walk_trunk_deg",
+        "key": "run_trunk_deg → walk_trunk_deg",
+        "app_status": "可沿用跑步算法",
+        "verdict": "合理",
+        "note": "定義（肩中點–髖中點連線對鉛垂線，前傾為正）與 App 跑步軀幹前傾相同。走路接近直立，-1～5° 合理。你 10/10 跑步實測 2.2°、2.7°，走路應更小。",
+        "suggestion": "可沿用；手機需放水平，鏡頭傾斜 1° 就會造成約 1° 誤差"
+      },
+      {
+        "metric_id": "walk_hip_extension_deg",
+        "key": "walk_hip_extension_deg",
+        "app_status": "未支援（新指標）",
+        "verdict": "合理，但有量法限制",
+        "note": "正常步行推蹬末期髖伸展約 10–20°，目標 5–18° 合理。量法以「肩–髖」當軀幹線：若用腰椎前凸代償（本檔 common_errors 就提到），軀幹線會跟著後仰，算出來的角度反而變大，代償會被掩蓋。",
+        "suggestion": "Code：與跑步的 run_hip_extension_deg（U7）共用同一套算法，在離地前一刻取最大後伸角；報告時同時看軀幹前傾，軀幹明顯後仰時該步的髖伸展不採信"
+      },
+      {
+        "metric_id": "walk_foot_strike_deg",
+        "key": "walk_foot_strike_deg",
+        "app_status": "未支援（新指標）",
+        "verdict": "合理，需扣除站立基準",
+        "note": "正常步行腳跟著地時腳底仰角約 15–25°，目標 8–25° 合理。但 MediaPipe 的腳跟與腳尖點不一定貼地，穿鞋（尤其厚底、有跟）時靜止站立就有幾度的仰角。",
+        "suggestion": "Code：記錄開始前站立 2 秒，取靜止腳底角當基準扣除；觸地時刻用 Zeni 法（腳跟在骨盆最前方）。fps ≥ 25 較準"
+      },
+      {
+        "metric_id": "walk_arm_swing_deg",
+        "key": "walk_arm_swing_deg",
+        "app_status": "未支援（新指標）",
+        "verdict": "合理",
+        "note": "側拍近側手臂可量。肩–腕連線同時受手肘彎曲影響，數值會比單純肩關節活動度略大；自然步行 25–45° 合理。",
+        "suggestion": "Code：每個步態週期取最大前擺＋最大後擺，再取平均；建議以軀幹線（而非鉛垂線）為基準，避免軀幹前傾影響"
+      },
+      {
+        "metric_id": "run_cadence_spm",
+        "key": "run_cadence_spm → walk_cadence_spm",
+        "app_status": "跑步算法需調整",
+        "verdict": "合理，但開節拍器時意義改變",
+        "note": "一般成人步行 100–120 步/分，目標 90–120 合理。你選擇開節拍器 110 bpm，步頻會被拍子帶著走，量到的是「跟拍準不準」，不是自然步頻。另外本項 id 用了 run_ 開頭，與其他 walk_ 指標不一致。",
+        "suggestion": "Code：走路改用 walk_cadence_spm，異常步伐過濾的步頻範圍改為約 60–150；想量自然步頻時，可關掉節拍器另錄一段"
+      }
+    ]
+  }
+}

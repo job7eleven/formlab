@@ -1,0 +1,598 @@
+{
+  "schema": "formlab-goals-1",
+  "goal_id": "goals_bat_校正與加強打擊_20261011",
+  "file_name": "goals_bat_校正與加強打擊_20261011.json",
+  "sport": "bat",
+  "sport_name": "棒球打擊",
+  "goal_name": "校正與加強打擊",
+  "title": "棒球打擊揮棒動作分析與學習目標",
+  "language": "zh-Hant",
+  "session_plan": {
+    "end_trigger": "count",
+    "duration_s": null,
+    "count_target": 10,
+    "max_duration_s": 180,
+    "metronome": false,
+    "metronome_bpm": null,
+    "basis": "claude_default",
+    "note": "以揮棒次數結束（10 揮）；最長 180 秒保險"
+  },
+  "athlete_context": "校正與加強打擊",
+  "sources": [
+    {
+      "ref": "S1",
+      "type": "youtube",
+      "url": "https://www.youtube.com/watch?v=e69HYs3n76o",
+      "title": "如何找到你/妳的打擊站姿&最常見的站姿錯誤系列 Set up your hitting stance & common mistakes in stance",
+      "channel": "JOE是棒球",
+      "presenter_credentials": "許智瑋（Coach Joe），前職棒球員/專業棒球教練",
+      "duration": "12:55"
+    },
+    {
+      "ref": "S2",
+      "type": "youtube",
+      "url": "https://www.youtube.com/watch?v=bPFTtBnfWas",
+      "title": "如何正確擊球及完成揮棒? How to Contact & Follow through Correctly (Baseball Hitting)",
+      "channel": "JOE是棒球",
+      "presenter_credentials": "許智瑋（Coach Joe），前職棒球員/專業棒球教練",
+      "duration": "08:57"
+    },
+    {
+      "ref": "S3",
+      "type": "youtube",
+      "url": "https://www.youtube.com/watch?v=YbWtBe0x2GY",
+      "title": "如何增加擊球力道? 2個方法 How to Improve Hitting Power?",
+      "channel": "JOE是棒球",
+      "presenter_credentials": "許智瑋（Coach Joe），前職棒球員/專業棒球教練",
+      "duration": "05:51"
+    }
+  ],
+  "camera_setup": {
+    "view": "side",
+    "distance_m": 4.0,
+    "camera_height": "腰部高度（約 90-100 cm）",
+    "fps_min": 25,
+    "framing": "正對打者胸膛面（打擊區開放側面視角），打者從頭頂至雙腳足底垂直全身入鏡，左右保留完整揮棒延伸空間（約 2.5 公尺寬）",
+    "notes": "建議採自然光或充足照明，避免擊球瞬間快門過慢產生動態模糊；右打者鏡頭位於打者右前胸側，左打者位於左前胸側。"
+  },
+  "phases": [
+    {
+      "id": "stance",
+      "name": "打擊站姿",
+      "description": "擊球前預備姿勢，雙腳平衡受力，膝蓋微彎呈運動員姿態，上半身放鬆",
+      "evidence": {
+        "ref": "S1",
+        "timestamp": "02:02"
+      }
+    },
+    {
+      "id": "loading_stride",
+      "name": "引棒與發力準備",
+      "description": "後髖蓄力載重，跨步著地達到發力啟動位置（Launch Position）",
+      "evidence": {
+        "ref": "S2",
+        "timestamp": "01:16"
+      }
+    },
+    {
+      "id": "contact",
+      "name": "擊球瞬間",
+      "description": "後手肘與後膝同步串聯，後腳跟離地，上手呈 Power L，頭至後膝呈一直線",
+      "evidence": {
+        "ref": "S2",
+        "timestamp": "02:05"
+      }
+    },
+    {
+      "id": "follow_through",
+      "name": "完成揮棒與延伸",
+      "description": "球棒穿過球心，雙手由 L 延展為 V 型，在高處完整收棒並維持平衡",
+      "evidence": {
+        "ref": "S2",
+        "timestamp": "06:36"
+      }
+    }
+  ],
+  "metrics": [
+    {
+      "id": "contact_power_l_elbow_deg",
+      "name": "擊球瞬間上手手肘角度",
+      "formlab_key": null,
+      "proposed_key": "bat_contact_back_elbow_deg",
+      "phase": "contact",
+      "definition": "擊球瞬間上手（後手）手肘彎曲夾角，評估是否維持 Power L 而非過早伸直倒棒",
+      "calc": {
+        "type": "angle",
+        "landmarks": [
+          "right_shoulder",
+          "right_elbow",
+          "right_wrist"
+        ],
+        "method": "擊球瞬間取後側肩膀-手肘-手腕之三點夾角（以右打為例使用右側關節，左打改用左側）",
+        "camera_view": "side"
+      },
+      "unit": "deg",
+      "direction": "range",
+      "target": {
+        "beginner": {
+          "min": 75.0,
+          "max": 115.0
+        },
+        "advanced": {
+          "min": 85.0,
+          "max": 100.0
+        },
+        "ideal": 90.0
+      },
+      "measurable_2d": "yes",
+      "basis": "stated",
+      "evidence": {
+        "ref": "S2",
+        "timestamp": "04:16",
+        "quote_or_scene": "要點6：Power 'L' (Top hand)，上手保持有力量的 L 型，手肘還是保持彎曲的"
+      },
+      "confidence": "high",
+      "priority": 1,
+      "cue": "上手保持L型",
+      "common_errors": [
+        "手臂過早完全伸直造成拋棒（Casting）",
+        "球棒遠離身體導致揮棒半徑過大"
+      ],
+      "correction": "意念集中在雙手貼近身體內側出棒，擊球點前手肘保持彎曲蓄力"
+    },
+    {
+      "id": "contact_axis_line_deg",
+      "name": "擊球瞬間頭至後膝軸心線性夾角",
+      "formlab_key": null,
+      "proposed_key": "bat_contact_axis_straight_deg",
+      "phase": "contact",
+      "definition": "擊球瞬間頭部、後髖與後膝三點之共線平整度，檢視力線是否崩塌或後倒",
+      "calc": {
+        "type": "angle",
+        "landmarks": [
+          "nose",
+          "right_hip",
+          "right_knee"
+        ],
+        "method": "擊球瞬間取頭部（鼻子）、後側髖部、後側膝蓋三點夾角，越接近 180 度代表共線越平整",
+        "camera_view": "side"
+      },
+      "unit": "deg",
+      "direction": "range",
+      "target": {
+        "beginner": {
+          "min": 160.0,
+          "max": 180.0
+        },
+        "advanced": {
+          "min": 170.0,
+          "max": 180.0
+        },
+        "ideal": 175.0
+      },
+      "measurable_2d": "yes",
+      "basis": "stated",
+      "evidence": {
+        "ref": "S2",
+        "timestamp": "03:20",
+        "quote_or_scene": "要點4：從頭至後膝蓋保持一條線，這條應該是一個很好很有力量的一條線"
+      },
+      "confidence": "high",
+      "priority": 1,
+      "cue": "頭到後膝一條線",
+      "common_errors": [
+        "身體過度後仰倒向捕手方向",
+        "頭部前衝衝出打擊中軸"
+      ],
+      "correction": "擊球時維持核心剛性，頭部保持在球後方，讓轉髖自然形成後傾支撐線"
+    },
+    {
+      "id": "contact_back_heel_lift_cm",
+      "name": "擊球瞬間後腳跟離地高度",
+      "formlab_key": null,
+      "proposed_key": "bat_contact_back_heel_lift_cm",
+      "phase": "contact",
+      "definition": "擊球瞬間後腳腳跟向上抬離地面的垂直距離，評估動能是否有效由後腿向前轉移",
+      "calc": {
+        "type": "displacement",
+        "landmarks": [
+          "right_heel",
+          "right_ankle"
+        ],
+        "method": "計算後腳跟垂直 y 座標相較於站姿起始基準點之垂直位移，經打者身高正規化換算為公分",
+        "camera_view": "side"
+      },
+      "unit": "cm",
+      "direction": "higher_better",
+      "target": {
+        "beginner": {
+          "min": 3.0,
+          "max": 15.0
+        },
+        "advanced": {
+          "min": 6.0,
+          "max": 14.0
+        },
+        "ideal": 8.0
+      },
+      "measurable_2d": "yes",
+      "basis": "stated",
+      "evidence": {
+        "ref": "S2",
+        "timestamp": "03:42",
+        "quote_or_scene": "要點5：後腳跟離開地板，大聯盟打者擊到球那一剎那後腳跟已經起來，力量由後向前釋放"
+      },
+      "confidence": "high",
+      "priority": 1,
+      "cue": "擊球後腳跟離地",
+      "common_errors": [
+        "後腳腳跟死黏在地面原地旋轉",
+        "下盤力量未往前傳遞至前側支撐腿"
+      ],
+      "correction": "透過轉髖旋轉同時推動後踝離地，將體重由後膝向內側前推進"
+    },
+    {
+      "id": "follow_through_elbow_deg",
+      "name": "完成揮棒雙手延伸夾角",
+      "formlab_key": null,
+      "proposed_key": "bat_follow_through_elbow_deg",
+      "phase": "follow_through",
+      "definition": "擊球後延伸階段雙手手臂由 L 轉為 V 型時之後手肘伸展夾角",
+      "calc": {
+        "type": "angle",
+        "landmarks": [
+          "right_shoulder",
+          "right_elbow",
+          "right_wrist"
+        ],
+        "method": "取擊球後延伸點（手臂向前送至最大行程）之後側手肘夾角",
+        "camera_view": "side"
+      },
+      "unit": "deg",
+      "direction": "higher_better",
+      "target": {
+        "beginner": {
+          "min": 140.0,
+          "max": 175.0
+        },
+        "advanced": {
+          "min": 155.0,
+          "max": 175.0
+        },
+        "ideal": 165.0
+      },
+      "measurable_2d": "yes",
+      "basis": "stated",
+      "evidence": {
+        "ref": "S2",
+        "timestamp": "06:36",
+        "quote_or_scene": "要點2：完成從 'L' 至 'V' 的動作，雙手手掌朝向保持並完全延伸穿過球"
+      },
+      "confidence": "high",
+      "priority": 2,
+      "cue": "擊球延伸雙手V",
+      "common_errors": [
+        "擊球碰球即減速縮手，未做延伸動作",
+        "手腕過早翻轉鎖死延伸路徑"
+      ],
+      "correction": "意念想像球棒要快速穿刺貫穿球心，把棒頭持續朝投手方向送出"
+    },
+    {
+      "id": "follow_through_finish_height_ratio",
+      "name": "收棒位置手部高度比",
+      "formlab_key": null,
+      "proposed_key": "bat_finish_hand_height_ratio",
+      "phase": "follow_through",
+      "definition": "完成揮棒最終煞車時，雙手手腕垂直高度相對於肩膀高度之比值",
+      "calc": {
+        "type": "ratio",
+        "landmarks": [
+          "left_wrist",
+          "right_wrist",
+          "left_shoulder",
+          "right_shoulder"
+        ],
+        "method": "計算收棒靜止瞬間雙手手腕中心高度除以雙肩中心高度（以地面為 0，比值大於 1 代表高於肩線）",
+        "camera_view": "side"
+      },
+      "unit": "ratio",
+      "direction": "higher_better",
+      "target": {
+        "beginner": {
+          "min": 0.95,
+          "max": 1.3
+        },
+        "advanced": {
+          "min": 1.05,
+          "max": 1.25
+        },
+        "ideal": 1.15
+      },
+      "measurable_2d": "yes",
+      "basis": "stated",
+      "evidence": {
+        "ref": "S2",
+        "timestamp": "07:04",
+        "quote_or_scene": "要點3：Finish High，在身體高的地方完成揮棒，約在肩膀到脖子的高度結束"
+      },
+      "confidence": "high",
+      "priority": 2,
+      "cue": "高處完成收棒",
+      "common_errors": [
+        "揮棒軌跡朝下砍完後手部掉在腰際",
+        "收棒位置過低導致仰角不足產生弱滾地球"
+      ],
+      "correction": "擊球穿過球後自然向上帶動，收在脖子與對側肩膀高度，完整釋放動量"
+    },
+    {
+      "id": "stance_width_ratio",
+      "name": "站姿雙腳寬度比",
+      "formlab_key": null,
+      "proposed_key": "bat_stance_width_ratio",
+      "phase": "stance",
+      "definition": "打擊預備站姿時雙腳踝水平間距除以雙肩寬度之比值",
+      "calc": {
+        "type": "ratio",
+        "landmarks": [
+          "left_ankle",
+          "right_ankle",
+          "left_shoulder",
+          "right_shoulder"
+        ],
+        "method": "計算兩踝 x 軸水平距離除以兩肩 x 軸水平距離",
+        "camera_view": "side"
+      },
+      "unit": "ratio",
+      "direction": "range",
+      "target": {
+        "beginner": {
+          "min": 1.3,
+          "max": 1.8
+        },
+        "advanced": {
+          "min": 1.4,
+          "max": 1.7
+        },
+        "ideal": 1.55
+      },
+      "measurable_2d": "yes",
+      "basis": "demonstrated",
+      "evidence": {
+        "ref": "S1",
+        "timestamp": "01:28",
+        "quote_or_scene": "示範站姿站寬，略寬於肩膀，為進入運動員姿勢與引棒做好穩定地基"
+      },
+      "confidence": "medium",
+      "priority": 3,
+      "cue": "雙腳略寬於肩",
+      "common_errors": [
+        "站姿過窄導致下盤重心不穩容易搖晃",
+        "站姿過寬鎖死髖關節轉動行程"
+      ],
+      "correction": "雙腳打開約 1.5 倍肩寬，保持膝蓋可自由微蹲彈性"
+    },
+    {
+      "id": "stance_knee_angle_deg",
+      "name": "站姿雙膝倒 V 彎曲角",
+      "formlab_key": null,
+      "proposed_key": "bat_stance_knee_deg",
+      "phase": "stance",
+      "definition": "預備站姿時膝關節彎曲角度，維持運動員姿勢的微蹲彈性",
+      "calc": {
+        "type": "angle",
+        "landmarks": [
+          "right_hip",
+          "right_knee",
+          "right_ankle"
+        ],
+        "method": "計算預備站姿時髖-膝-踝三點夾角",
+        "camera_view": "side"
+      },
+      "unit": "deg",
+      "direction": "range",
+      "target": {
+        "beginner": {
+          "min": 135.0,
+          "max": 160.0
+        },
+        "advanced": {
+          "min": 140.0,
+          "max": 155.0
+        },
+        "ideal": 145.0
+      },
+      "measurable_2d": "yes",
+      "basis": "stated",
+      "evidence": {
+        "ref": "S1",
+        "timestamp": "04:52",
+        "quote_or_scene": "膝蓋位置：約為倒'V'，膝蓋在腳掌內側微扣，保持運動員姿勢像滑雪一樣"
+      },
+      "confidence": "high",
+      "priority": 3,
+      "cue": "膝微彎呈倒V",
+      "common_errors": [
+        "雙腿完全打直站立（膝角接近 180 度）",
+        "過度深蹲導致重心過低移動遲緩"
+      ],
+      "correction": "放鬆下沉重心，感覺膝蓋在腳掌內側上方自然微屈"
+    }
+  ],
+  "qualitative_points": [
+    {
+      "point": "打擊預備站姿雙腳重心 50/50 平衡",
+      "cue": "雙腳平分重心",
+      "why_not_measurable": "單一手機 2D 骨盆投影座標無法精確量測足底壓力中心（COP）與左右腳實質垂直地面反作用力分配比例",
+      "basis": "stated",
+      "evidence": {
+        "ref": "S1",
+        "timestamp": "02:02"
+      }
+    },
+    {
+      "point": "腳掌受力點於前腳掌肉墊（Ball of Foot）而非腳趾或腳跟",
+      "cue": "腳掌前肉踩穩",
+      "why_not_measurable": "手機鏡頭與 MediaPipe 點位無法偵測鞋體內部的足底微細壓力分佈",
+      "basis": "stated",
+      "evidence": {
+        "ref": "S1",
+        "timestamp": "03:08"
+      }
+    },
+    {
+      "point": "擊球瞬間上手手掌朝上、下手手掌朝下（Palms Up & Down）",
+      "cue": "上手朝上下朝下",
+      "why_not_measurable": "MediaPipe Pose 僅有手腕與食指點位，缺乏手掌旋前/旋後（Pronation/Supination）三維旋轉與手掌朝向模型",
+      "basis": "stated",
+      "evidence": {
+        "ref": "S2",
+        "timestamp": "04:56"
+      }
+    },
+    {
+      "point": "擊球瞬間雙眼與頭部專注盯球",
+      "cue": "雙眼緊盯擊球點",
+      "why_not_measurable": "以 30 fps 手機無法捕捉時速破百之球體與毫秒級的視線焦點（Gaze Tracking），僅能粗估頭部朝向",
+      "basis": "stated",
+      "evidence": {
+        "ref": "S2",
+        "timestamp": "05:34"
+      }
+    },
+    {
+      "point": "擊球前維持身體動態微幅晃動節奏感（Rhythm）",
+      "cue": "保持放鬆節奏",
+      "why_not_measurable": "節奏屬於打者神經肌肉微幅律動與時間感知，無法以單一靜態骨架幾何閥值定義",
+      "basis": "stated",
+      "evidence": {
+        "ref": "S1",
+        "timestamp": "10:06"
+      }
+    }
+  ],
+  "drills": [
+    {
+      "name": "退後步擊球訓練（Step Back Drill）",
+      "how": "雙腳併攏站於球前，後腳向後跨步一步將重心承載於後側髖部內側（Loading），接著推蹬外側腳向前揮棒，訓練重心不後倒並將力量往前推送",
+      "sets_reps": "3 組，每組 8-10 次（使用打擊座 Tee）",
+      "evidence": {
+        "ref": "S3",
+        "timestamp": "01:42"
+      }
+    },
+    {
+      "name": "走步揮棒訓練（Walking Drill）",
+      "how": "雙手持棒手心指向投手帶出節奏，後腳往前一步踏入打擊位置，感受由走步帶來的慣性向前轉移，自然連貫啟動髖部旋轉與擊球",
+      "sets_reps": "3 組，每組 8-10 次（使用打擊座 Tee）",
+      "evidence": {
+        "ref": "S3",
+        "timestamp": "03:30"
+      }
+    },
+    {
+      "name": "本壘板距離測量法",
+      "how": "練習前將球棒前端抵住本壘板外緣，握把端對齊前腳站位基準，確保每次擊球時身體與本壘板保持恆定空間距離",
+      "sets_reps": "每次打擊練習前校正 1 次",
+      "evidence": {
+        "ref": "S1",
+        "timestamp": "12:03"
+      }
+    }
+  ],
+  "realtime_feedback": [
+    {
+      "metric_id": "contact_power_l_elbow_deg",
+      "type": "voice_cue",
+      "setting": "若擊球瞬間手肘大於 120 度（過早伸直拋棒），即時語音提示：『保持L型！』"
+    },
+    {
+      "metric_id": "contact_back_heel_lift_cm",
+      "type": "beep_on_rep",
+      "setting": "擊球瞬間後腳跟離地高度達標（> 5 cm）時發出成功提示音效"
+    },
+    {
+      "metric_id": "follow_through_finish_height_ratio",
+      "type": "voice_cue",
+      "setting": "收棒位置比值低於 0.95（收棒太低）時，提示：『在高處收棒！』"
+    }
+  ],
+  "safety_notes": [
+    "在進行打擊練習與揮棒時，打者周遭 3 公尺半徑範圍內嚴禁有人員逗留或未固定之物品，避免揮棒誤傷。",
+    "操作『退後步擊球』與『走步揮棒』動態重心轉移訓練時，請穿著抓地力良好的球鞋，確保地面平整無積水，防止跨步時滑倒扭傷膝踝。"
+  ],
+  "open_questions": [
+    "S1 教學強調新手站姿應嚴格維持 50/50 平衡，但部分高階打者習慣起始站姿帶有 60/40 後腳蓄力；FormLab 演算法是否需允許使用者自訂站姿重心偏好？",
+    "手機以 25-30 fps 錄影時，打者在 Contact（擊球瞬间）手部速度極快（約 100-120 km/h），易產生影像殘影；建議 App 端以 Launch Position 著地瞬間與 Follow Through 延伸頂點作為關鍵錨定幀輔助插值。"
+  ],
+  "created_by": "Gemini",
+  "created_date": "2026-10-11",
+  "review": {
+    "reviewed_by": "Claude（Cowork）",
+    "review_date": "2026-10-13",
+    "policy": "只標註建議、不修改 Gemini 原始數字（使用者指示）",
+    "renamed_from_goal_id": "bat_baseball_swing_20261011",
+    "general": [
+      "本檔由舊版提示詞產生，缺少 target_basis（目標數字依據）、applies_to（適用側）欄位；依使用者指示「只標註建議、不修改數字」，原數字與依據標示均保留。",
+      "多數目標數字影片並未明講，實際應屬 general_knowledge（Gemini 推估）；標為 stated／demonstrated 且 confidence=high 者，建議視為 medium 參考。",
+      "athlete_context 目前填的是目標名稱「校正與加強打擊」，建議改填你的程度與目的（例如：業餘打者，想修正揮棒軸心與收棒），以利報告解讀。"
+    ],
+    "metrics": [
+      {
+        "metric_id": "contact_power_l_elbow_deg",
+        "key": "bat_contact_back_elbow_deg",
+        "app_status": "unsupported",
+        "verdict": "App 尚未支援",
+        "note": "打擊分析（待辦 E1）尚未實作，App 會顯示「App 未支援」。 定義以右打為例使用右側關節；App 需新增「左打／右打」設定（Code 待辦）。擊球瞬間需慢動作影片才抓得準。",
+        "suggestion": "待 E1 實作"
+      },
+      {
+        "metric_id": "contact_axis_line_deg",
+        "key": "bat_contact_axis_straight_deg",
+        "app_status": "unsupported",
+        "verdict": "App 尚未支援",
+        "note": "打擊分析（待辦 E1）尚未實作，App 會顯示「App 未支援」。 需判定擊球瞬間；建議慢動作影片模式。",
+        "suggestion": "待 E1 實作"
+      },
+      {
+        "metric_id": "contact_back_heel_lift_cm",
+        "key": "bat_contact_back_heel_lift_cm",
+        "app_status": "unsupported",
+        "verdict": "App 尚未支援",
+        "note": "打擊分析（待辦 E1）尚未實作，App 會顯示「App 未支援」。 以站姿腳跟高度為基準，可量；需左右打設定判斷後腳。",
+        "suggestion": "待 E1 實作"
+      },
+      {
+        "metric_id": "follow_through_elbow_deg",
+        "key": "bat_follow_through_elbow_deg",
+        "app_status": "unsupported",
+        "verdict": "App 尚未支援",
+        "note": "打擊分析（待辦 E1）尚未實作，App 會顯示「App 未支援」。 需切出揮棒並找延伸頂點。",
+        "suggestion": "待 E1 實作"
+      },
+      {
+        "metric_id": "follow_through_finish_height_ratio",
+        "key": "bat_finish_hand_height_ratio",
+        "app_status": "unsupported",
+        "verdict": "App 尚未支援",
+        "note": "打擊分析（待辦 E1）尚未實作，App 會顯示「App 未支援」。 以地面為 0 的高度比，需地面基準（可用站姿腳跟高度）。",
+        "suggestion": "待 E1 實作"
+      },
+      {
+        "metric_id": "stance_width_ratio",
+        "key": "bat_stance_width_ratio",
+        "app_status": "unsupported",
+        "verdict": "App 尚未支援",
+        "note": "打擊分析（待辦 E1）尚未實作，App 會顯示「App 未支援」。 camera_setup 為「正對打者胸膛」時才看得到肩寬；若從打者正側面拍，兩肩幾乎重疊，比值會失真。請確認拍攝方向。",
+        "suggestion": "待 E1 實作"
+      },
+      {
+        "metric_id": "stance_knee_angle_deg",
+        "key": "bat_stance_knee_deg",
+        "app_status": "unsupported",
+        "verdict": "App 尚未支援",
+        "note": "打擊分析（待辦 E1）尚未實作，App 會顯示「App 未支援」。 站姿靜止期可量，相對單純。",
+        "suggestion": "待 E1 實作"
+      }
+    ]
+  }
+}
