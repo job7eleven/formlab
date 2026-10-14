@@ -3,162 +3,228 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0f1417">
+<meta name="theme-color" content="#0b0f13">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="author" content="JobChang">
 <meta name="copyright" content="© 2026 JobChang. All rights reserved.">
-<title>動作實驗室 FormLab</title>
+<title>動作實驗室 FormLab V5.0 (Gemini 4 Edition)</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<!-- 動作實驗室 FormLab © 2026 JobChang. All rights reserved. 未經授權不得複製、修改或散布。 -->
-<!-- 本檔由 build.ps1 從 src/ 組裝產生，請改 src/ 底下的原始碼，不要直接改這個檔。 -->
+<!-- 動作實驗室 FormLab V5.0 (Gemini 4 Flagship Edition) © 2026 JobChang. All rights reserved. -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&display=swap">
 <style>
-/* Layout: camera-first app shell — slim header with tabs, stage fills the screen, fixed action bar under it; settings as a bottom sheet; records/replay on the second tab. Dark single look for gym use. */
+/* ===================== FormLab V5.0 Tactical HUD Design System (Gemini 4 Edition) =====================
+   © 2026 JobChang. All rights reserved. 未經授權不得複製、修改或散布。 */
 :root{
-  --bg:#0f1417; --panel:#172026; --panel2:#1d2830; --line:#26333b; --fg:#e8eef1; --muted:#8fa1ab;
-  --accent:#c6f432; --left:#ffa24a; --right:#43cdf5; --warn:#ffcf5a; --bad:#ff6b6b; --good:#7fe08f;
+  --bg:#0b0f13; --panel:#131a21; --panel2:#1a242e; --panel3:#22303c; --line:#283745;
+  --fg:#f0f6fa; --muted:#8fa5b5;
+  --accent:#c6f432; --accent-dim:rgba(198,244,50,0.16);
+  --left:#ff9f43; --right:#2ed573; --right-limb:#38d9f5;
+  --warn:#ffd166; --bad:#ff5e6c; --good:#4cd97b;
+  --hud-bg:rgba(11,15,19,0.82); --hud-border:rgba(255,255,255,0.14);
+  --toast-info:#2a2312; --toast-ok:#12291c; --toast-err:#2d1418;
+  --canvas-bg:#070a0d;
   --num:"Barlow Condensed","Roboto Condensed","Arial Narrow",system-ui,sans-serif;
   --body:system-ui,-apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
   color-scheme:dark;
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
-html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5;-webkit-tap-highlight-color:transparent}
 .app{height:100dvh;display:grid;grid-template-rows:auto 1fr;padding-top:env(safe-area-inset-top,0px)}
-header{display:flex;align-items:center;gap:10px;padding:8px 16px;border-bottom:1px solid var(--line)}
-.brand{font-family:var(--num);font-weight:700;font-size:22px;letter-spacing:.02em;white-space:nowrap}
-.brand small{font-size:13px;color:var(--muted);font-weight:500;margin-left:4px}
-.ver{font-family:var(--num);color:var(--accent);font-size:13px;border:1px solid var(--accent);padding:0 6px;border-radius:4px}
-.tabs{margin-left:auto;display:flex;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:2px}
-.tabs button{border:0;background:transparent;color:var(--muted);font:inherit;font-weight:600;padding:6px 14px;border-radius:6px;min-height:36px;cursor:pointer}
-.tabs button[aria-selected="true"]{background:var(--panel2);color:var(--fg)}
+header{display:flex;align-items:center;gap:10px;padding:8px 16px;border-bottom:1px solid var(--line);background:var(--panel)}
+.brand{font-family:var(--num);font-weight:700;font-size:22px;letter-spacing:.03em;white-space:nowrap;display:flex;align-items:baseline;gap:6px}
+.brand small{font-size:13px;color:var(--accent);font-weight:600}
+.ver{font-family:var(--num);color:#0b0f13;background:var(--accent);font-weight:700;font-size:12.5px;padding:1px 7px;border-radius:5px;letter-spacing:.03em}
+.tabs{margin-left:auto;display:flex;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px}
+.tabs button{border:0;background:transparent;color:var(--muted);font:inherit;font-weight:600;padding:5px 14px;border-radius:7px;min-height:34px;cursor:pointer;transition:all .15s}
+.tabs button[aria-selected="true"]{background:var(--panel2);color:var(--accent);box-shadow:0 1px 4px rgba(0,0,0,.4)}
 .tabs button:disabled{opacity:.4}
 main{min-height:0;overflow:hidden}
 .view{height:100%}
-/* capture view */
+
+/* ---------- Capture View & Responsive Portrait/Landscape ---------- */
 #vCap{display:grid;grid-template-rows:1fr auto;min-height:0}
 .stage{position:relative;background:#000;overflow:hidden;display:flex;align-items:center;justify-content:center;min-height:0}
 .stage canvas{max-width:100%;max-height:100%;display:block}
 .stage video{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
-.hud{position:absolute;top:8px;left:8px;right:96px;display:flex;flex-wrap:wrap;gap:6px;pointer-events:none}
-.chip{font-size:12.5px;padding:2px 8px;border-radius:99px;background:rgba(15,20,23,.8);border:1px solid var(--line);color:var(--fg);font-variant-numeric:tabular-nums}
-.chip.ok{border-color:#3e7a4a;color:#a6f0b4}.chip.warn{border-color:#7a6524;color:var(--warn)}.chip.bad{border-color:#7a2a2a;color:#ffc2c2}
-.tools{position:absolute;top:8px;right:8px;display:flex;flex-direction:column;gap:6px}
-.tools button{width:40px;height:40px;min-height:0;padding:0;border-radius:10px;background:rgba(15,20,23,.8);display:flex;align-items:center;justify-content:center}
-.tools button.on{border-color:var(--accent);color:var(--accent)}
-.phase{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;background:rgba(15,20,23,.72);border:1px solid var(--line);border-radius:14px;padding:10px 22px}
-.phase .big{font-family:var(--num);font-size:64px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
-.phase .lbl{font-size:14px;color:var(--muted)}
-.phase.rec .big{color:#fff}.phase.rec .lbl{color:var(--bad)}
+
+/* High-contrast glass HUD */
+.hud{position:absolute;top:10px;left:10px;right:64px;display:flex;flex-wrap:wrap;gap:6px;pointer-events:none;z-index:5}
+.chip{font-size:13px;font-weight:600;padding:3px 10px;border-radius:99px;background:var(--hud-bg);backdrop-filter:blur(6px);border:1px solid var(--hud-border);color:var(--fg);font-variant-numeric:tabular-nums;text-shadow:0 1px 2px rgba(0,0,0,.85)}
+.chip.ok{border-color:#2e854a;color:#a8f5c2}
+.chip.warn{border-color:#9e7a1e;color:var(--warn)}
+.chip.bad{border-color:#962d37;color:#ffb8bf}
+
+.tools{position:absolute;top:10px;right:10px;display:flex;flex-direction:column;gap:8px;z-index:6}
+.tools button{width:44px;height:44px;min-height:0;padding:0;border-radius:12px;background:var(--hud-bg);backdrop-filter:blur(6px);border:1px solid var(--hud-border);display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+.tools button.on{border-color:var(--accent);color:var(--accent);background:rgba(198,244,50,0.18)}
+
+/* Far-distance 2-4m Phase Overlay */
+.phase{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;background:rgba(11,15,19,0.84);backdrop-filter:blur(8px);border:2px solid var(--accent);border-radius:20px;padding:14px 28px;z-index:8;box-shadow:0 12px 36px rgba(0,0,0,.65);min-width:210px;transition:transform .15s}
+.phase.pulse{transform:translate(-50%,-50%) scale(1.08)}
+.phase .big{font-family:var(--num);font-size:88px;font-weight:700;line-height:0.95;font-variant-numeric:tabular-nums;text-shadow:0 3px 12px rgba(0,0,0,.9)}
+.phase .lbl{font-size:16px;font-weight:700;color:var(--fg);margin-top:4px;letter-spacing:.03em}
+.phase .sub{font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums;margin-top:2px}
+.phase .cue-live{font-size:18px;font-weight:700;color:var(--accent);margin-top:6px;padding:3px 10px;background:rgba(198,244,50,0.14);border-radius:8px}
+.phase.rec{border-color:var(--bad)}
+.phase.rec .big{color:#fff}
+.phase.rec .lbl{color:var(--bad)}
 .phase.wait .big{color:var(--accent)}
-.light{position:absolute;left:12px;bottom:12px;display:flex;align-items:center;gap:8px;font-size:13px;background:rgba(15,20,23,.8);border:1px solid var(--line);border-radius:99px;padding:4px 10px 4px 6px;pointer-events:none}
-.light i{width:14px;height:14px;border-radius:50%;background:var(--bad);box-shadow:0 0 8px var(--bad)}
-.light.ok i{background:var(--good);box-shadow:0 0 8px var(--good)}
-.placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;color:var(--muted);text-align:center;padding:24px}
-.actionbar{display:grid;grid-template-columns:auto auto 1fr;gap:8px;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);background:var(--bg)}
-button,.btn{font:inherit;font-weight:600;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--fg);padding:10px 14px;cursor:pointer;min-height:48px}
+
+.light{position:absolute;left:12px;bottom:12px;display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;background:var(--hud-bg);backdrop-filter:blur(6px);border:1px solid var(--hud-border);border-radius:99px;padding:5px 12px 5px 8px;pointer-events:none;z-index:5}
+.light i{width:14px;height:14px;border-radius:50%;background:var(--bad);box-shadow:0 0 10px var(--bad)}
+.light.ok i{background:var(--good);box-shadow:0 0 10px var(--good)}
+
+.metro-badge{position:absolute;right:62px;top:214px;font-family:var(--num);font-size:16px;font-weight:700;background:var(--hud-bg);border:1px solid var(--accent);color:var(--accent);border-radius:10px;padding:3px 10px;pointer-events:none;font-variant-numeric:tabular-nums;z-index:5;transition:all .08s}
+.metro-badge.tick{background:var(--accent);color:#0b0f13;transform:scale(1.08)}
+
+.placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;color:var(--muted);text-align:center;padding:24px;z-index:4}
+
+.actionbar{display:grid;grid-template-columns:minmax(0,1.2fr) auto 1.3fr;gap:10px;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line);background:var(--panel)}
+button,.btn{font:inherit;font-weight:600;border-radius:12px;border:1px solid var(--line);background:var(--panel2);color:var(--fg);padding:10px 14px;cursor:pointer;min-height:48px;transition:transform .1s,background .15s,border-color .15s}
+button:active{transform:scale(0.98)}
 button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-button.primary{background:var(--accent);color:#11170a;border-color:var(--accent);font-size:17px}
-button.stop{background:var(--bad);border-color:var(--bad);color:#fff;font-size:17px}
+button.primary{background:var(--accent);color:#0b0f13;border-color:var(--accent);font-size:17px;font-weight:700;box-shadow:0 4px 14px rgba(198,244,50,.22)}
+button.stop{background:var(--bad);border-color:var(--bad);color:#fff;font-size:17px;font-weight:700}
 button:disabled{opacity:.45;cursor:not-allowed}
-.sportchip{display:flex;align-items:center;gap:6px;white-space:nowrap}
-.sportchip svg{flex:none}
-/* sheets & overlays */
-.overlay{position:fixed;inset:0;background:rgba(5,8,10,.72);display:flex;align-items:flex-end;justify-content:center;z-index:20}
-.sheet{width:100%;max-width:640px;max-height:88dvh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:16px 16px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:12px}
-.sheet h2{margin:0;font-size:17px}
-.sheet .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
-label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
-input,select{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px;min-height:44px;width:100%}
-.vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
-.filebtn{display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--fg);min-height:44px}
-label:focus-within .filebtn{outline:2px solid var(--accent);outline-offset:2px}
-.plan{font-size:13px;background:var(--panel2);border-radius:8px;padding:8px 10px;font-variant-numeric:tabular-nums}
-.plan b{color:var(--accent);font-weight:600}
-.welcome{position:fixed;inset:0;z-index:30;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:24px 16px calc(24px + env(safe-area-inset-bottom,0px));overflow:auto}
-.welcome h1{font-family:var(--num);font-size:34px;margin:0;letter-spacing:.02em}
+.sportchip{display:flex;align-items:center;gap:8px;white-space:nowrap;min-width:0;padding:8px 12px}
+.sportchip svg{flex:none;color:var(--accent)}
+.sc-txt{display:flex;flex-direction:column;align-items:flex-start;line-height:1.2;min-width:0}
+.sc-txt small{font-size:12px;color:var(--muted);font-weight:500;max-width:36vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Landscape Mode for Pull-up / Batting (Horizontal Phone) */
+@media (orientation:landscape) and (max-height:560px){
+  header{padding:4px 12px}
+  .brand{font-size:19px}
+  #vCap{grid-template-rows:1fr;grid-template-columns:1fr 190px}
+  .actionbar{grid-template-columns:1fr;grid-template-rows:auto auto 1fr;border-top:0;border-left:1px solid var(--line);padding:12px;align-items:stretch}
+  .actionbar #btnRec{min-height:84px;font-size:19px}
+  .sc-txt small{max-width:130px}
+  .phase .big{font-size:74px}
+}
+
+/* ---------- Welcome Screen (Sport & Goal Picker) ---------- */
+.welcome{position:fixed;inset:0;z-index:30;background:radial-gradient(circle at 50% 0%,#1a2836 0%,var(--bg) 70%);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:16px;padding:24px 16px calc(24px + env(safe-area-inset-bottom,0px));overflow:auto}
+.wstep{display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;max-width:600px;margin:auto 0}
+.welcome h1{font-family:var(--num);font-size:36px;margin:0;letter-spacing:.02em;text-align:center}
 .welcome p{margin:0;color:var(--muted);text-align:center}
-.welcome .q{font-size:20px;color:var(--fg);font-weight:600}
-.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;width:100%;max-width:560px}
-.card-s{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 8px;border-radius:14px;background:var(--panel);border:1px solid var(--line);min-height:150px;justify-content:center}
-.card-s b{font-size:16px}.card-s span{font-size:12px;color:var(--muted);font-weight:500}
-.card-s[aria-current="true"]{border-color:var(--accent)}
-@media (max-width:380px){.cards{grid-template-columns:1fr}.card-s{flex-direction:row;min-height:0;justify-content:flex-start;padding:12px}}
-.msg{font-size:14px;padding:10px 12px;border-radius:8px;background:#2a2312;border:1px solid #6b5520;color:#ffe2a0;margin:0}
-.msg.err{background:#2c1515;border-color:#7a2a2a;color:#ffc2c2}
-.msg.ok{background:#14261a;border-color:#2f6b3d;color:#bdf5c8}
-.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);z-index:25;max-width:calc(100% - 32px)}
-/* records view */
+.welcome .q{font-size:19px;color:var(--fg);font-weight:700}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;width:100%}
+.card-s{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 10px;border-radius:16px;background:var(--panel);border:1.5px solid var(--line);min-height:136px;justify-content:center;position:relative;overflow:hidden}
+.card-s svg{color:var(--fg);transition:transform .2s,color .2s}
+.card-s:hover svg{transform:scale(1.08);color:var(--accent)}
+.card-s b{font-size:16.5px;letter-spacing:.02em}
+.card-s span{font-size:12px;color:var(--muted);font-weight:500;text-align:center}
+.card-s .badge-ai{position:absolute;top:7px;right:7px;font-size:10px;font-family:var(--num);font-weight:700;padding:1px 6px;border-radius:99px;background:var(--accent-dim);color:var(--accent);border:1px solid rgba(198,244,50,.35)}
+.card-s[aria-current="true"]{border-color:var(--accent);background:linear-gradient(180deg,rgba(198,244,50,0.12),var(--panel));box-shadow:0 0 18px rgba(198,244,50,.15)}
+.card-s[aria-current="true"] svg{color:var(--accent)}
+@media (max-width:440px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.card-s{min-height:118px}}
+
+.w2title{display:flex;align-items:center;gap:10px;margin:0;font-size:24px}
+.w2title svg{color:var(--accent)}
+#customWrap{width:100%}
+.goalbox{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.goalhead{display:flex;align-items:center;justify-content:space-between}
+.goallist{display:flex;flex-direction:column;gap:8px}
+.goalopt{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--bg);text-align:left;min-height:0;font-weight:500;width:100%}
+.goalopt[aria-checked="true"]{border-color:var(--accent);background:rgba(198,244,50,0.08)}
+.goalopt .dot{width:18px;height:18px;border-radius:50%;border:2px solid var(--muted);flex:none;margin-top:3px}
+.goalopt[aria-checked="true"] .dot{border-color:var(--accent);background:radial-gradient(var(--accent) 45%,transparent 52%)}
+.goalopt b{display:block;font-size:15.5px;color:var(--fg)}
+.goalopt small{color:var(--muted);font-size:12.5px;display:block;margin-top:2px;line-height:1.4}
+.goal-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:5px}
+.gtag{font-size:11.5px;padding:1px 8px;border-radius:6px;background:var(--panel2);color:var(--accent);border:1px solid rgba(198,244,50,.25)}
+
+button.mini{min-height:34px;padding:4px 10px;font-size:13px;border-radius:8px}
+.wstep .controls{width:100%;display:flex;gap:10px}
+.grow{flex:1 1 140px}
+
+/* ---------- Settings Sheet ---------- */
+.overlay{position:fixed;inset:0;background:rgba(5,8,12,.76);backdrop-filter:blur(4px);display:flex;align-items:flex-end;justify-content:center;z-index:25}
+.sheet{width:100%;max-width:660px;max-height:88dvh;overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:20px 20px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px}
+.sheet h2{margin:0;font-size:19px;display:flex;align-items:center;justify-content:space-between}
+.sheet h3{margin:6px 0 0;font-size:14px;color:var(--accent);letter-spacing:.04em;text-transform:uppercase}
+.sheet .row{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px}
+label{display:flex;flex-direction:column;gap:5px;font-size:13px;color:var(--muted)}
+.sheet label.wide{grid-column:1/-1}
+input,select{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-height:44px;width:100%}
+.vh{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
+.filebtn{display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--accent);border-color:rgba(198,244,50,.4);min-height:44px}
+.plan{font-size:13.5px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-variant-numeric:tabular-nums;line-height:1.55}
+.plan b{color:var(--accent);font-weight:700}
+
+/* ---------- Records & Interactive Replay View ---------- */
 #vRec{overflow:auto}
-.recwrap{max-width:760px;margin:0 auto;padding:14px 16px 40px;display:flex;flex-direction:column;gap:14px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
-.card h2{font-size:15px;margin:0;color:var(--muted);font-weight:600;letter-spacing:.06em}
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
-.kpi{background:var(--panel2);border-radius:8px;padding:8px 10px}
-.kpi .k{font-size:12.5px;color:var(--muted)}
-.kpi .v{font-family:var(--num);font-size:28px;font-weight:600;line-height:1.1;font-variant-numeric:tabular-nums}
-.kpi .v span{font-size:14px;color:var(--muted);margin-left:2px}
-.kpi .s{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
-.tbl{overflow-x:auto}
+.recwrap{max-width:820px;margin:0 auto;padding:16px 16px 48px;display:flex;flex-direction:column;gap:16px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.card h2{font-size:16px;margin:0;color:var(--fg);font-weight:700;letter-spacing:.03em;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.kpi{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.kpi .k{font-size:12.5px;color:var(--muted);font-weight:600}
+.kpi .v{font-family:var(--num);font-size:32px;font-weight:700;line-height:1.1;color:var(--fg);font-variant-numeric:tabular-nums;margin-top:2px}
+.kpi .v span{font-size:14px;color:var(--muted);margin-left:3px;font-weight:500}
+.kpi .s{font-size:12px;color:var(--accent);font-variant-numeric:tabular-nums;margin-top:2px}
+
+/* Mobile-friendly Goal Evaluation Cards */
+.eval-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:8px}
+.eval-card{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:4px}
+.eval-card .eh{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.eval-card .eh b{font-size:14.5px;color:var(--fg)}
+.eval-card .ev-val{font-family:var(--num);font-size:22px;font-weight:700}
+.eval-card .em{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+.eval-card .ecue{font-size:12px;color:var(--accent);margin-top:2px}
+.ev-met{color:var(--good);font-weight:700}
+.ev-adv{color:var(--accent);font-weight:700}
+.ev-not{color:var(--bad);font-weight:700}
+.ev-na{color:var(--muted)}
+
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
 table{border-collapse:collapse;width:100%;font-size:13.5px;font-variant-numeric:tabular-nums}
-th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
-th{color:var(--muted);font-weight:600}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--muted);font-weight:600;background:var(--panel2)}
+tr.unit-row{cursor:pointer;transition:background .12s}
+tr.unit-row:hover{background:var(--panel3)}
+tr.unit-row.excl{opacity:.55;text-decoration:line-through}
+
 .note{font-size:12.5px;color:var(--muted);margin:0}
-.tag{display:inline-block;font-size:11.5px;padding:0 6px;border-radius:4px;border:1px solid var(--line);color:var(--muted);margin-left:4px}
 .controls{display:flex;flex-wrap:wrap;gap:8px}
-.rp-stage{background:#0a0e10;border:1px solid var(--line);border-radius:8px;overflow:hidden;display:flex;justify-content:center}
-.rp-stage canvas{display:block;max-width:100%;max-height:56vh}
-.rp-read{display:flex;flex-wrap:wrap;gap:2px 14px;font-size:13px;font-variant-numeric:tabular-nums}
+
+/* Replay Canvas & Layer Toggles */
+.rp-stage{background:var(--canvas-bg);border:1px solid var(--line);border-radius:12px;overflow:hidden;display:flex;justify-content:center;position:relative}
+.rp-stage canvas{display:block;max-width:100%;max-height:58vh}
+.rp-layers{display:flex;flex-wrap:wrap;gap:6px}
+.rp-layers button{min-height:32px;padding:4px 10px;font-size:12.5px;border-radius:8px;background:var(--bg)}
+.rp-layers button.on{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+.rp-read{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13.5px;font-variant-numeric:tabular-nums;background:var(--panel2);padding:8px 12px;border-radius:10px}
 .rp-ctrl{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .rp-ctrl button{min-height:40px;padding:6px 12px}
 .rp-ctrl select{width:auto;min-height:40px}
 .rp-ctrl input[type=range]{flex:1 1 200px;min-height:auto;padding:0;accent-color:var(--accent)}
-.chart{width:100%;display:block;background:var(--panel2);border-radius:6px}
-.rec-item{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.chart{width:100%;display:block;background:var(--panel2);border:1px solid var(--line);border-radius:10px;cursor:pointer}
+
+.rec-item{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding:12px 0;border-bottom:1px solid var(--line)}
 .rec-item:last-child{border-bottom:0}
 .rec-item .info{flex:1 1 200px;min-width:0}
-.rec-item .info b{font-size:15px}
+.rec-item .info b{font-size:15.5px;color:var(--fg)}
 .rec-item .info div{font-size:12.5px;color:var(--muted)}
-.rec-item button{min-height:38px;padding:6px 12px;font-size:14px}
-details{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px}
-summary{cursor:pointer;font-weight:600}
-details ol{padding-left:20px;margin:8px 0 0}
-details li{margin:4px 0}
+.rec-item button{min-height:38px;padding:6px 12px;font-size:13.5px}
+
+details{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 16px}
+summary{cursor:pointer;font-weight:700;color:var(--fg)}
+details ol{padding-left:20px;margin:10px 0 0}
+details li{margin:5px 0;color:var(--muted)}
+details li b{color:var(--fg)}
+
+.msg{font-size:14px;font-weight:600;padding:10px 14px;border-radius:10px;background:var(--toast-info);border:1px solid #8a6d26;color:#ffe5a3;margin:0;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.msg.err{background:var(--toast-err);border-color:#9e333f;color:#ffc4ca}
+.msg.ok{background:var(--toast-ok);border-color:#2e854a;color:#bdf7cf}
+.toast{position:fixed;left:50%;bottom:92px;transform:translateX(-50%);z-index:40;max-width:calc(100% - 32px)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
-.sc-txt{display:flex;flex-direction:column;align-items:flex-start;line-height:1.15;min-width:0}
-.sc-txt small{font-size:11.5px;color:var(--muted);font-weight:500;max-width:34vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.actionbar{grid-template-columns:minmax(0,auto) auto 1fr}
-.sportchip{min-width:0}
-.metro-badge{position:absolute;right:56px;top:142px;font-family:var(--num);font-size:15px;background:rgba(15,20,23,.85);border:1px solid var(--accent);color:var(--accent);border-radius:8px;padding:2px 8px;pointer-events:none;font-variant-numeric:tabular-nums}
-.metro-badge.tick{background:var(--accent);color:#11170a}
-.cards{grid-template-columns:repeat(3,minmax(0,1fr))}
-.card-s{min-height:128px}
-@media (max-width:420px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.card-s{min-height:112px}}
-.wstep{display:flex;flex-direction:column;align-items:center;gap:16px;width:100%;max-width:560px}
-.w2title{display:flex;align-items:center;gap:10px;margin:0;font-size:22px}
-#customWrap{width:100%}
-.goalbox{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px}
-.goalhead{display:flex;align-items:center;justify-content:space-between}
-.goallist{display:flex;flex-direction:column;gap:6px}
-.goalopt{display:flex;gap:10px;align-items:flex-start;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--bg);text-align:left;min-height:0;font-weight:500}
-.goalopt[aria-checked="true"]{border-color:var(--accent)}
-.goalopt .dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--muted);flex:none;margin-top:3px}
-.goalopt[aria-checked="true"] .dot{border-color:var(--accent);background:radial-gradient(var(--accent) 45%,transparent 50%)}
-.goalopt b{display:block;font-size:15px}.goalopt small{color:var(--muted);font-size:12.5px}
-button.mini{min-height:32px;padding:4px 10px;font-size:13px}
-.sheet h3{margin:6px 0 0;font-size:14px;color:var(--accent);letter-spacing:.04em}
-.sheet label.wide{grid-column:1/-1}
-.grow{flex:1 1 140px}
-.ev-met{color:var(--good)}.ev-adv{color:var(--accent)}.ev-not{color:var(--bad)}.ev-na{color:var(--muted)}
-.wstep .controls{width:100%}
-.phase .sub{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
-
 </style>
-
 </head>
 <body>
 <!-- icons -->
@@ -186,6 +252,7 @@ button.mini{min-height:32px;padding:4px 10px;font-size:13px}
     <symbol id="ic-flip" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9a8 8 0 0 1 14-3l2 2M20 15a8 8 0 0 1-14 3l-2-2"/><path d="M20 4v4h-4M4 20v-4h4"/></g></symbol>
     <symbol id="ic-grid" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 3v18M3 12h18"/></g></symbol>
     <symbol id="ic-metro" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6l4 18H5z"/><path d="M12 16 L17 7"/><path d="M8 16h8"/></g></symbol>
+    <symbol id="ic-voice" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a10 10 0 0 1 0 14"/></g></symbol>
     <symbol id="ic-full" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></g></symbol>
     <symbol id="ic-unfull" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></g></symbol>
   </defs>
@@ -194,10 +261,10 @@ button.mini{min-height:32px;padding:4px 10px;font-size:13px}
 <div class="app">
   <header>
     <div class="brand">動作實驗室<small>FormLab</small></div>
-    <span class="ver" id="ver">V4</span>
+    <span class="ver" id="ver">V5.0 G4</span>
     <nav class="tabs" role="tablist">
       <button id="tabCap" role="tab" aria-selected="true" aria-controls="vCap">拍攝</button>
-      <button id="tabRec" role="tab" aria-selected="false" aria-controls="vRec">紀錄</button>
+      <button id="tabRec" role="tab" aria-selected="false" aria-controls="vRec">紀錄與分析</button>
     </nav>
   </header>
   <main>
@@ -215,14 +282,19 @@ button.mini{min-height:32px;padding:4px 10px;font-size:13px}
           <button id="btnFull" aria-label="全螢幕" title="全螢幕"><svg width="22" height="22" id="fullIcon"><use href="#ic-full"/></svg></button>
           <button id="btnFlip" aria-label="切換前後鏡頭" title="切換鏡頭"><svg width="22" height="22"><use href="#ic-flip"/></svg></button>
           <button id="btnGuide" class="on" aria-pressed="true" aria-label="輔助線" title="輔助線"><svg width="22" height="22"><use href="#ic-grid"/></svg></button>
+          <button id="btnVoice" class="on" aria-pressed="true" aria-label="語音教練" title="語音報數與口訣"><svg width="22" height="22"><use href="#ic-voice"/></svg></button>
           <button id="btnMetro" aria-pressed="false" aria-label="節拍器" title="節拍器"><svg width="22" height="22"><use href="#ic-metro"/></svg></button>
         </div>
         <div class="metro-badge" id="metroBadge" hidden></div>
         <div class="light" id="light" hidden><i></i><span id="lightTxt">偵測中</span></div>
-        <div class="phase" id="phase" hidden><div class="big" id="phaseBig">0:00</div><div class="lbl" id="phaseLbl"></div></div>
+        <div class="phase" id="phase" hidden>
+          <div class="big" id="phaseBig">0:00</div>
+          <div class="lbl" id="phaseLbl"></div>
+          <div class="cue-live" id="phaseCue" hidden></div>
+        </div>
       </div>
       <div class="actionbar">
-        <button id="btnSport" class="sportchip" aria-label="運動項目與目標"><svg width="24" height="24" id="sportIcon"><use href="#ic-run"/></svg><span class="sc-txt"><span id="sportName">跑步</span><small id="goalName">不比對目標</small></span></button>
+        <button id="btnSport" class="sportchip" aria-label="運動項目與目標"><svg width="26" height="26" id="sportIcon"><use href="#ic-run"/></svg><span class="sc-txt"><span id="sportName">跑步</span><small id="goalName">完美跑姿訓練</small></span></button>
         <button id="btnSet" aria-label="設定"><svg width="22" height="22"><use href="#ic-gear"/></svg></button>
         <button id="btnRec" class="primary" disabled>● 開始</button>
       </div>
@@ -230,63 +302,74 @@ button.mini{min-height:32px;padding:4px 10px;font-size:13px}
 
     <section class="view" id="vRec" role="tabpanel" hidden>
       <div class="recwrap">
-        <section class="card" id="sumCard" hidden><h2>本次紀錄概要</h2><div id="sumBody"></div></section>
+        <section class="card" id="sumCard" hidden>
+          <h2><span>本次紀錄概要與目標判讀</span><span class="ver">Gemini 4 Engine</span></h2>
+          <div id="sumBody"></div>
+        </section>
         <section class="card" id="rpCard" hidden>
-          <h2>回放檢視</h2>
+          <h2>
+            <span>互動動力學回放檢視</span>
+            <div class="rp-layers">
+              <button id="btnGhost" class="on" title="顯示動作殘影軌跡">殘影軌跡</button>
+              <button id="btnTrail" class="on" title="顯示重心或手腕軌跡">運動軌跡</button>
+              <button id="btnAng" class="on" title="在畫面上標示即時關節角度">角度標籤</button>
+            </div>
+          </h2>
           <div class="rp-stage"><canvas id="rpCanvas" width="540" height="720"></canvas></div>
           <div class="rp-read" id="rpRead"></div>
           <div class="rp-ctrl">
             <button id="rpPrev" aria-label="上一格">◀︎ 格</button>
-            <button id="rpPlay">播放</button>
+            <button id="rpPlay" class="primary" style="min-height:40px;padding:6px 16px">播放</button>
             <button id="rpNext" aria-label="下一格">格 ▶︎</button>
-            <button id="rpPrevU">上一個</button>
-            <button id="rpNextU">下一個</button>
+            <button id="rpPrevU">上一個動作</button>
+            <button id="rpNextU">下一個動作</button>
             <select id="rpSpeed" aria-label="播放速度"><option value="0.25">0.25×</option><option value="0.5" selected>0.5×</option><option value="1">1×</option></select>
           </div>
           <div class="rp-ctrl"><input id="rpSlider" type="range" min="0" max="0" value="0" aria-label="時間軸"></div>
           <canvas class="chart" id="rpChart" height="300"></canvas>
           <canvas class="chart" id="rpOverview" height="90"></canvas>
           <p class="note" id="rpNote"></p>
+          <details id="unitAuditWrap">
+            <summary>逐下／逐步動作明細與異常審計表（點擊任一列可直接跳轉回放）</summary>
+            <div class="tbl" id="unitAuditTbl" style="margin-top:10px"></div>
+          </details>
         </section>
-        <section class="card"><h2>已存紀錄（只存在這支手機）</h2><div id="recList"><p class="note">還沒有紀錄。</p></div></section>
+        <section class="card"><h2>已存紀錄（儲存在本機瀏覽器）</h2><div id="recList"><p class="note">還沒有紀錄。</p></div></section>
         <details>
-          <summary>拍攝方式與注意事項</summary>
+          <summary>拍攝方式與 V5 升級功能說明</summary>
           <ol>
-            <li><b>跑步</b>：手機在跑步機正側面 2–3 公尺、腰部高度，全身入鏡。</li>
-            <li><b>走路</b>：手機在跑步機（或長廊）正側面約 3 公尺、骨盆高度，全身入鏡；地面行走時請等速走過畫面中央。</li>
-            <li><b>引體向上</b>：手機橫放、側面 3–4 公尺，單槓、雙手到腳尖都要入鏡。預設「做滿次數就結束」，畫面會即時計次。</li>
-            <li><b>棒球打擊</b>：側拍，球棒揮動範圍要在畫面內；球棒偵測為實驗功能，揮棒很快，建議用慢動作錄影再以「設定 → 分析影片檔」處理。</li>
-            <li><b>舞蹈／未定義</b>：只記錄骨架，高解析＝33 點、60 fps；低解析＝17 點、15 fps。</li>
-            <li>打開輔助線，讓傾斜顯示綠色（±1° 內），人物高度佔畫面 55–85%。</li>
-            <li>畫面左上的「相機 ／ 分析 fps」：相機 fps 偏低（例如低於 24）通常是<b>光線不足</b>，手機會自動降速拉長曝光，請開燈或移到亮處；相機正常但分析 fps 偏低，則是手機運算跟不上，可在設定把「畫面中的人數」設為「只有我」。</li>
-            <li>想讓 App 全螢幕開啟：用 Chrome 選單「加到主畫面」（或「安裝應用程式」），之後從主畫面圖示開啟就不會有網址列。</li>
-            <li>本程式<b>不錄影、不上傳</b>（除非你設定 Google Drive）：每次記錄存成一個 ZIP 封包到手機「下載」資料夾。</li>
+            <li><b>跑步</b>：手機架在跑步機正側面 2–3 公尺、腰部高度，全身入鏡。內建已校正跨步距目標（入門 ≤15 cm、進階 ≤10 cm）。</li>
+            <li><b>走路</b>：手機架在正側面約 3 公尺、骨盆高度，全身入鏡；預設 60 秒、110 bpm 節拍器。</li>
+            <li><b>引體向上</b>：手機橫放（支援橫式專屬版面）、側面 3–4 公尺，單槓至腳尖入鏡。<b>V5 已支援「單槓錨點防誤判」與「離槓／靜止 5 秒自動收尾存檔」</b>。</li>
+            <li><b>棒球打擊</b>：側拍（面對打者胸膛面），<b>V5 全新實作 7 項打擊生物力學指標（Power L、頭至後膝軸線、後腳跟離地、延伸夾角、收棒高度比、站姿寬度與膝角）與揮棒即時計次</b>！</li>
+            <li><b>即時語音教練（TTS）</b>：開啟右側喇叭按鈕後，運動中會自動以繁體中文語音報數，並即時提醒目標口訣（Cue）。</li>
+            <li><b>離線目標保證</b>：5 份核心目標檔已內建於 V5 核心中，即使在地下室健身房無網路也能直接選用並自動比對。</li>
           </ol>
         </details>
-        <p class="note">參考範圍為一般常見值，僅供自我觀察，不構成教練或醫療建議。</p>
-        <p class="note">© 2026 JobChang・動作實驗室 FormLab。保留所有權利，未經授權不得複製、修改或散布本程式。</p>
+        <p class="note">參考範圍為運動生物力學常見區間，僅供自我訓練觀察，不構成醫療建議。</p>
+        <p class="note">© 2026 JobChang・動作實驗室 FormLab V5 (Gemini 4 Flagship Edition)。保留所有權利。</p>
       </div>
     </section>
   </main>
 </div>
 
-<!-- welcome: sport → (custom name) → goal -->
+<!-- welcome: sport -> (custom name) -> goal -->
 <div class="welcome" id="welcome">
   <div class="wstep" id="wStep1">
-    <h1>動作實驗室 <span style="color:var(--accent)">FormLab</span></h1>
+    <h1>動作實驗室 <span style="color:var(--accent)">FormLab</span> <span class="ver" style="vertical-align:middle">V5.0</span></h1>
     <p class="q">今天要記錄什麼動作？</p>
     <div class="cards" id="cards">
-      <button class="card-s" data-sport="run"><svg width="48" height="48"><use href="#ic-run"/></svg><b>跑步</b><span>步頻・膝角・跨步</span></button>
-      <button class="card-s" data-sport="walk"><svg width="48" height="48"><use href="#ic-walk"/></svg><b>走路</b><span>步頻・髖伸展・擺臂</span></button>
-      <button class="card-s" data-sport="pullup"><svg width="48" height="48"><use href="#ic-pull"/></svg><b>引體向上</b><span>次數・幅度・上槓</span></button>
-      <button class="card-s" data-sport="bat"><svg width="48" height="48"><use href="#ic-bat"/></svg><b>棒球打擊</b><span>骨架＋球棒（實驗）</span></button>
-      <button class="card-s" data-sport="dance"><svg width="48" height="48"><use href="#ic-dance"/></svg><b>舞蹈</b><span>33 點・30 fps</span></button>
-      <button class="card-s" data-sport="custom"><svg width="48" height="48"><use href="#ic-custom"/></svg><b>未定義</b><span>自訂動作名稱</span></button>
+      <button class="card-s" data-sport="run"><span class="badge-ai">13 指標</span><svg width="48" height="48"><use href="#ic-run"/></svg><b>跑步</b><span>步頻・膝角・跨步・髖伸展</span></button>
+      <button class="card-s" data-sport="walk"><span class="badge-ai">5 指標</span><svg width="48" height="48"><use href="#ic-walk"/></svg><b>走路</b><span>步頻・髖伸展・著地角・擺臂</span></button>
+      <button class="card-s" data-sport="pullup"><span class="badge-ai">13 指標</span><svg width="48" height="48"><use href="#ic-pull"/></svg><b>引體向上</b><span>即時計次・防放手誤判・上槓</span></button>
+      <button class="card-s" data-sport="bat"><span class="badge-ai">7 指標 NEW</span><svg width="48" height="48"><use href="#ic-bat"/></svg><b>棒球打擊</b><span>揮棒計次・Power L・軸線・收棒</span></button>
+      <button class="card-s" data-sport="dance"><svg width="48" height="48"><use href="#ic-dance"/></svg><b>舞蹈</b><span>33 點・30 fps・節拍器</span></button>
+      <button class="card-s" data-sport="custom"><svg width="48" height="48"><use href="#ic-custom"/></svg><b>未定義</b><span>自訂動作・高／低解析</span></button>
     </div>
-    <p class="note">只記錄關節座標，不錄影。</p>
+    <p class="note">純前端 AI 骨架運算，只記錄關節座標，不錄影、不上傳影像。</p>
   </div>
   <div class="wstep" id="wStep2" hidden>
-    <h2 class="w2title"><svg width="32" height="32" id="w2Icon"><use href="#ic-run"/></svg><span id="w2Sport">跑步</span></h2>
+    <h2 class="w2title"><svg width="34" height="34" id="w2Icon"><use href="#ic-run"/></svg><span id="w2Sport">跑步</span></h2>
     <div id="customWrap" class="goalbox" hidden>
       <b>記錄解析度</b>
       <div class="goallist" id="resList" role="radiogroup" aria-label="記錄解析度">
@@ -296,7 +379,7 @@ button.mini{min-height:32px;padding:4px 10px;font-size:13px}
       <label for="inCustom">動作名稱<input id="inCustom" type="text" maxlength="30" placeholder="例如：深蹲、羽球殺球"></label>
     </div>
     <div class="goalbox">
-      <div class="goalhead"><b>本次目標</b><button id="btnReloadGoals" class="mini">重新載入</button></div>
+      <div class="goalhead"><b>選擇本次學習目標（內建 5 套＋雲端同步）</b><button id="btnReloadGoals" class="mini">同步雲端</button></div>
       <div id="goalList" class="goallist"></div>
       <p class="note" id="goalNote"></p>
     </div>
@@ -307,1151 +390,49 @@ button.mini{min-height:32px;padding:4px 10px;font-size:13px}
 <!-- settings -->
 <div class="overlay" id="setSheet" hidden>
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="setTitle">
-    <h2 id="setTitle">設定</h2>
-    <h3>記錄</h3>
+    <h2 id="setTitle"><span>拍攝與分析設定</span><button id="setCloseTop" class="mini">✕</button></h2>
+    <h3>常用記錄設定</h3>
     <div class="row">
       <label for="inUser">記錄者<input id="inUser" type="text" maxlength="20" placeholder="例如：JobChang"></label>
       <label for="inHeight">身高（cm）<input id="inHeight" type="number" inputmode="numeric" min="100" max="230" value="170"></label>
       <label for="inWait">開始前等待（不記錄）<select id="inWait"><option value="0">不等待</option><option value="5">5 秒</option><option value="10">10 秒</option><option value="30">30 秒</option><option value="60">1 分鐘</option><option value="90">1 分 30 秒</option><option value="120">2 分鐘</option></select></label>
       <label for="inEnd" id="endWrap">結束方式<select id="inEnd"><option value="time">定時結束</option><option value="count">做滿次數就結束</option></select></label>
-      <label for="inCount" id="countWrap">次數（下）<input id="inCount" type="number" inputmode="numeric" min="1" max="50" value="10"></label>
+      <label for="inCount" id="countWrap">目標次數（下／揮）<input id="inCount" type="number" inputmode="numeric" min="1" max="50" value="10"></label>
       <label for="inDur"><span id="durLbl">記錄時長</span><select id="inDur"><option value="15">15 秒</option><option value="30">30 秒</option><option value="60">1 分鐘</option><option value="120">2 分鐘</option><option value="180">3 分鐘</option><option value="300">5 分鐘</option></select></label>
-      <label for="inFps">記錄 fps<select id="inFps"><option value="auto">依項目預設</option><option value="15">15</option><option value="20">20</option><option value="30">30</option><option value="60">60（手機支援才有）</option></select></label>
-      <label for="inModel">AI 模型<select id="inModel"><option value="lite">輕量（建議，較快）</option><option value="full">標準（較準、較慢）</option></select></label>
-      <label for="inPoses">畫面中的人數<select id="inPoses"><option value="1">只有我（較快）</option><option value="2">可能有別人入鏡</option></select></label>
       <label for="inBatSide" id="batSideWrap" hidden>打擊方向<select id="inBatSide"><option value="R">右打（站在本壘板左側）</option><option value="L">左打（站在本壘板右側）</option></select></label>
-      <label for="inBeep">提示音<select id="inBeep"><option value="1">開</option><option value="0">關</option></select></label>
-      <label for="inFile">分析手機影片檔<span class="btn filebtn">選擇影片…</span><input id="inFile" type="file" accept="video/*" class="vh"></label>
+      <label for="inIdleStop" id="idleStopWrap" hidden>離槓／靜止自動停機<select id="inIdleStop"><option value="5">完成至少1下後靜止 5 秒停機</option><option value="8">靜止 8 秒停機</option><option value="0">關閉（只靠次數或時間）</option></select></label>
+      <label for="inVoice">語音教練（報數＋口訣）<select id="inVoice"><option value="1">開啟（繁中語音）</option><option value="0">關閉</option></select></label>
+      <label for="inBeep">提示音效<select id="inBeep"><option value="1">開</option><option value="0">關</option></select></label>
+      <label for="inFile" class="wide">離線分析手機影片檔（0.5× 高精度慢放分析）<span class="btn filebtn">📂 選擇手機內的動作影片檔…</span><input id="inFile" type="file" accept="video/*" class="vh"></label>
     </div>
     <div class="plan" id="plan"></div>
-    <h3 id="metroHead">節拍器</h3>
+    <h3 id="metroHead">節拍器（步頻節奏訓練）</h3>
     <div class="row" id="metroRow">
       <label for="inBpm">速度（bpm）<input id="inBpm" type="number" inputmode="numeric" min="30" max="260" value="170"></label>
       <label for="inAccent">重音<select id="inAccent"><option value="0">無</option><option value="2">每 2 拍</option><option value="3">每 3 拍</option><option value="4">每 4 拍</option></select></label>
       <label for="inMvol">音量<select id="inMvol"><option value="0.15">小</option><option value="0.35">中</option><option value="0.7">大</option></select></label>
-      <label for="inMauto">跟著記錄啟動<select id="inMauto"><option value="0">否（手動開關）</option><option value="1">是（開始記錄時自動開、結束自動關）</option></select></label>
+      <label for="inMauto">跟著記錄啟動<select id="inMauto"><option value="0">否（手動開關）</option><option value="1">是（開始記錄自動開、結束自動關）</option></select></label>
     </div>
     <div class="controls" id="metroCtl"><button id="btnBpmGoal" hidden></button><button id="btnMetroTest">試聽 / 停止</button></div>
-    <h3>Google Drive（選用）</h3>
-    <div class="row">
-      <label for="inDriveId" class="wide">OAuth 用戶端 ID<input id="inDriveId" type="text" placeholder="xxxxxxxx.apps.googleusercontent.com"></label>
-      <label for="inDriveFolder">雲端資料夾名稱<input id="inDriveFolder" type="text" value="FormLab 紀錄"></label>
-      <label for="inDriveAuto">記錄後自動上傳<select id="inDriveAuto"><option value="0">否（手動按）</option><option value="1">是（已登入時）</option></select></label>
-    </div>
-    <div class="controls"><button id="btnDriveLogin">登入 Google 並測試</button></div>
-    <p class="note">未設定用戶端 ID 時，可以用「分享」把封包傳到 Google Drive App 並選擇資料夾。設定方式見專案 README。</p>
-    <button id="setClose" class="primary">完成</button>
+    <details>
+      <summary>進階效能與雲端設定（FPS、AI 模型、Google Drive）</summary>
+      <div class="row" style="margin-top:10px">
+        <label for="inFps">記錄 fps<select id="inFps"><option value="auto">依項目預設</option><option value="15">15</option><option value="20">20</option><option value="30">30</option><option value="60">60（手機支援才有）</option></select></label>
+        <label for="inModel">AI 模型<select id="inModel"><option value="lite">輕量（建議，高幀率）</option><option value="full">標準（較準、較慢）</option></select></label>
+        <label for="inPoses">畫面中的人數<select id="inPoses"><option value="1">只有我（鎖定單人・極速）</option><option value="2">可能有別人入鏡</option></select></label>
+        <label for="inDriveId" class="wide">Google Drive OAuth 用戶端 ID（選填）<input id="inDriveId" type="text" placeholder="xxxxxxxx.apps.googleusercontent.com"></label>
+        <label for="inDriveFolder">雲端資料夾名稱<input id="inDriveFolder" type="text" value="FormLab 紀錄"></label>
+        <label for="inDriveAuto">記錄後自動上傳<select id="inDriveAuto"><option value="0">否（手動按）</option><option value="1">是（已登入時）</option></select></label>
+      </div>
+      <div class="controls" style="margin-top:8px"><button id="btnDriveLogin">登入 Google 並測試</button></div>
+    </details>
+    <button id="setClose" class="primary">完成並儲存</button>
   </div>
 </div>
 
 <p id="msg" class="msg toast" hidden></p>
 
-<script>
-/* ===================== FormLab core (pure, no DOM) — V4 =====================
-   © 2026 JobChang. All rights reserved. 未經授權不得複製、修改或散布。 */
-(function(G){
-const LEG_RATIO=0.491;           // thigh+shank ≈ 0.491 × body height (Winter)
-const NLM=33, LMW=7, EXTRA=5, ROW=1+NLM*LMW+EXTRA; // row: t_ms + 33×(x,y,z,vis,wx,wy,wz) + bat(knob_x,knob_y,tip_x,tip_y,score)
-const BODY=[0,7,8,11,12,13,14,15,16,19,20,23,24,25,26,27,28,29,30,31,32];
-const NAMES=['nose','left_eye_inner','left_eye','left_eye_outer','right_eye_inner','right_eye','right_eye_outer','left_ear','right_ear','mouth_left','mouth_right','left_shoulder','right_shoulder','left_elbow','right_elbow','left_wrist','right_wrist','left_pinky','right_pinky','left_index','right_index','left_thumb','right_thumb','left_hip','right_hip','left_knee','right_knee','left_ankle','right_ankle','left_heel','right_heel','left_foot_index','right_foot_index'];
-const SIDE={L:{sh:11,el:13,wr:15,hip:23,kn:25,an:27,he:29,ft:31},R:{sh:12,el:14,wr:16,hip:24,kn:26,an:28,he:30,ft:32}};
-
-const mean=a=>{let s=0,c=0;for(const x of a)if(Number.isFinite(x)){s+=x;c++;}return c?s/c:NaN;};
-const median=a=>{const s=a.filter(Number.isFinite).sort((x,y)=>x-y);if(!s.length)return NaN;const m=s.length>>1;return s.length%2?s[m]:(s[m-1]+s[m])/2;};
-const pct=(a,p)=>{const s=a.filter(Number.isFinite).sort((x,y)=>x-y);if(!s.length)return NaN;const i=Math.min(s.length-1,Math.max(0,Math.round(p*(s.length-1))));return s[i];};
-const sd=a=>{const b=a.filter(Number.isFinite);if(b.length<2)return NaN;const m=mean(b);return Math.sqrt(b.reduce((s,x)=>s+(x-m)**2,0)/(b.length-1));};
-const agg=a=>{const b=a.filter(Number.isFinite);return {mean:mean(b),sd:sd(b),min:b.length?Math.min(...b):NaN,max:b.length?Math.max(...b):NaN,n:b.length};};
-function ang(ax,ay,bx,by,cx,cy){const v1x=ax-bx,v1y=ay-by,v2x=cx-bx,v2y=cy-by;const d=Math.hypot(v1x,v1y)*Math.hypot(v2x,v2y);if(!d)return NaN;return Math.acos(Math.max(-1,Math.min(1,(v1x*v2x+v1y*v2y)/d)))*180/Math.PI;}
-const sig=x=>1/(1+Math.exp(-x));
-const DEG=180/Math.PI;
-// segment angle from straight-down, + = toward the movement direction (dir = +1 right / -1 left)
-const fwdAng=(dx,dy,dir)=>Math.atan2(dir*dx,dy)*DEG;
-// thigh (hip→knee) angle from vertical, + = forward
-function thighAngOf(X,Y,s,j,dir){const q=SIDE[s];return fwdAng(X[q.kn][j]-X[q.hip][j],Y[q.kn][j]-Y[q.hip][j],dir);}
-// hip extension relative to the trunk line (shoulder→hip extended downward), + = thigh behind the trunk line:
-//   ext = −(thigh angle + trunk lean); max over both legs = the trailing (extended) leg, so it is label-free
-function maxHipExt(X,Y,trunk,valid,dir,j0,j1){let m=-Infinity;
-  for(let j=Math.max(0,j0);j<=j1;j++){if(!valid[j]||!Number.isFinite(trunk[j]))continue;
-    for(const s of ['L','R']){const e=-(thighAngOf(X,Y,s,j,dir)+trunk[j]);if(e>m)m=e;}}
-  return m===-Infinity?NaN:m;}
-// first frame index within `win` seconds before frame j
-function idxBefore(T,j,win){let k=j;while(k>0&&T[j]-T[k-1]<=win)k--;return k;}
-// local maxima: highest within ±half s, prominence ≥ prom over ±span s, at least minInt s apart; sub-frame time by parabola
-function findPeaks(T,a,valid,o){const n=a.length,cand=[];
-  for(let i=0;i<n;i++){if(!valid[i]||!Number.isFinite(a[i]))continue;let ok=true,lmin=Infinity,rmin=Infinity;
-    for(let j=i-1;j>=0&&T[i]-T[j]<=o.span;j--){if(!Number.isFinite(a[j]))continue;if(T[i]-T[j]<=o.half&&a[j]>=a[i]){ok=false;break;}lmin=Math.min(lmin,a[j]);}
-    if(!ok)continue;
-    for(let j=i+1;j<n&&T[j]-T[i]<=o.span;j++){if(!Number.isFinite(a[j]))continue;if(T[j]-T[i]<=o.half&&a[j]>a[i]){ok=false;break;}rmin=Math.min(rmin,a[j]);}
-    if(!ok||lmin===Infinity||rmin===Infinity)continue;const prom=a[i]-Math.max(lmin,rmin);if(prom>=o.prom)cand.push({i,prom});}
-  cand.sort((p,q)=>q.prom-p.prom);const acc=[];for(const c of cand)if(acc.every(p=>Math.abs(T[p.i]-T[c.i])>=o.minInt))acc.push(c);
-  acc.sort((p,q)=>p.i-q.i);
-  return acc.map(({i})=>{let t=T[i];if(i>0&&i<n-1&&Number.isFinite(a[i-1])&&Number.isFinite(a[i+1])){const den=a[i-1]-2*a[i]+a[i+1];
-    if(den<0){const d=Math.max(-0.5,Math.min(0.5,0.5*(a[i-1]-a[i+1])/den));t=T[i]+d*(T[i+1]-T[i-1])/2;}}return {i,t};});}
-
-/* ---------- live (online) analyzer: approximate numbers while running ---------- */
-class LiveAnalyzer{
-  constructor(h){this.heightCm=h||170;this.reset();}
-  reset(){this.F=[];this.steps=[];this.scan=0;this.lastPeak=-1;this.dirVotes=0;this.legs=[];this.Lpx=NaN;}
-  get dir(){return this.dirVotes>=0?1:-1;}
-  get cmPerPx(){return this.Lpx>0?LEG_RATIO*this.heightCm/this.Lpx:NaN;}
-  push(t,lm,W,H){
-    const P=i=>({x:lm[i].x*W,y:lm[i].y*H,v:lm[i].visibility??1});
-    const core=[11,12,23,24,25,26,27,28].map(P); if(mean(core.map(p=>p.v))<0.45) return {t,valid:false};
-    const p={};for(const i of BODY)p[i]=P(i);
-    const hip={x:(p[23].x+p[24].x)/2,y:(p[23].y+p[24].y)/2},sh={x:(p[11].x+p[12].x)/2,y:(p[11].y+p[12].y)/2};
-    const f=((p[31].x-p[29].x)+(p[32].x-p[30].x))/2; if(Math.abs(f)>2) this.dirVotes=Math.max(-300,Math.min(300,this.dirVotes+Math.sign(f)));
-    const leg=(Math.hypot(p[23].x-p[25].x,p[23].y-p[25].y)+Math.hypot(p[25].x-p[27].x,p[25].y-p[27].y)+Math.hypot(p[24].x-p[26].x,p[24].y-p[26].y)+Math.hypot(p[26].x-p[28].x,p[26].y-p[28].y))/2;
-    this.legs.push(leg);if(this.legs.length>240)this.legs.shift();this.Lpx=median(this.legs);
-    const d=this.dir;
-    const fr={t,valid:true,hip,ankL:p[27],ankR:p[28],
-      kneeL:ang(p[23].x,p[23].y,p[25].x,p[25].y,p[27].x,p[27].y),kneeR:ang(p[24].x,p[24].y,p[26].x,p[26].y,p[28].x,p[28].y),
-      trunk:Math.atan2(d*(sh.x-hip.x),hip.y-sh.y)*180/Math.PI,bodyH:Math.max(p[29].y,p[30].y,p[31].y,p[32].y)-p[0].y};
-    this.F.push(fr);this._detect(t);
-    if(this.F.length>400&&this.F[0].t<t-4){const c=this.F.findIndex(x=>x.t>=t-4);if(c>0){this.F.splice(0,c);this.scan=Math.max(0,this.scan-c);this.lastPeak-=c;}}
-    return fr;
-  }
-  _detect(tNow){
-    const F=this.F,W=0.12;const sm=k=>(F[Math.max(0,k-1)].hip.y+2*F[k].hip.y+F[Math.min(F.length-1,k+1)].hip.y)/4;
-    while(this.scan<F.length&&F[this.scan].t<=tNow-W){
-      const k=this.scan++,tk=F[k].t,yk=sm(k);let ok=true;
-      for(let j=k-1;j>=0&&F[j].t>=tk-W;j--)if(sm(j)>=yk){ok=false;break;}
-      if(ok)for(let j=k+1;j<F.length&&F[j].t<=tk+W;j++)if(sm(j)>yk){ok=false;break;}
-      if(!ok)continue;const prev=this.lastPeak>=0?F[this.lastPeak]:null;
-      if(prev&&tk-prev.t<0.22)continue;
-      let ymin=Infinity;for(let j=k;j>=0&&F[j].t>=tk-0.35;j--)ymin=Math.min(ymin,sm(j));
-      if(!(yk-ymin>=0.012*this.Lpx))continue;
-      const f=F[k],cm=this.cmPerPx,iv=prev?tk-prev.t:NaN;
-      let hi=Infinity;for(let j=Math.max(0,prev?F.indexOf(prev):k-8);j<=k;j++)hi=Math.min(hi,F[j].hip.y);
-      const side=f.ankL.y>=f.ankR.y?'L':'R';
-      const st={t:tk,side,cadence:iv>0&&iv<0.6?60/iv:NaN,osc:prev&&iv<0.6?(f.hip.y-hi)*cm:NaN,knee:side==='L'?f.kneeL:f.kneeR,trunk:f.trunk};
-      this.steps.push(st);this.lastPeak=k;if(this.onStep)this.onStep(st);
-    }
-  }
-  stats(win){
-    const S=this.steps.filter(s=>!win||s.t>=(this.steps.at(-1)?.t??0)-win);
-    const iv=[];for(let i=1;i<S.length;i++){const d=S[i].t-S[i-1].t;if(d>0&&d<0.6)iv.push(d);}
-    return {steps:S.length,cadence:iv.length?60/mean(iv):NaN,osc:mean(S.map(s=>s.osc).filter(x=>x<25)),trunk:mean(S.map(s=>s.trunk))};
-  }
-}
-
-/* ---------- offline (whole-session) analysis ---------- */
-function analyzeSession(flat,info){
-  const n=Math.floor(flat.length/ROW),W=info.W,H=info.H,heightCm=info.heightCm||170;
-  const T=new Float64Array(n);for(let i=0;i<n;i++)T[i]=flat[i*ROW]/1000;
-  const raw=(i,k,c)=>flat[i*ROW+1+k*LMW+c];
-  const X={},Y={},V={};
-  for(const k of BODY){X[k]=new Float64Array(n);Y[k]=new Float64Array(n);V[k]=new Float64Array(n);
-    for(let i=0;i<n;i++){X[k][i]=raw(i,k,0)*W;Y[k][i]=raw(i,k,1)*H;V[k][i]=raw(i,k,3);}}
-  // 1) validity
-  const core=[11,12,23,24,25,26,27,28];
-  const valid=new Uint8Array(n);
-  for(let i=0;i<n;i++){let s=0,ok=true;for(const k of core){if(!Number.isFinite(X[k][i])){ok=false;break;}s+=V[k][i];}valid[i]=ok&&s/core.length>=0.45?1:0;}
-  // 2) rough leg length for thresholds
-  const legRaw=[];for(let i=0;i<n;i++)if(valid[i])for(const s of ['L','R']){const q=SIDE[s];legRaw.push(Math.hypot(X[q.hip][i]-X[q.kn][i],Y[q.hip][i]-Y[q.kn][i])+Math.hypot(X[q.kn][i]-X[q.an][i],Y[q.kn][i]-Y[q.an][i]));}
-  let Lpx=median(legRaw);
-  // 3) spike removal: a point that jumps away and comes straight back (vs. mean of neighbours)
-  const thr=0.15*Lpx;let outliers=0;
-  for(const k of BODY)for(const A of [X[k],Y[k]]){
-    const src=Float64Array.from(A);
-    for(let i=1;i<n-1;i++){if(!valid[i]||!valid[i-1]||!valid[i+1])continue;
-      const pred=(src[i-1]+src[i+1])/2,nb=Math.abs(src[i+1]-src[i-1]);
-      if(Math.abs(src[i]-pred)>thr+0.5*nb){A[i]=pred;outliers++;}}
-  }
-  // frames where the whole body jumps (e.g. swapped detection): mark invalid
-  for(let i=1;i<n-1;i++){if(!valid[i])continue;const hx=(X[23][i]+X[24][i])/2,hy=(Y[23][i]+Y[24][i])/2;
-    const px=(X[23][i-1]+X[24][i-1])/2,py=(Y[23][i-1]+Y[24][i-1])/2,nx=(X[23][i+1]+X[24][i+1])/2,ny=(Y[23][i+1]+Y[24][i+1])/2;
-    if(valid[i-1]&&valid[i+1]&&Math.hypot(hx-(px+nx)/2,hy-(py+ny)/2)>0.25*Lpx)valid[i]=0;}
-  // 4) fill short gaps (≤4 frames) by interpolation
-  let gapsFilled=0;
-  for(let i=0;i<n;i++){if(valid[i])continue;let j=i;while(j<n&&!valid[j])j++;
-    if(i>0&&j<n&&j-i<=4){for(const k of BODY)for(const A of [X[k],Y[k]])for(let m=i;m<j;m++){const f=(T[m]-T[i-1])/(T[j]-T[i-1]);A[m]=A[i-1]+f*(A[j]-A[i-1]);}
-      for(let m=i;m<j;m++)valid[m]=1;gapsFilled+=j-i;}
-    i=j;}
-  // 5) smoothing [1,2,1]/4 within valid runs
-  for(const k of BODY)for(const A of [X[k],Y[k]]){const s=Float64Array.from(A);
-    for(let i=1;i<n-1;i++)if(valid[i]&&valid[i-1]&&valid[i+1])A[i]=(s[i-1]+2*s[i]+s[i+1])/4;}
-  // 6) direction (whole session) & near side
-  const dv=[];for(let i=0;i<n;i++)if(valid[i]){const f=((X[31][i]-X[29][i])+(X[32][i]-X[30][i]))/2;if(Math.abs(f)>1)dv.push(Math.sign(f));}
-  let dsum=dv.reduce((a,b)=>a+b,0);
-  if(Math.abs(dsum)<dv.length*0.2){const ev=[];for(let i=0;i<n;i++)if(valid[i])ev.push(Math.sign(X[0][i]-(X[7][i]+X[8][i])/2));dsum=ev.reduce((a,b)=>a+b,0);}
-  const dir=dsum>=0?1:-1;
-  const visOf=s=>{const q=SIDE[s];const a=[];for(let i=0;i<n;i++)if(valid[i])for(const k of [q.el,q.wr,q.kn,q.an,q.he,q.ft])a.push(V[k][i]);return mean(a);};
-  const visL=visOf('L'),visR=visOf('R');const near=visR>=visL?'R':'L',far=near==='R'?'L':'R';
-  // 7) scale from near leg
-  const NQ=SIDE[near],FQ=SIDE[far];const legN=[];
-  for(let i=0;i<n;i++)if(valid[i])legN.push(Math.hypot(X[NQ.hip][i]-X[NQ.kn][i],Y[NQ.hip][i]-Y[NQ.kn][i])+Math.hypot(X[NQ.kn][i]-X[NQ.an][i],Y[NQ.kn][i]-Y[NQ.an][i]));
-  Lpx=median(legN);const cm=LEG_RATIO*heightCm/Lpx;
-  // 8) per-frame derived
-  const pelvis=new Float64Array(n),knee={L:new Float64Array(n),R:new Float64Array(n)},elb={L:new Float64Array(n),R:new Float64Array(n)},trunk=new Float64Array(n),hipX=new Float64Array(n);
-  const low={L:new Float64Array(n),R:new Float64Array(n)};
-  for(let i=0;i<n;i++){
-    if(!valid[i]){pelvis[i]=trunk[i]=hipX[i]=NaN;for(const s of ['L','R']){knee[s][i]=elb[s][i]=low[s][i]=NaN;}continue;}
-    pelvis[i]=(Y[23][i]+Y[24][i])/2;hipX[i]=(X[23][i]+X[24][i])/2;
-    const sx=(X[11][i]+X[12][i])/2,sy=(Y[11][i]+Y[12][i])/2;
-    trunk[i]=Math.atan2(dir*(sx-hipX[i]),pelvis[i]-sy)*180/Math.PI;
-    for(const s of ['L','R']){const q=SIDE[s];
-      knee[s][i]=ang(X[q.hip][i],Y[q.hip][i],X[q.kn][i],Y[q.kn][i],X[q.an][i],Y[q.an][i]);
-      elb[s][i]=ang(X[q.sh][i],Y[q.sh][i],X[q.el][i],Y[q.el][i],X[q.wr][i],Y[q.wr][i]);
-      low[s][i]=Math.max(Y[q.he][i],Y[q.ft][i]);}
-  }
-  if(info.sport&&info.sport!=='run'){
-    const vf=valid.reduce((a,b)=>a+b,0)/Math.max(1,n);
-    const base={n,T,X,Y,V,valid,pelvis,knee,elb,trunk,hipX,dir,near,far,visL,visR,Lpx,cmPerPx:cm,steps:[],units:[],marks:[],events:new Map(),
-      stats:{validFrac:vf,outlierPoints:outliers,gapsFilled}};
-    if(info.sport==='pullup')return analyzePullup(base);
-    if(info.sport==='walk')return analyzeWalk(base);
-    return base;
-  }
-  // 9) step candidates = lowest body position (pelvis y max) — extra smoothing for detection
-  const ps=Float64Array.from(pelvis);for(let pass=0;pass<2;pass++){const s=Float64Array.from(ps);for(let i=1;i<n-1;i++)if(valid[i-1]&&valid[i]&&valid[i+1])ps[i]=(s[i-1]+2*s[i]+s[i+1])/4;}
-  const HALF=0.12,MIN_INT=0.22;const cand=[];
-  for(let i=0;i<n;i++){if(!valid[i])continue;let ok=true,lmin=Infinity,rmin=Infinity;
-    for(let j=i-1;j>=0&&T[i]-T[j]<=0.3;j--){if(!valid[j]){ok=false;break;}if(T[i]-T[j]<=HALF&&ps[j]>=ps[i]){ok=false;break;}lmin=Math.min(lmin,ps[j]);}
-    if(!ok)continue;
-    for(let j=i+1;j<n&&T[j]-T[i]<=0.3;j++){if(!valid[j]){ok=false;break;}if(T[j]-T[i]<=HALF&&ps[j]>ps[i]){ok=false;break;}rmin=Math.min(rmin,ps[j]);}
-    if(!ok)continue;const prom=ps[i]-Math.max(lmin,rmin);if(prom>=0.012*Lpx)cand.push({i,prom});}
-  cand.sort((a,b)=>b.prom-a.prom);const acc=[];
-  for(const c of cand){if(acc.every(a=>Math.abs(T[a.i]-T[c.i])>=MIN_INT))acc.push(c);}
-  acc.sort((a,b)=>a.i-b.i);
-  // fill single missed steps: a gap ≈ 2× the typical interval gets its best local low point
-  {const iv=[];for(let k=1;k<acc.length;k++)iv.push(T[acc[k].i]-T[acc[k-1].i]);const med=median(iv.filter(x=>x<0.6));
-   if(med>0){const add=[];for(let k=1;k<acc.length;k++){const a=acc[k-1].i,b=acc[k].i,g=T[b]-T[a];
-     if(g<1.6*med||g>2.6*med)continue;let best=-1;
-     for(let i=a+1;i<b;i++){if(!valid[i]||T[i]-T[a]<0.6*med||T[b]-T[i]<0.6*med)continue;
-       if(!(ps[i]>=ps[i-1]&&ps[i]>=ps[i+1]))continue;if(best<0||ps[i]>ps[best])best=i;}
-     if(best>0)add.push({i:best,prom:0,filled:true});}
-   acc.push(...add);acc.sort((a,b)=>a.i-b.i);}}
-  // 10) stance side by Viterbi (alternation prior + foot-on-ground evidence)
-  const gN=pct(Array.from(low[near]),0.9),gF=pct(Array.from(low[far]),0.9);
-  const em=acc.map(a=>{const dN=Math.max(0,gN-low[near][a.i]),dF=Math.max(0,gF-low[far][a.i]);
-    const pN=Math.min(0.98,Math.max(0.02,sig((0.07*Lpx-dN)/(0.025*Lpx)))),pF=Math.min(0.98,Math.max(0.02,sig((0.07*Lpx-dF)/(0.025*Lpx))));
-    return [Math.log(pN)+0.5*Math.log(1-pF),Math.log(1-pN)+0.5*Math.log(pF)];});
-  const m=acc.length,score=[],back=[];
-  if(m){score.push(em[0].slice());back.push([0,0]);
-    for(let k=1;k<m;k++){const iv=T[acc[k].i]-T[acc[k-1].i];const alt=iv<=0.55?0.92:0.5;const lt=[Math.log(1-alt),Math.log(alt)];// [same,switch]
-      const s=[0,0],b=[0,0];for(const st of [0,1]){const fromSame=score[k-1][st]+lt[0],fromOther=score[k-1][1-st]+lt[1];
-        if(fromSame>=fromOther){s[st]=fromSame;b[st]=st;}else{s[st]=fromOther;b[st]=1-st;}s[st]+=em[k][st];}
-      score.push(s);back.push(b);}
-  }
-  const state=new Array(m);if(m){state[m-1]=score[m-1][0]>=score[m-1][1]?0:1;for(let k=m-1;k>0;k--)state[k-1]=back[k][state[k]];}
-  // 11) per-step metrics — label-free foot tracking (MediaPipe often swaps legs in side view)
-  const steps=[],events=new Map();
-  const addEv=(i,e)=>events.set(i,(events.get(i)?events.get(i)+'|':'')+e);
-  const tPeak=acc.map(a=>{const i=a.i;if(i<1||i>=n-1||!valid[i-1]||!valid[i+1])return T[i];
-    const y0=ps[i-1],y1=ps[i],y2=ps[i+1],den=y0-2*y1+y2;if(!(Math.abs(den)>1e-9))return T[i];
-    const d=Math.max(-0.5,Math.min(0.5,0.5*(y0-y2)/den));return T[i]+d*(T[i+1]-T[i-1])/2;});
-  const thighAng=(s,j)=>thighAngOf(X,Y,s,j,dir);
-  const hipExtAt=(j0,j1)=>maxHipExt(X,Y,trunk,valid,dir,j0,j1);
-  // Zeni-style events on a treadmill: strike = most anterior heel, toe-off = most posterior toe (relative to pelvis)
-  const track1=(i,step,win,key,sign,start)=>{ // follow one foot from midstance; return extreme of sign*d*(pt.x-hip.x)
-    let cur=start,j=i,best={j:i,side:cur,v:-Infinity},ser=[];
-    const val=(s,jj)=>sign*dir*(X[SIDE[s][key]][jj]-hipX[jj]);
-    while(true){const v=val(cur,j);ser.push([j,v,cur]);if(v>best.v)best={j,side:cur,v};
-      const nj=j+step;if(nj<0||nj>=n||!valid[nj]||Math.abs(T[nj]-T[i])>win)break;
-      const px=X[SIDE[cur].he][j],py=Y[SIDE[cur].he][j];
-      cur=['L','R'].reduce((b,s)=>{const d=Math.hypot(X[SIDE[s].he][nj]-px,Y[SIDE[s].he][nj]-py);return d<b.d?{s,d}:b;},{s:cur,d:Infinity}).s;j=nj;}
-    const atEdge=best.j===ser[ser.length-1][0]&&ser.length>1&&Math.abs(T[best.j]-T[i])>=win-0.06;
-    // sub-frame refinement
-    let t=T[best.j];const jm=best.j-1,jp=best.j+1;
-    if(jm>=0&&jp<n&&valid[jm]&&valid[jp]){const y0=val(best.side,jm),y1=best.v,y2=val(best.side,jp),den=y0-2*y1+y2;
-      if(den<0){const d=Math.max(-0.5,Math.min(0.5,0.5*(y0-y2)/den));t=T[best.j]+d*(T[jp]-T[jm])/2;}}
-    return {j:best.j,side:best.side,t,ok:!atEdge&&best.j!==i};
-  };
-  const track=(i,step,win,key,sign)=>{ // try both feet; the swing foot peaks at i itself and is rejected
-    const r=['L','R'].map(s=>track1(i,step,win,key,sign,s)).filter(x=>x.ok);
-    if(!r.length)return {ok:false,j:i,side:low.L[i]>=low.R[i]?'L':'R',t:NaN};
-    r.sort((a,b)=>Math.abs(T[a.j]-T[i])-Math.abs(T[b.j]-T[i]));return r[0];
-  };
-  for(let k=0;k<m;k++){
-    const i=acc[k].i,isNear=state[k]===0,side=isNear?near:far;
-    const B=track(i,-1,0.3,'he',+1),F=track(i,+1,0.35,'ft',-1);
-    const tStrike=B.ok?B.t:NaN,tOff=F.ok?F.t:NaN;
-    const a=B.j,b=F.j,cs=B.side,contact=tOff-tStrike;
-    const prevT=k>0?tPeak[k-1]:NaN,iv=tPeak[k]-prevT,cont=iv>0&&iv<=0.6,prev=k>0?acc[k-1].i:-1;
-    let hi=Infinity;if(cont)for(let j=prev;j<=i;j++)if(Number.isFinite(pelvis[j]))hi=Math.min(hi,pelvis[j]);
-    const seg=[];for(let j=cont?prev:Math.max(0,i-8);j<=i;j++)seg.push(j);
-    const ok=Number.isFinite(tStrike);
-    const st={n:k+1,i,t:tPeak[k],side,near:isNear,ia:a,ib:b,
-      tStrike,tOff,contactMs:contact>0.08&&contact<0.5?contact*1000:NaN,
-      cadence:cont?60/iv:NaN,
-      kneeStrike:ok?knee[cs][a]:NaN,
-      overstrideCm:ok?dir*(X[SIDE[cs].an][a]-hipX[a])*cm:NaN,
-      vertOscCm:cont?(pelvis[i]-hi)*cm:NaN,
-      trunkDeg:mean(seg.map(j=>trunk[j])),elbowNear:mean(seg.map(j=>elb[near][j])),
-      elbowL:mean(seg.map(j=>elb.L[j])),elbowR:mean(seg.map(j=>elb.R[j])),
-      hipExt:Number.isFinite(tOff)?hipExtAt(idxBefore(T,b,0.15),b):NaN,
-      strikeFound:ok,strikeSide:cs,kneeToeoff:Number.isFinite(tOff)?knee[F.side][b]:NaN};
-    if(!(st.hipExt>=-30&&st.hipExt<=60))st.hipExt=NaN;
-    const bad=[];
-    if(Number.isFinite(st.vertOscCm)&&st.vertOscCm>20)bad.push('osc');
-    if(Math.abs(st.overstrideCm)>60)bad.push('over');
-    if(st.kneeStrike<100)bad.push('knee');
-    if(st.kneeToeoff<100)st.kneeToeoff=NaN;
-    if(Math.abs(st.trunkDeg)>30)bad.push('trunk');
-    if(st.cadence>260||st.cadence<110)bad.push('cad');
-    st.quality=bad.length?'outlier':(ok?(isNear?'ok':'far'):'weak');
-    st.flags=bad.join(',');
-    steps.push(st);
-    addEv(i,'mid_'+side);if(ok)addEv(a,'strike_'+side);if(Number.isFinite(tOff))addEv(b,'off_'+side);
-  }
-  // 11b) swing-leg metrics for the leg that lands at step k (window: previous midstance → this strike)
-  for(let k=1;k<steps.length;k++){const st=steps[k];st.thighSwing=NaN;st.heelRec=NaN;if(!st.strikeFound||st.quality==='outlier')continue;
-    const j0=Math.max(0,steps[k-1].i-3),j1=st.ia,s=st.strikeSide;if(j1-j0<2||T[j1]-T[j0]>0.7)continue;
-    let mx=-Infinity,mnK=Infinity,jK=-1;for(let j=j0;j<=j1;j++){if(!valid[j])continue;const a=thighAng(s,j);if(a>mx)mx=a;if(knee[s][j]<mnK){mnK=knee[s][j];jK=j;}}
-    if(Number.isFinite(mx))st.thighSwing=mx;if(jK>=0)st.heelRec=dir*(X[SIDE[s].an][jK]-hipX[jK])*cm;}
-  if(steps.length)steps[0].thighSwing=steps[0].heelRec=NaN;
-  // 12) stats
-  const good=steps.filter(s=>s.quality!=='outlier');
-  const allOK=good.filter(s=>s.strikeFound),nearOK=allOK.filter(s=>s.near),farOK=allOK.filter(s=>!s.near);
-  let nSeg=0,durSeg=0;{let k0=0;for(let k=1;k<=m;k++){if(k===m||T[acc[k].i]-T[acc[k-1].i]>0.6){if(k-1>k0){nSeg+=k-1-k0;durSeg+=T[acc[k-1].i]-T[acc[k0].i];}k0=k;}}}
-  const P=(arr,key)=>arr.map(s=>s[key]);
-  let alt=0;for(let k=1;k<m;k++)if(state[k]===state[k-1])alt++;
-  const validFrac=valid.reduce((a,b)=>a+b,0)/Math.max(1,n);
-  const stats={steps:m,stepsL:steps.filter(s=>s.side==='L').length,stepsR:steps.filter(s=>s.side==='R').length,
-    cadence:durSeg>0?60*nSeg/durSeg:NaN,cadenceStep:agg(P(good,'cadence')),
-    vertOscCm:agg(P(good,'vertOscCm')),trunkDeg:agg(P(good,'trunkDeg')),elbowNear:agg(P(good,'elbowNear')),
-    knee:agg(P(allOK,'kneeStrike')),over:agg(P(allOK,'overstrideCm')),contact:agg(P(allOK,'contactMs')),kneeNear:agg(P(nearOK,'kneeStrike')),kneeFar:agg(P(farOK,'kneeStrike')),
-    overNear:agg(P(nearOK,'overstrideCm')),overFar:agg(P(farOK,'overstrideCm')),
-    contactNear:agg(P(nearOK,'contactMs')),contactFar:agg(P(farOK,'contactMs')),
-    kneeToeoff:agg(P(good,'kneeToeoff')),thighSwing:agg(P(good,'thighSwing')),heelRec:agg(P(good,'heelRec')),
-    hipExt:agg(P(good,'hipExt')),elbowL:agg(P(good,'elbowL')),elbowR:agg(P(good,'elbowR')),
-    outlierSteps:steps.length-good.length,sameSidePairs:alt,validFrac,outlierPoints:outliers,gapsFilled};
-  for(const st of steps)st.jump=st.strikeFound?st.ia:st.i;
-  const marks=[];for(const st of steps){if(Number.isFinite(st.tStrike))marks.push({t:st.tStrike,side:st.side,kind:'solid'});if(Number.isFinite(st.tOff))marks.push({t:st.tOff,side:st.side,kind:'dash'});}
-  return {n,T,X,Y,V,valid,pelvis,knee,elb,trunk,hipX,dir,near,far,visL,visR,Lpx,cmPerPx:cm,steps,units:steps,marks,events,stats};
-}
-
-/* ---------- pull-up / muscle-up (light analysis) ---------- */
-function smoothArr(a,valid,half){const n=a.length,o=new Float64Array(n);
-  for(let i=0;i<n;i++){if(!valid[i]||!Number.isFinite(a[i])){o[i]=NaN;continue;}let s=0,c=0;for(let j=Math.max(0,i-half);j<=Math.min(n-1,i+half);j++)if(valid[j]&&Number.isFinite(a[j])){s+=a[j];c++;}o[i]=s/c;}return o;}
-function analyzePullup(b){
-  const {n,T,X,Y,valid,cmPerPx:cm,dir,near,elb,trunk}=b,NQ=SIDE[near];
-  const s=new Float64Array(n);           // shoulder height relative to hands (cm, + = shoulders above wrists)
-  for(let i=0;i<n;i++)s[i]=valid[i]?(((Y[15][i]+Y[16][i])/2)-((Y[11][i]+Y[12][i])/2))*cm:NaN;
-  const ss=smoothArr(s,valid,2);
-  const idxAt=t=>{let lo=0,hi=n-1;while(lo<hi){const m=(lo+hi)>>1;if(T[m]<t)lo=m+1;else hi=m;}return lo;};
-  const HALF=0.5,PROM=12,MININT=1.0,cand=[];
-  for(let i=0;i<n;i++){if(!Number.isFinite(ss[i]))continue;let ok=true,lmin=Infinity,rmin=Infinity;
-    for(let j=i-1;j>=0&&T[i]-T[j]<=1.5;j--){if(!Number.isFinite(ss[j]))continue;if(T[i]-T[j]<=HALF&&ss[j]>=ss[i]){ok=false;break;}lmin=Math.min(lmin,ss[j]);}
-    if(!ok)continue;
-    for(let j=i+1;j<n&&T[j]-T[i]<=1.5;j++){if(!Number.isFinite(ss[j]))continue;if(T[j]-T[i]<=HALF&&ss[j]>ss[i]){ok=false;break;}rmin=Math.min(rmin,ss[j]);}
-    if(!ok)continue;const prom=ss[i]-Math.max(lmin===Infinity?ss[i]:lmin,rmin===Infinity?ss[i]:rmin);
-    if(prom>=PROM||(lmin===Infinity||rmin===Infinity)&&ss[i]-Math.min(lmin,rmin)>=PROM)cand.push({i,prom});}
-  cand.sort((a,c)=>c.prom-a.prom);const peaks=[];for(const c of cand)if(peaks.every(p=>Math.abs(T[p]-T[c.i])>=MININT))peaks.push(c.i);peaks.sort((a,c)=>a-c);
-  const argmin=(a,i0,i1)=>{let m=Infinity,k=-1;for(let j=Math.max(0,i0);j<=Math.min(n-1,i1);j++)if(Number.isFinite(a[j])&&a[j]<m){m=a[j];k=j;}return k;};
-  const reps=[],events=new Map(),marks=[];const addEv=(i,e)=>events.set(i,(events.get(i)?events.get(i)+'|':'')+e);
-  peaks.forEach((p,k)=>{
-    const st=argmin(ss,k?peaks[k-1]:idxAt(T[p]-3),p),en=argmin(ss,p,k<peaks.length-1?peaks[k+1]:idxAt(T[p]+3));
-    if(st<0||en<0)return;
-    let vc=0;for(let j=st;j<=en;j++)vc+=valid[j];const q=vc/(en-st+1)>=0.8?'ok':'weak';
-    const rng=(i0,i1,f)=>{const o=[];for(let j=Math.max(0,i0);j<=Math.min(n-1,i1);j++)if(valid[j]){const v=f(j);if(Number.isFinite(v))o.push(v);}return o;};
-    const wx=j=>(X[15][j]+X[16][j])/2,sx=j=>(X[11][j]+X[12][j])/2,wy=j=>(Y[15][j]+Y[16][j])/2;
-    const top=ss[p],bottom=ss[st];
-    let cross=-1;for(let j=st+1;j<=p;j++)if(Number.isFinite(s[j])&&Number.isFinite(s[j-1])&&s[j-1]<0&&s[j]>=0){cross=j;break;}
-    const above=rng(idxAt(T[p]-0.5),en,j=>s[j]>0?elb[near][j]:NaN);
-    const firstAbove=side=>{const q2=SIDE[side];for(let j=st;j<=en;j++)if(valid[j]&&Y[q2.el][j]<Y[q2.wr][j])return T[j];return NaN;};
-    const tL=firstAbove('L'),tR=firstAbove('R');
-    const leanLine=j=>Math.atan2(Math.abs(X[NQ.an][j]-X[NQ.sh][j]),Y[NQ.an][j]-Y[NQ.sh][j])*180/Math.PI;
-    const r={n:reps.length+1,i:p,jump:p,t:T[p],side:'',ist:st,ien:en,quality:q,
-      topCm:top,romCm:top-bottom,muscleUp:top>5,
-      chinOver:Math.min(...rng(st,en,j=>Y[0][j]-wy(j)))<0,
-      hangElbow:Math.max(...rng(idxAt(T[st]-0.3),idxAt(T[st]+0.3),j=>(elb.L[j]+elb.R[j])/2)),
-      upS:T[p]-T[st],downS:T[en]-T[p],
-      // A2 (V4): muscle-up-only metrics are left empty for ordinary pull-ups
-      dipLockout:top>5&&above.length?Math.max(...above):NaN,
-      transTrunk:top>5&&cross>=0?trunk[cross]:NaN,
-      kneeTuck:Math.min(...rng(idxAt(T[st]-1),p,j=>ang(X[NQ.sh][j],Y[NQ.sh][j],X[NQ.hip][j],Y[NQ.hip][j],X[NQ.kn][j],Y[NQ.kn][j]))),
-      swingLean:Math.max(...rng(idxAt(T[st]-1.5),idxAt(T[st]+0.5),leanLine)),
-      cOffset:Math.max(...rng(st,p,j=>Math.abs(wx(j)-sx(j))*cm)),
-      elbowSyncMs:Number.isFinite(tL)&&Number.isFinite(tR)?Math.abs(tL-tR)*1000:NaN,
-      hipSwingCm:(()=>{const h=rng(st,en,j=>b.hipX[j]);return h.length?(Math.max(...h)-Math.min(...h))*cm:NaN;})()};
-    for(const k2 of ['hangElbow','kneeTuck','swingLean','cOffset'])if(!Number.isFinite(r[k2]))r[k2]=NaN;
-    reps.push(r);addEv(st,'rep_start');addEv(p,'rep_top');addEv(en,'rep_end');
-    marks.push({t:T[st],side:'',kind:'dash'},{t:T[p],side:'',kind:'solid'});
-  });
-  const good=reps.filter(r=>r.quality==='ok'),P=k=>good.map(r=>r[k]);
-  const stats={...b.stats,reps:reps.length,repsOk:good.length,muscleUps:reps.filter(r=>r.muscleUp).length,chinOver:reps.filter(r=>r.chinOver).length,
-    topCm:agg(P('topCm')),romCm:agg(P('romCm')),hangElbow:agg(P('hangElbow')),upS:agg(P('upS')),downS:agg(P('downS')),dipLockout:agg(P('dipLockout')),
-    transTrunk:agg(P('transTrunk')),kneeTuck:agg(P('kneeTuck')),swingLean:agg(P('swingLean')),cOffset:agg(P('cOffset')),elbowSyncMs:agg(P('elbowSyncMs')),hipSwingCm:agg(P('hipSwingCm'))};
-  return {...b,units:reps,marks,events,stats,series:{shoulderRel:s}};
-}
-
-/* ---------- walking (V4) ----------
-   Steps are cut at heel strikes (Zeni): strike = most anterior heel relative to the pelvis, toe-off = most posterior toe.
-   Both use the front/back envelope over the two feet, so MediaPipe's left/right swaps do not matter.
-   (Unlike running, the pelvis is HIGHEST at walking midstance, so the running "lowest pelvis" cut cannot be used.) */
-function analyzeWalk(b){
-  const {n,T,X,Y,valid,cmPerPx:cm,dir,near,trunk,hipX,Lpx,knee}=b,NQ=SIDE[near];
-  const rel=(k,i)=>dir*(X[k][i]-hipX[i]);
-  const front=new Float64Array(n),back=new Float64Array(n),fSide=[],bSide=[];
-  for(let i=0;i<n;i++){if(!valid[i]){front[i]=back[i]=NaN;continue;}
-    const hl=rel(29,i),hr=rel(30,i),tl=-rel(31,i),tr=-rel(32,i);
-    front[i]=Math.max(hl,hr);fSide[i]=hl>=hr?'L':'R';back[i]=Math.max(tl,tr);bSide[i]=tl>=tr?'L':'R';}
-  const pk={half:0.2,span:0.6,minInt:0.3,prom:0.08*Lpx};
-  const strikes=findPeaks(T,front,valid,pk),offs=findPeaks(T,back,valid,pk);
-  // foot angle: heel→toe vs horizontal, + = toe higher than heel
-  const footAng=(s,i)=>{const q=SIDE[s];return Math.atan2(Y[q.he][i]-Y[q.ft][i],dir*(X[q.ft][i]-X[q.he][i]))*DEG;};
-  // standing baseline: flat foot at midstance (ankle under the pelvis, the lower foot) — removes shoe / landmark offset
-  const bl=[];for(let i=0;i<n;i++){if(!valid[i])continue;const low=s=>Math.max(Y[SIDE[s].he][i],Y[SIDE[s].ft][i]);
-    for(const s of ['L','R']){const o=s==='L'?'R':'L';if(Math.abs(rel(SIDE[s].an,i))<0.06*Lpx&&low(s)>=low(o))bl.push(footAng(s,i));}}
-  const footBase=bl.length>=10?median(bl):0;
-  // near-side arm (shoulder→wrist) relative to the trunk line, + = forward
-  const arm=new Float64Array(n);for(let i=0;i<n;i++)arm[i]=valid[i]?fwdAng(X[NQ.wr][i]-X[NQ.sh][i],Y[NQ.wr][i]-Y[NQ.sh][i],dir)+trunk[i]:NaN;
-  const steps=[],events=new Map(),marks=[];const addEv=(i,e)=>events.set(i,(events.get(i)?events.get(i)+'|':'')+e);
-  for(let k=0;k<strikes.length;k++){const {i:a,t}=strikes[k],side=fSide[a];
-    const prev=k>0?strikes[k-1]:null,iv=prev?t-prev.t:NaN,cont=iv>0.35&&iv<1.2;
-    const next=k<strikes.length-1?strikes[k+1].t:t+1.2;
-    const off=offs.find(o=>o.t>t&&o.t<next);       // the other foot leaves the ground shortly after this strike
-    const seg=[];for(let j=cont?prev.i:idxBefore(T,a,0.3);j<=a;j++)seg.push(j);
-    const p2=k>1?strikes[k-2]:null,cyc=p2&&t-p2.t<2.4;   // one full gait cycle = two steps
-    let armSwing=NaN;if(cyc){let mx=-Infinity,mn=Infinity;for(let j=p2.i;j<=a;j++)if(Number.isFinite(arm[j])){mx=Math.max(mx,arm[j]);mn=Math.min(mn,arm[j]);}if(mx>mn)armSwing=mx-mn;}
-    const st={n:k+1,i:a,t,side,near:side===near,ia:a,ib:off?off.i:-1,tStrike:t,tOff:off?off.t:NaN,
-      cadence:cont?60/iv:NaN,trunkDeg:mean(seg.map(j=>trunk[j])),
-      footStrike:footAng(side,a)-footBase,
-      hipExt:off?maxHipExt(X,Y,trunk,valid,dir,idxBefore(T,off.i,0.15),off.i):NaN,
-      armSwing,kneeStrike:knee[side][a],strikeFound:true};
-    if(!(st.footStrike>=-30&&st.footStrike<=50))st.footStrike=NaN;
-    if(!(st.hipExt>=-30&&st.hipExt<=60))st.hipExt=NaN;
-    if(!(st.armSwing<=120))st.armSwing=NaN;
-    const bad=[];if(st.cadence<60||st.cadence>150)bad.push('cad');if(Math.abs(st.trunkDeg)>30)bad.push('trunk');
-    st.quality=bad.length?'outlier':(off?(st.near?'ok':'far'):'weak');st.flags=bad.join(',');
-    steps.push(st);addEv(a,'strike_'+side);if(off)addEv(off.i,'off_'+bSide[off.i]);
-    marks.push({t,side,kind:'solid'});if(off)marks.push({t:off.t,side:bSide[off.i],kind:'dash'});
-    st.jump=a;}
-  const good=steps.filter(s=>s.quality!=='outlier'),P=k=>good.map(s=>s[k]);
-  let nSeg=0,durSeg=0;{let k0=0;const m=strikes.length;for(let k=1;k<=m;k++){if(k===m||strikes[k].t-strikes[k-1].t>1.2){if(k-1>k0){nSeg+=k-1-k0;durSeg+=strikes[k-1].t-strikes[k0].t;}k0=k;}}}
-  const stats={...b.stats,steps:steps.length,stepsL:steps.filter(s=>s.side==='L').length,stepsR:steps.filter(s=>s.side==='R').length,
-    cadence:durSeg>0?60*nSeg/durSeg:NaN,cadenceStep:agg(P('cadence')),trunkDeg:agg(P('trunkDeg')),hipExt:agg(P('hipExt')),
-    footStrike:agg(P('footStrike')),armSwing:agg(P('armSwing')),footBaseline:footBase,footBaselineN:bl.length,outlierSteps:steps.length-good.length};
-  return {...b,steps,units:steps,marks,events,stats,series:{arm}};
-}
-
-/* ---------- live rep counter for "end after N reps" (pull-up; V4) ----------
-   s = wrist height − shoulder height (cm, + = shoulders above wrists), same signal as analyzePullup.
-   Hysteresis: arm when s rises ≥ 12 cm above the last low, count when it then drops 6 cm below the peak. */
-class PullupCounter{
-  constructor(heightCm){this.h=heightCm||170;this.legs=[];this.win=[];this.armed=false;this.low=Infinity;this.peak=-Infinity;this.count=0;this.lastT=-1e9;}
-  push(t,lm,W,H){if(!lm)return this.count;
-    const v=k=>lm[k].visibility??1;if(Math.min(v(11),v(12),v(15),v(16))<0.3)return this.count;
-    const d=(a,c)=>Math.hypot((lm[a].x-lm[c].x)*W,(lm[a].y-lm[c].y)*H);
-    if(Math.min(v(23),v(24),v(25),v(26),v(27),v(28))>=0.5){this.legs.push((d(23,25)+d(25,27)+d(24,26)+d(26,28))/2);if(this.legs.length>300)this.legs.shift();}
-    const L=median(this.legs);if(!(L>0))return this.count;const cm=LEG_RATIO*this.h/L;
-    this.win.push(((lm[15].y+lm[16].y)/2-(lm[11].y+lm[12].y)/2)*H*cm);if(this.win.length>3)this.win.shift();const s=mean(this.win);
-    if(!this.armed){this.low=Math.min(this.low,s);if(s>=this.low+12){this.armed=true;this.peak=s;}}
-    else{this.peak=Math.max(this.peak,s);if(s<=this.peak-6){this.armed=false;this.low=s;if(t-this.lastT>=1.0){this.count++;this.lastT=t;}}}
-    return this.count;}
-}
-
-/* ---------- capture profiles (points & fps per sport) ---------- */
-const ALL=[...Array(NLM).keys()];
-// end: 'time' | 'count' (how a recording ends by default); metro: metronome offered; bpm: default tempo
-// count is only live-countable where LIVE_COUNT has a counter (bat stays time-based until swing detection, E1)
-const RUN_PTS=[0,7,8,11,12,13,14,15,16,19,20,23,24,25,26,27,28,29,30,31,32];
-const PROFILES={
-  run:{pts:RUN_PTS,fps:30,cam:30,bat:false,end:'time',metro:true,bpm:170},
-  walk:{pts:RUN_PTS,fps:30,cam:30,bat:false,end:'time',metro:true,bpm:110},
-  pullup:{pts:[...Array(26).keys()].map(i=>i+7).concat([0]).sort((a,b)=>a-b),fps:30,cam:30,bat:false,end:'count',count:10,maxDur:120,metro:false},
-  bat:{pts:ALL,fps:60,cam:60,bat:true,end:'time',metro:false},
-  dance:{pts:ALL,fps:30,cam:30,bat:false,end:'time',metro:true,bpm:100},
-  custom_hi:{pts:ALL,fps:60,cam:60,bat:false,end:'time',metro:false},
-  custom_lo:{pts:[0,11,12,13,14,15,16,23,24,25,26,27,28,29,30,31,32],fps:15,cam:30,bat:false,end:'time',metro:false}};
-const LIVE_COUNT={pullup:h=>new PullupCounter(h)};
-
-/* ---------- metric catalog (what the App can compute) ---------- */
-const CATALOG={
-  run_cadence_spm:{sport:'run',name:'步頻',unit:'spm',v:r=>r.stats.cadence,u:'cadence'},
-  run_knee_strike_deg:{sport:'run',name:'觸地膝角',unit:'deg',u:'kneeStrike'},
-  run_overstride_cm:{sport:'run',name:'跨步距',unit:'cm',u:'overstrideCm'},
-  run_vert_osc_cm:{sport:'run',name:'垂直振幅',unit:'cm',u:'vertOscCm'},
-  run_contact_ms:{sport:'run',name:'觸地時間',unit:'ms',u:'contactMs'},
-  run_trunk_deg:{sport:'run',name:'軀幹前傾',unit:'deg',u:'trunkDeg'},
-  run_toeoff_knee_deg:{sport:'run',name:'離地膝角',unit:'deg',u:'kneeToeoff'},
-  run_thigh_swing_deg:{sport:'run',name:'大腿前擺角',unit:'deg',u:'thighSwing'},
-  run_heel_recovery_dist_cm:{sport:'run',name:'收腿落點（踝相對髖）',unit:'cm',u:'heelRec'},
-  run_hip_extension_deg:{sport:'run',name:'離地髖伸展角',unit:'deg',u:'hipExt'},
-  run_elbow_near_deg:{sport:'run',name:'近側手肘角（擺臂平均）',unit:'deg',u:'elbowNear'},
-  run_elbow_L_deg:{sport:'run',name:'左手肘角（擺臂平均）',unit:'deg',u:'elbowL'},
-  run_elbow_R_deg:{sport:'run',name:'右手肘角（擺臂平均）',unit:'deg',u:'elbowR'},
-  walk_cadence_spm:{sport:'walk',name:'步頻',unit:'spm',v:r=>r.stats.cadence,u:'cadence'},
-  walk_trunk_deg:{sport:'walk',name:'軀幹前傾',unit:'deg',u:'trunkDeg'},
-  walk_hip_extension_deg:{sport:'walk',name:'推蹬髖伸展角',unit:'deg',u:'hipExt'},
-  walk_foot_strike_deg:{sport:'walk',name:'腳跟著地角',unit:'deg',u:'footStrike'},
-  walk_arm_swing_deg:{sport:'walk',name:'手臂擺幅',unit:'deg',u:'armSwing'},
-  pullup_reps_count:{sport:'pullup',name:'次數',unit:'count',v:r=>r.stats.reps},
-  pullup_pull_height_cm:{sport:'pullup',name:'拉引高度（肩相對手腕）',unit:'cm',u:'topCm'},
-  pullup_rom_cm:{sport:'pullup',name:'動作幅度',unit:'cm',u:'romCm'},
-  pullup_hang_elbow_deg:{sport:'pullup',name:'下垂手肘角',unit:'deg',u:'hangElbow'},
-  pullup_up_time_s:{sport:'pullup',name:'上拉時間',unit:'s',u:'upS'},
-  pullup_down_time_s:{sport:'pullup',name:'下放時間',unit:'s',u:'downS'},
-  pullup_dip_lockout_deg:{sport:'pullup',name:'槓上推撐手肘角',unit:'deg',u:'dipLockout'},
-  pullup_trunk_lean_deg:{sport:'pullup',name:'過槓瞬間軀幹前傾',unit:'deg',u:'transTrunk'},
-  pullup_knee_tuck_deg:{sport:'pullup',name:'提膝屈髖角（最小）',unit:'deg',u:'kneeTuck'},
-  pullup_swing_lean_deg:{sport:'pullup',name:'擺盪傾角（最大）',unit:'deg',u:'swingLean'},
-  pullup_c_curve_offset_cm:{sport:'pullup',name:'手腕與肩水平距離（最大）',unit:'cm',u:'cOffset'},
-  pullup_elbow_trans_diff_ms:{sport:'pullup',name:'雙肘過槓時差',unit:'ms',u:'elbowSyncMs'},
-  pullup_hip_swing_cm:{sport:'pullup',name:'髖部前後擺動',unit:'cm',u:'hipSwingCm'}};
-function metricValue(res,key){const c=CATALOG[key];if(!c)return null;
-  const units=(res.units||[]).filter(u=>u.quality!=='outlier'&&u.quality!=='weak'||c.u==='cadence');
-  const per=c.u?units.map(u=>u[c.u]).filter(Number.isFinite):[];
-  const v=c.v?c.v(res):mean(per);return {value:v,per,n:c.v?(res.units||[]).length:per.length};}
-
-/* ---------- goal evaluation ---------- */
-const LMIDX=Object.fromEntries(NAMES.map((nm,i)=>[nm,i]));
-function passes(v,rng,dir){if(!rng||!Number.isFinite(v))return null;const lo=rng.min,hi=rng.max;
-  if(dir==='lower_better')return Number.isFinite(hi)?v<=hi:null;
-  if(dir==='higher_better')return Number.isFinite(lo)?v>=lo:null;
-  return (lo==null||v>=lo)&&(hi==null||v<=hi);}
-function evaluateGoals(res,goal){
-  if(!goal||!Array.isArray(goal.metrics))return [];
-  return goal.metrics.map(m=>{
-    // use whichever of formlab_key / proposed_key the App supports (e.g. formlab_key run_elbow_L_deg, proposed walk_*)
-    const key=[m.formlab_key,m.proposed_key].find(k=>k&&CATALOG[k])||m.formlab_key||m.proposed_key||null,t=m.target||{},dir=m.direction||'range';
-    const out={id:m.id,name:m.name,key,unit:m.unit,direction:dir,priority:m.priority??null,target:t,cue:m.cue||null};
-    const mv=key?metricValue(res,key):null;
-    if(!mv){out.status='unsupported';out.note='App 尚未支援此指標，請由分析工具依 data.csv 估算或略過';
-      const lm=(m.calc&&m.calc.landmarks)||[];
-      if(m.calc&&m.calc.type==='angle'&&lm.length>=3){const ix=lm.slice(0,3).map(nm=>LMIDX[nm]);
-        if(ix.every(k=>res.X[k])){const a=[];for(let i=0;i<res.n;i++)if(res.valid[i])a.push(ang(res.X[ix[0]][i],res.Y[ix[0]][i],res.X[ix[1]][i],res.Y[ix[1]][i],res.X[ix[2]][i],res.Y[ix[2]][i]));
-          out.generic_angle_stats={landmarks:lm.slice(0,3),min:r2(pct(a,0)),p10:r2(pct(a,0.1)),median:r2(pct(a,0.5)),p90:r2(pct(a,0.9)),max:r2(pct(a,1))};}}
-      return out;}
-    out.value=r2(mv.value,2);out.n=mv.n;
-    if(!Number.isFinite(mv.value)){out.status='no_data';out.note='本次紀錄沒有可用的數據（動作未出現或偵測不足）';return out;}
-    const b=passes(mv.value,t.beginner,dir),a=passes(mv.value,t.advanced,dir);
-    out.beginner_pass=b;out.advanced_pass=a;
-    out.unit_pass_rate_beginner=mv.per.length?r2(mv.per.filter(v=>passes(v,t.beginner,dir)).length/mv.per.length,3):null;
-    out.status=a?'advanced_met':b?'beginner_met':(b===false?'not_met':'unknown');
-    return out;});
-}
-
-/* ---------- export: CSV ---------- */
-const SCHEMA='formlab-2';
-function isoLocal(ms){const pad=n=>String(n).padStart(2,'0');const d=new Date(ms),o=-d.getTimezoneOffset(),sg=o>=0?'+':'-',oa=Math.abs(o);
-  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}.${String(d.getMilliseconds()).padStart(3,'0')}${sg}${pad(oa/60|0)}:${pad(oa%60)}`;}
-const SPORT_COLS={
-  run:['run_pelvis_y_cm','run_knee_L_deg','run_knee_R_deg','run_elbow_L_deg','run_elbow_R_deg','run_trunk_deg','run_cadence_spm','run_knee_strike_deg','run_overstride_cm','run_vert_osc_cm','run_contact_ms','run_toeoff_knee_deg','run_thigh_swing_deg','run_heel_recovery_dist_cm','run_hip_extension_deg'],
-  walk:['walk_pelvis_y_cm','walk_knee_L_deg','walk_knee_R_deg','walk_trunk_deg','walk_arm_near_deg','walk_cadence_spm','walk_hip_extension_deg','walk_foot_strike_deg','walk_arm_swing_deg'],
-  pullup:['pullup_shoulder_rel_wrist_cm','pullup_elbow_L_deg','pullup_elbow_R_deg','pullup_trunk_deg','pullup_pull_height_cm','pullup_rom_cm','pullup_dip_lockout_deg','pullup_trunk_lean_deg','pullup_knee_tuck_deg','pullup_c_curve_offset_cm','pullup_elbow_trans_diff_ms','pullup_up_time_s','pullup_down_time_s']};
-const BAT_COLS=['bat_knob_x','bat_knob_y','bat_tip_x','bat_tip_y','bat_score'];
-function buildCSV(flat,res,meta,profile){
-  const sport=meta.sport,f=(v,d)=>Number.isFinite(v)?v.toFixed(d):'',sc=SPORT_COLS[sport]||[];
-  const head=['schema','sport','session_id','frame','t_s','t_epoch_ms','t_local','valid','event','unit_n','unit_side','unit_quality',...sc];
-  for(const k of profile.pts)head.push(`${NAMES[k]}_x`,`${NAMES[k]}_y`,`${NAMES[k]}_z`,`${NAMES[k]}_vis`,`${NAMES[k]}_wx`,`${NAMES[k]}_wy`,`${NAMES[k]}_wz`);
-  if(profile.bat)head.push(...BAT_COLS);
-  const unitAt=new Map();for(const u of res.units||[])unitAt.set(u.i,u);
-  const p0=sport==='run'||sport==='walk'?pct(Array.from(res.pelvis),0.5):0;
-  const out=[head.join(',')];
-  for(let i=0;i<res.n;i++){
-    const ep=Math.round(meta.epoch0+res.T[i]*1000),v=res.valid[i],u=unitAt.get(i);
-    const row=[SCHEMA,sport,meta.sessionId,i,res.T[i].toFixed(3),ep,isoLocal(ep),v,res.events.get(i)||'',u?u.n:'',u?u.side:'',u?u.quality:''];
-    if(sport==='run')row.push(v?f((res.pelvis[i]-p0)*res.cmPerPx,2):'',v?f(res.knee.L[i],1):'',v?f(res.knee.R[i],1):'',v?f(res.elb.L[i],1):'',v?f(res.elb.R[i],1):'',v?f(res.trunk[i],1):'',
-      u?f(u.cadence,1):'',u?f(u.kneeStrike,1):'',u?f(u.overstrideCm,1):'',u?f(u.vertOscCm,1):'',u?f(u.contactMs,0):'',u?f(u.kneeToeoff,1):'',u?f(u.thighSwing,1):'',u?f(u.heelRec,1):'',u?f(u.hipExt,1):'');
-    else if(sport==='walk')row.push(v?f((res.pelvis[i]-p0)*res.cmPerPx,2):'',v?f(res.knee.L[i],1):'',v?f(res.knee.R[i],1):'',v?f(res.trunk[i],1):'',v?f(res.series.arm[i],1):'',
-      u?f(u.cadence,1):'',u?f(u.hipExt,1):'',u?f(u.footStrike,1):'',u?f(u.armSwing,1):'');
-    else if(sport==='pullup')row.push(v?f(res.series.shoulderRel[i],1):'',v?f(res.elb.L[i],1):'',v?f(res.elb.R[i],1):'',v?f(res.trunk[i],1):'',
-      u?f(u.topCm,1):'',u?f(u.romCm,1):'',u?f(u.dipLockout,1):'',u?f(u.transTrunk,1):'',u?f(u.kneeTuck,1):'',u?f(u.cOffset,1):'',u?f(u.elbowSyncMs,0):'',u?f(u.upS,2):'',u?f(u.downS,2):'');
-    const o=i*ROW+1;for(const k of profile.pts){const b=o+k*LMW;for(let c=0;c<LMW;c++)row.push(f(flat[b+c],3));}
-    if(profile.bat){const b=o+NLM*LMW;for(let c=0;c<EXTRA;c++)row.push(f(flat[b+c],3));}
-    out.push(row.join(','));
-  }
-  return '﻿'+out.join('\n');
-}
-
-/* ---------- export: record.json ---------- */
-function r2(x,d=2){return Number.isFinite(x)?+x.toFixed(d):null;}
-function aggOut(a,d=1){return a&&a.n?{mean:r2(a.mean,d),sd:r2(a.sd,d),min:r2(a.min,d),max:r2(a.max,d),n:a.n}:null;}
-function summaryOf(res,sport){const st=res.stats;
-  if(sport==='run')return {steps:st.steps,steps_L:st.stepsL,steps_R:st.stepsR,run_cadence_spm:r2(st.cadence,1),
-    run_vert_osc_cm:aggOut(st.vertOscCm),run_knee_strike_deg:aggOut(st.knee),run_knee_strike_near_deg:aggOut(st.kneeNear),run_knee_strike_far_deg:aggOut(st.kneeFar),
-    run_overstride_cm:aggOut(st.over),run_overstride_near_cm:aggOut(st.overNear),run_overstride_far_cm:aggOut(st.overFar),run_contact_ms:aggOut(st.contact,0),
-    run_trunk_deg:aggOut(st.trunkDeg),run_elbow_near_deg:aggOut(st.elbowNear),run_elbow_L_deg:aggOut(st.elbowL),run_elbow_R_deg:aggOut(st.elbowR),
-    run_toeoff_knee_deg:aggOut(st.kneeToeoff),run_thigh_swing_deg:aggOut(st.thighSwing),run_heel_recovery_dist_cm:aggOut(st.heelRec),run_hip_extension_deg:aggOut(st.hipExt),
-    outlier_steps:st.outlierSteps,same_side_pairs:st.sameSidePairs};
-  if(sport==='walk')return {steps:st.steps,steps_L:st.stepsL,steps_R:st.stepsR,walk_cadence_spm:r2(st.cadence,1),walk_cadence_step_spm:aggOut(st.cadenceStep),
-    walk_trunk_deg:aggOut(st.trunkDeg),walk_hip_extension_deg:aggOut(st.hipExt),walk_foot_strike_deg:aggOut(st.footStrike),walk_arm_swing_deg:aggOut(st.armSwing),
-    foot_baseline_deg:r2(st.footBaseline,1),foot_baseline_frames:st.footBaselineN,outlier_steps:st.outlierSteps};
-  if(sport==='pullup')return {pullup_reps_count:st.reps,reps_ok:st.repsOk,muscle_ups:st.muscleUps,chin_over_bar_reps:st.chinOver,
-    pullup_pull_height_cm:aggOut(st.topCm),pullup_rom_cm:aggOut(st.romCm),pullup_hang_elbow_deg:aggOut(st.hangElbow),pullup_up_time_s:aggOut(st.upS,2),pullup_down_time_s:aggOut(st.downS,2),
-    pullup_dip_lockout_deg:aggOut(st.dipLockout),pullup_trunk_lean_deg:aggOut(st.transTrunk),pullup_knee_tuck_deg:aggOut(st.kneeTuck),pullup_swing_lean_deg:aggOut(st.swingLean),
-    pullup_c_curve_offset_cm:aggOut(st.cOffset),pullup_elbow_trans_diff_ms:aggOut(st.elbowSyncMs,0),pullup_hip_swing_cm:aggOut(st.hipSwingCm)};
-  return {note:'此項目目前只記錄骨架，App 尚無專屬分析'};}
-function unitsTable(res,sport){
-  if(sport==='run'){const cols=['n','t_s','side','quality','cadence_spm','knee_strike_deg','overstride_cm','vert_osc_cm','contact_ms','toeoff_knee_deg','thigh_swing_deg','heel_recovery_cm','trunk_deg','hip_extension_deg','elbow_near_deg'];
-    return {type:'step',columns:cols,rows:res.units.map(u=>[u.n,r2(u.t,3),u.side,u.quality,r2(u.cadence,1),r2(u.kneeStrike,1),r2(u.overstrideCm,1),r2(u.vertOscCm,1),r2(u.contactMs,0),r2(u.kneeToeoff,1),r2(u.thighSwing,1),r2(u.heelRec,1),r2(u.trunkDeg,1),r2(u.hipExt,1),r2(u.elbowNear,1)])};}
-  if(sport==='walk'){const cols=['n','t_strike_s','side','quality','cadence_spm','trunk_deg','hip_extension_deg','foot_strike_deg','arm_swing_deg','knee_strike_deg','t_toeoff_s'];
-    return {type:'step',columns:cols,rows:res.units.map(u=>[u.n,r2(u.t,3),u.side,u.quality,r2(u.cadence,1),r2(u.trunkDeg,1),r2(u.hipExt,1),r2(u.footStrike,1),r2(u.armSwing,1),r2(u.kneeStrike,1),r2(u.tOff,3)])};}
-  if(sport==='pullup'){const cols=['n','t_top_s','quality','muscle_up','chin_over_bar','pull_height_cm','rom_cm','hang_elbow_deg','up_s','down_s','dip_lockout_deg','trunk_lean_deg','knee_tuck_deg','swing_lean_deg','c_offset_cm','elbow_sync_ms','hip_swing_cm'];
-    return {type:'rep',columns:cols,rows:res.units.map(u=>[u.n,r2(u.t,3),u.quality,u.muscleUp,u.chinOver,r2(u.topCm,1),r2(u.romCm,1),r2(u.hangElbow,1),r2(u.upS,2),r2(u.downS,2),r2(u.dipLockout,1),r2(u.transTrunk,1),r2(u.kneeTuck,1),r2(u.swingLean,1),r2(u.cOffset,1),r2(u.elbowSyncMs,0),r2(u.hipSwingCm,1)])};}
-  return null;}
-function buildRecord(res,meta,profile,goal,evals){
-  return {schema:'formlab-record-1',app:'FormLab 動作實驗室',version:meta.version,
-    session:{id:meta.sessionId,sport:meta.sport,sport_name:meta.sportName,custom_name:meta.customName||null,recorder:meta.recorder||null,
-      start_epoch_ms:Math.round(meta.epoch0),start_local:isoLocal(meta.epoch0),timezone:meta.tz,duration_s:meta.durationSec,frames:meta.frames,avg_fps:meta.avgFps,
-      source:meta.source,file_name:meta.fileName||null,ended_early:meta.early,end_reason:meta.endReason||null,live_count:meta.liveCount??null,
-      diag:meta.diag||null},
-    settings:{height_cm:meta.heightCm,model:meta.model,num_poses:meta.numPoses??null,wait_s:meta.waitSec,planned_s:meta.plannedSec,
-      end_mode:meta.endMode||'time',count_target:meta.endMode==='count'?meta.countTarget:null,camera:meta.facing,record_fps_target:meta.fpsTarget,
-      frame_w:meta.W||null,frame_h:meta.H||null,batting_side:meta.battingSide||null,
-      landmarks:profile.pts.map(k=>NAMES[k]),includes_3d:true,decimals:3,bat_tracking:!!profile.bat,metronome_bpm:meta.metronome||null},
-    quality:{valid_frac:r2(res.stats.validFrac,3),outlier_points:res.stats.outlierPoints,gaps_filled:res.stats.gapsFilled,near_side:res.near,move_dir:res.dir>0?'right':'left',cm_per_px:r2(res.cmPerPx,4),
-      notes:['單機 2D 分析：距離以身高換算為估計值；離鏡頭較遠一側的數值較不準','fps 低於 25 時，時間類指標（觸地時間等）誤差較大']},
-    summary:summaryOf(res,meta.sport),units:unitsTable(res,meta.sport),
-    goal:goal?{goal_id:goal.goal_id||null,goal_name:goal.goal_name||null,title:goal.title||null,session_plan:goal.session_plan||null,athlete_context:goal.athlete_context||null,file:'goals.json',source_file:goal.__file||null}:null,
-    goal_evaluation:evals||[],
-    files:{csv:'data.csv',record:'record.json',goals:goal?'goals.json':null,readme:'README.md'},
-    csv_columns:{common:['schema','sport','session_id','frame','t_s','t_epoch_ms','t_local','valid'],events:['event','unit_n','unit_side','unit_quality'],
-      sport:SPORT_COLS[meta.sport]||[],landmarks:profile.pts.map(k=>NAMES[k]+'_{x,y,z,vis,wx,wy,wz}'),bat:profile.bat?BAT_COLS:[]}};}
-
-/* ---------- export: README.md for the analysis tool ---------- */
-function buildReadme(meta,profile,goal){
-  return `# FormLab 動作紀錄封包
-
-- 項目：${meta.sportName}${meta.customName?`（${meta.customName}）`:''}（代碼 \`${meta.sport}\`）
-- 紀錄：${meta.sessionId}｜${isoLocal(meta.epoch0)}｜${meta.durationSec} 秒｜平均 ${meta.avgFps} fps
-- 記錄者：${meta.recorder||'未填'}｜身高設定 ${meta.heightCm} cm
-- 目標：${goal?`${goal.goal_name||goal.title||goal.goal_id}（goals.json）`:'未選擇目標'}
-- 結束方式：${meta.endMode==='count'?`做滿 ${meta.countTarget} 下自動停止（上限 ${meta.plannedSec} 秒）`:`定時 ${meta.plannedSec} 秒`}｜實際結束原因：${({time:'時間到',count:'達到次數',manual:'手動提前結束',video_end:'影片播完'})[meta.endReason]||'—'}
-
-## 檔案
-| 檔案 | 內容 |
-|---|---|
-| record.json | **先讀這份**：設定、資料品質、本次統計（summary）、每步/每下明細（units）、與目標的比對（goal_evaluation） |
-| goals.json | 記錄當下使用的學習目標副本（schema formlab-goals-1）${goal?'':'；本次未選擇，沒有此檔'} |
-| data.csv | 每一格骨架數據（schema ${SCHEMA}），需要細查時才讀 |
-
-## data.csv 欄位
-1. 共通層：schema, sport, session_id, frame, t_s（相對秒）, t_epoch_ms（Unix 毫秒）, t_local（當地 ISO 時間）, valid（1=有抓到人）
-2. 事件層：event（跑步 strike/mid/off_L|R；走路 strike/off_L|R；引體 rep_start/rep_top/rep_end）, unit_n, unit_side, unit_quality
-3. 項目層：${(SPORT_COLS[meta.sport]||[]).join(', ')||'（本項目無）'}
-4. 點位層：${profile.pts.length} 個 MediaPipe 點位，各有 _x/_y（畫面比例 0–1，左上為原點，未鏡射）、_z（相對深度）、_vis（可信度）、_wx/_wy/_wz（以髖為原點的 3D 公尺座標）；小數 3 位${profile.bat?'\n5. 球棒層（實驗性）：bat_knob_x/y（握把端）、bat_tip_x/y（棒頭端）、bat_score（偵測信心），由物件偵測框推估':''}
-
-## 判讀建議（給分析工具）
-1. 先看 record.json 的 quality：valid_frac 低於 0.85 或 avg_fps 低於 25 時，請先說明數據限制。
-2. 數字以 App 計算的 summary / units / goal_evaluation 為準，不要另行重算；App 未支援的指標（status = unsupported）才從 data.csv 估算，並註明是估算。
-3. goal_evaluation 的 status：advanced_met（達進階）、beginner_met（達入門）、not_met（未達）、no_data（本次沒有該動作）、unsupported（App 未支援）。unit_pass_rate_beginner 是逐步／逐下達到入門目標的比例。
-4. 建議報告結構：本次紀錄概況 → 達標總覽（依 priority 排序）→ 主要問題與可能原因 → 改善建議與練習（可引用 goals.json 的 cue、drills）→ 下次拍攝或記錄建議。
-5. 單機側拍是 2D 分析；遠側肢體與平面外的旋轉不可靠，請避免過度解讀。
-6. 點位的 x、y 是畫面比例；換算角度或距離時，請用 record.json 的 settings.frame_w／frame_h（畫面像素寬高）還原長寬比。${meta.sport==='pullup'?`
-7. 引體向上：App 只負責切分與計算，**不排除偏差的下數**，請分析時自行判斷並說明排除理由，常見情況：
-   - 記錄開頭或結尾沒做完的那一下（例如 down_s 接近 0、rom_cm 明顯偏小，或位於紀錄最前／最後）
-   - 放手落地：雙手離槓後手腕掉到腰部，肩相對手腕變成很大的正值，會被算成一下，且常被標成 muscle_up
-   - 排除後請重新統計次數與各項平均，並在報告中列出 App 原始次數與排除後次數
-   - 槓上推撐手肘角（dip_lockout_deg）、過槓瞬間前傾（trunk_lean_deg）只在 muscle_up = true 的那幾下才有數值`:''}${meta.sport==='walk'?`
-7. 走路：步伐以觸地（腳跟在骨盆最前方）切分；foot_strike_deg 已扣除支撐中期的平踩腳底角（summary.foot_baseline_deg）；hip_extension_deg 是離地前 0.15 秒內大腿相對軀幹線的最大後伸角，軀幹明顯後仰時該步不宜採信；arm_swing_deg 是近側肩→腕連線相對軀幹線、每個步態週期（兩步）的最大前擺＋最大後擺。開節拍器時步頻會跟著拍子，請改看是否穩定跟拍。`:''}
-`;}
-
-/* ---------- ZIP (deflate via CompressionStream; store fallback) ---------- */
-const CRC=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0;}return t;})();
-function crc32(b){let c=0xFFFFFFFF;for(let i=0;i<b.length;i++)c=CRC[(c^b[i])&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0;}
-async function deflate(u8){if(typeof CompressionStream==='undefined')return null;
-  try{const cs=new CompressionStream('deflate-raw');const w=cs.writable.getWriter();w.write(u8);w.close();
-    const chunks=[];const r=cs.readable.getReader();let len=0;for(;;){const {done,value}=await r.read();if(done)break;chunks.push(value);len+=value.length;}
-    const o=new Uint8Array(len);let p=0;for(const c of chunks){o.set(c,p);p+=c.length;}return o;}catch(e){return null;}}
-async function makeZip(files){ // files: [[name, string|Uint8Array]]
-  const enc=new TextEncoder(),parts=[],cen=[];let off=0;
-  const now=new Date(),dt=((now.getHours()<<11)|(now.getMinutes()<<5)|(now.getSeconds()>>1)),dd=(((now.getFullYear()-1980)<<9)|((now.getMonth()+1)<<5)|now.getDate());
-  for(const [name,content] of files){
-    const data=typeof content==='string'?enc.encode(content):content,nm=enc.encode(name),crc=crc32(data);
-    const comp=await deflate(data),useDef=comp&&comp.length<data.length,body=useDef?comp:data,method=useDef?8:0;
-    const h=new DataView(new ArrayBuffer(30));
-    h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x0800,true);h.setUint16(8,method,true);h.setUint16(10,dt,true);h.setUint16(12,dd,true);
-    h.setUint32(14,crc,true);h.setUint32(18,body.length,true);h.setUint32(22,data.length,true);h.setUint16(26,nm.length,true);h.setUint16(28,0,true);
-    parts.push(new Uint8Array(h.buffer),nm,body);
-    const c=new DataView(new ArrayBuffer(46));
-    c.setUint32(0,0x02014b50,true);c.setUint16(4,20,true);c.setUint16(6,20,true);c.setUint16(8,0x0800,true);c.setUint16(10,method,true);c.setUint16(12,dt,true);c.setUint16(14,dd,true);
-    c.setUint32(16,crc,true);c.setUint32(20,body.length,true);c.setUint32(24,data.length,true);c.setUint16(28,nm.length,true);c.setUint32(42,off,true);
-    cen.push(new Uint8Array(c.buffer),nm);off+=30+nm.length+body.length;
-  }
-  const cenSize=cen.reduce((s,b)=>s+b.length,0),e=new DataView(new ArrayBuffer(22));
-  e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,cenSize,true);e.setUint32(16,off,true);
-  return new Blob([...parts,...cen,new Uint8Array(e.buffer)],{type:'application/zip'});
-}
-async function buildPackage(flat,res,meta,profile,goal){
-  const evals=evaluateGoals(res,goal);
-  const files=[['record.json',JSON.stringify(buildRecord(res,meta,profile,goal,evals),null,2)],['README.md',buildReadme(meta,profile,goal)]];
-  if(goal){const g={...goal};delete g.__file;files.push(['goals.json',JSON.stringify(g,null,2)]);}
-  files.push(['data.csv',buildCSV(flat,res,meta,profile)]);
-  return {blob:await makeZip(files),evals};
-}
-
-G.FormCore={ROW,NLM,LMW,EXTRA,BODY,NAMES,SIDE,PROFILES,CATALOG,SCHEMA,LIVE_COUNT,PullupCounter,LEG_RATIO,analyzeSession,evaluateGoals,buildCSV,buildRecord,buildReadme,makeZip,buildPackage,metricValue,isoLocal,mean,median,pct,agg};
-})(typeof window!=='undefined'?window:globalThis);
-
-</script>
-<script type="module">
-/* 動作實驗室 FormLab App — © 2026 JobChang. All rights reserved. 未經授權不得複製、修改或散布。 */
-const APP_VER='4.0';
-const MP_VER='0.10.21';
-const MP_BASE=`https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MP_VER}`;
-const MODEL_URL={
-  full:'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/1/pose_landmarker_full.task',
-  lite:'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task',
-  obj:'https://storage.googleapis.com/mediapipe-models/object_detector/efficientdet_lite0/float16/1/efficientdet_lite0.tflite'};
-const C=window.FormCore,ROW=C.ROW,BAT_OFF=1+C.NLM*C.LMW;
-const SPORTS={
-  run:{name:'跑步',icon:'ic-run',wait:60,dur:120,tip:'手機架在跑步機正側面 2–3 公尺，全身入鏡。',guide:{top:'頭頂附近',bottom:'腳底'}},
-  walk:{name:'走路',icon:'ic-walk',wait:10,dur:60,tip:'手機架在跑步機正側面約 3 公尺、骨盆高度，全身入鏡。',guide:{top:'頭頂附近',bottom:'腳底'}},
-  pullup:{name:'引體向上',icon:'ic-pull',wait:10,dur:120,tip:'手機橫放在側面 3–4 公尺，單槓、雙手到腳尖都要入鏡。',guide:{top:'單槓',bottom:'腳尖附近'}},
-  bat:{name:'棒球打擊',icon:'ic-bat',wait:10,dur:60,tip:'側拍，球棒揮動範圍要在畫面內；球棒偵測為實驗功能。',guide:{top:'頭頂附近',bottom:'腳底'}},
-  dance:{name:'舞蹈',icon:'ic-dance',wait:10,dur:60,tip:'全身入鏡，四周留出動作空間。',guide:{top:'頭頂附近',bottom:'腳底'}},
-  custom_hi:{name:'未定義（高解析）',icon:'ic-custom',wait:10,dur:60,custom:true,tip:'全身入鏡；高解析會用 33 點、60 fps 記錄。',guide:{top:'頭頂附近',bottom:'腳底'}},
-  custom_lo:{name:'未定義（低解析）',icon:'ic-custom',wait:10,dur:60,custom:true,tip:'全身入鏡；低解析會用 17 點、15 fps 記錄。',guide:{top:'頭頂附近',bottom:'腳底'}}};
-const EDGES=[[11,12,'c'],[11,23,'l'],[12,24,'r'],[23,24,'c'],[11,13,'l'],[13,15,'l'],[12,14,'r'],[14,16,'r'],[15,19,'l'],[16,20,'r'],[23,25,'l'],[25,27,'l'],[27,29,'l'],[29,31,'l'],[27,31,'l'],[24,26,'r'],[26,28,'r'],[28,30,'r'],[30,32,'r'],[28,32,'r'],[0,11,'c'],[0,12,'c']];
-const $=id=>document.getElementById(id);
-const video=$('video'),canvas=$('canvas'),ctx=canvas.getContext('2d');
-const css=getComputedStyle(document.documentElement);
-const COL={l:css.getPropertyValue('--left').trim(),r:css.getPropertyValue('--right').trim(),c:'#e8eef1',acc:css.getPropertyValue('--accent').trim(),good:css.getPropertyValue('--good').trim(),warn:css.getPropertyValue('--warn').trim()};
-const store={get(k,d){try{const v=localStorage.getItem('formlab.'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem('formlab.'+k,JSON.stringify(v));}catch(e){}}};
-const fmt=(v,d=0)=>Number.isFinite(v)?v.toFixed(d):'--';
-const fmtDur=s=>{s=Math.max(0,Math.round(s));return `${s/60|0}:${String(s%60).padStart(2,'0')}`;};
-const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-let msgT=0;function showMsg(t,kind,ms=5000){const m=$('msg');m.textContent=t||'';m.className='msg toast'+(kind?' '+kind:'');m.hidden=!t;clearTimeout(msgT);if(t&&ms)msgT=setTimeout(()=>m.hidden=true,ms);}
-
-let sport=store.get('sport','run');if(!SPORTS[sport])sport='run';
-let vision=null,landmarker=null,objDet=null,objFail=false,modelKind=null,stream=null,facing='environment',running=false,mode=null;
-let lastDetTs=0,prevHip=null,fpsT=[],wakeLock=null,guides=true,sess=null,tilt=null,actx=null,lastBat=null;
-// A3 diagnostics: camera frames actually delivered vs. frames analysed, detection time, GPU/CPU
-let delegate=null,detMs=NaN,camT=[],camFps=0;
-let goals=[],goalSel=null; // goalSel: goal object or null
-
-/* ---------- audio ---------- */
-function audio(){try{actx=actx||new (window.AudioContext||window.webkitAudioContext)();if(actx.state==='suspended')actx.resume();}catch(e){}return actx;}
-function tone(freq,dur,vol,at){const a=actx;if(!a)return;const o=a.createOscillator(),g=a.createGain();o.frequency.value=freq;o.connect(g);g.connect(a.destination);const t=at??a.currentTime;g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.001,t+dur);o.start(t);o.stop(t+dur+0.02);}
-function beep(f=880,d=0.12,v=0.25){if($('inBeep').value!=='1')return;audio();tone(f,d,v);}
-
-/* ---------- metronome ---------- */
-const metro={on:false,next:0,beat:0,timer:0,
-  start(){audio();if(!actx)return;this.on=true;this.beat=0;this.next=actx.currentTime+0.1;this.loop();$('btnMetro').classList.add('on');$('btnMetro').setAttribute('aria-pressed','true');$('metroBadge').hidden=false;this.badge();},
-  stop(){this.on=false;clearTimeout(this.timer);$('btnMetro').classList.remove('on');$('btnMetro').setAttribute('aria-pressed','false');$('metroBadge').hidden=true;},
-  toggle(){this.on?this.stop():this.start();},
-  badge(){$('metroBadge').textContent=`♩ ${+$('inBpm').value||170}`;},
-  loop(){if(!this.on)return;const bpm=Math.max(30,Math.min(260,+$('inBpm').value||170)),sp=60/bpm,acc=+$('inAccent').value,vol=+$('inMvol').value;
-    while(this.next<actx.currentTime+0.15){const strong=acc>0&&this.beat%acc===0;tone(strong?1600:1100,0.05,vol*(strong?1.3:1),this.next);
-      const ms=(this.next-actx.currentTime)*1000;setTimeout(()=>{const b=$('metroBadge');b.classList.add('tick');setTimeout(()=>b.classList.remove('tick'),80);},Math.max(0,ms));
-      this.next+=sp;this.beat++;}
-    this.timer=setTimeout(()=>this.loop(),40);}};
-$('btnMetro').onclick=()=>metro.toggle();$('btnMetroTest').onclick=()=>metro.toggle();
-$('inBpm').addEventListener('change',()=>metro.badge());
-function goalBpm(g){if(!g)return null;const sp=g.session_plan;if(sp&&sp.metronome!==false&&+sp.metronome_bpm>0)return +sp.metronome_bpm;
-  if(!Array.isArray(g.realtime_feedback))return null;const m=g.realtime_feedback.find(x=>x&&x.type==='metronome');if(!m)return null;const n=String(m.setting||'').match(/(\d{2,3})\s*(bpm|BPM|拍)/)||String(m.setting||'').match(/(\d{2,3})/);return n?+n[1]:null;}
-function refreshBpmGoal(){const b=goalBpm(goalSel);$('btnBpmGoal').hidden=!b;if(b){$('btnBpmGoal').textContent=`套用目標建議 ${b} bpm`;$('btnBpmGoal').onclick=()=>{$('inBpm').value=b;saveSettings();metro.badge();showMsg(`節拍器設為 ${b} bpm`,'ok',2500);};}}
-
-/* ---------- settings (per sport) ---------- */
-const profileOf=s=>C.PROFILES[s]||C.PROFILES.custom_hi;
-const canCount=s=>!!C.LIVE_COUNT[s];   // live rep counting exists for this sport
-function fpsTarget(){const v=$('inFps').value;return v==='auto'?profileOf(sport).fps:+v;}
-function endMode(){return canCount(sport)&&$('inEnd').value==='count'?'count':'time';}
-function ensureDurOption(sec){const sel=$('inDur');if(![...sel.options].some(o=>+o.value===sec)){const o=document.createElement('option');o.value=sec;o.textContent=sec%60?`${sec} 秒`:`${sec/60} 分鐘`;
-  const after=[...sel.options].find(x=>+x.value>sec);sel.insertBefore(o,after||null);}sel.value=sec;}
-function loadSettings(){const sp=SPORTS[sport],p=profileOf(sport),s=store.get('set.'+sport,{});
-  $('inWait').value=s.wait??sp.wait;ensureDurOption(s.dur??p.maxDur??sp.dur);$('inFps').value=s.fps??'auto';$('inModel').value=s.model??'lite';
-  $('inEnd').value=canCount(sport)?(s.end??p.end):'time';$('inCount').value=s.count??p.count??10;
-  const g=store.get('global',{});$('inBeep').value=g.beep??'1';$('inHeight').value=g.height??170;$('inUser').value=g.user??'';$('inPoses').value=g.poses??'1';$('inBatSide').value=g.batSide??'R';
-  $('inBpm').value=s.bpm??p.bpm??100;$('inAccent').value=s.accent??'0';$('inMvol').value=g.mvol??'0.35';$('inMauto').value=s.mauto??'0';
-  $('inDriveId').value=g.driveId??'';$('inDriveFolder').value=g.driveFolder??'FormLab 紀錄';$('inDriveAuto').value=g.driveAuto??'0';sportControls();renderPlan();metro.badge();}
-function saveSettings(){store.set('set.'+sport,{wait:+$('inWait').value,dur:+$('inDur').value,fps:$('inFps').value,model:$('inModel').value,end:$('inEnd').value,count:Math.max(1,+$('inCount').value||10),
-    bpm:+$('inBpm').value,accent:$('inAccent').value,mauto:$('inMauto').value});
-  store.set('global',{beep:$('inBeep').value,height:+$('inHeight').value||170,user:$('inUser').value.trim(),poses:$('inPoses').value,batSide:$('inBatSide').value,mvol:$('inMvol').value,
-    driveId:$('inDriveId').value.trim(),driveFolder:$('inDriveFolder').value.trim()||'FormLab 紀錄',driveAuto:$('inDriveAuto').value});}
-// show only the controls that apply to the current sport (U3 count end, U4 metronome, U7 batting side)
-function sportControls(){const p=profileOf(sport),cnt=endMode()==='count';
-  $('endWrap').hidden=!canCount(sport);$('countWrap').hidden=!cnt;$('durLbl').textContent=cnt?'時間上限（數不到時停止）':'記錄時長';
-  $('batSideWrap').hidden=sport!=='bat';
-  for(const id of ['metroHead','metroRow','metroCtl','btnMetro'])$(id).hidden=!p.metro;if(!p.metro&&metro.on)metro.stop();}
-function renderPlan(){const w=+$('inWait').value,d=+$('inDur').value,p=profileOf(sport),f=fpsTarget(),kb=Math.round(d*f*p.pts.length*7*6.2/1024*0.3);
-  const rec=endMode()==='count'?`記錄到做滿 <b>${+$('inCount').value||10} 下</b>自動停止（上限 ${fmtDur(d)}）`:`記錄 <b>${fmtDur(d)}</b>`;
-  $('plan').innerHTML=`按「開始」→ 等待 <b>${w?fmtDur(w):'0'}</b>（不記錄）→ ${rec}（${p.pts.length} 點、${f} fps${p.bat?'、含球棒':''}）→ 自動存 ZIP 封包（最多約 ${kb>1024?(kb/1024).toFixed(1)+' MB':kb+' KB'}）`;}
-['inWait','inDur','inFps','inModel','inEnd','inCount','inPoses','inBatSide','inBeep','inHeight','inUser','inBpm','inAccent','inMvol','inMauto','inDriveId','inDriveFolder','inDriveAuto'].forEach(id=>$(id).addEventListener('change',()=>{sportControls();renderPlan();saveSettings();
-  if((id==='inModel'||id==='inPoses')&&running&&!sess)ensureModel().catch(e=>showMsg('模型載入失敗：'+e.message,'err'));if(id==='inFps'&&mode==='cam'&&!sess)startCamera();}));
-// apply a goal's session_plan (end trigger, count, duration, metronome) as the new defaults for this sport
-function applySessionPlan(g){const sp=g&&g.session_plan;if(!sp)return null;const p=profileOf(sport),msg=[];
-  if(sp.end_trigger==='count'&&canCount(sport)){$('inEnd').value='count';if(+sp.count_target>0)$('inCount').value=+sp.count_target;ensureDurOption(+sp.max_duration_s||p.maxDur||120);
-    msg.push(`做滿 ${$('inCount').value} 下（上限 ${fmtDur(+$('inDur').value)}）`);}
-  else{if(canCount(sport))$('inEnd').value='time';const d=sp.end_trigger==='count'?+sp.max_duration_s:+sp.duration_s;if(d>0)ensureDurOption(d);
-    msg.push(sp.end_trigger==='count'?`定時 ${fmtDur(+$('inDur').value)}（此項目尚不能即時計次）`:`定時 ${fmtDur(+$('inDur').value)}`);}
-  if(p.metro){if(sp.metronome&&+sp.metronome_bpm>0){$('inBpm').value=+sp.metronome_bpm;$('inMauto').value='1';msg.push(`節拍器 ${sp.metronome_bpm} bpm（隨記錄自動開關）`);}
-    else if(sp.metronome===false){$('inMauto').value='0';}}
-  saveSettings();sportControls();renderPlan();metro.badge();return msg.join('、');}
-$('btnSet').onclick=()=>{$('setSheet').hidden=false;};$('setClose').onclick=()=>{$('setSheet').hidden=true;};
-$('setSheet').addEventListener('click',e=>{if(e.target===$('setSheet'))$('setSheet').hidden=true;});
-
-/* ---------- goals (GitHub goals/ folder) ---------- */
-async function fetchJSON(url){const r=await fetch(url,{cache:'no-store'});if(!r.ok)throw new Error(r.status+' '+url);return r.json();}
-async function loadGoals(force){
-  if(!force){const c=store.get('goalsCache',null);if(c&&Date.now()-c.at<6*3600e3){goals=c.list;return 'cache';}}
-  let names=[];
-  try{const host=location.hostname,m=host.match(/^([^.]+)\.github\.io$/i),repo=location.pathname.split('/').filter(Boolean)[0];
-    if(m&&repo){const list=await fetchJSON(`https://api.github.com/repos/${m[1]}/${repo}/contents/goals`);names=list.filter(f=>f.type==='file'&&/\.json$/i.test(f.name)&&f.name!=='index.json').map(f=>f.name);}}catch(e){console.warn('GitHub list failed',e);}
-  if(!names.length){try{const idx=await fetchJSON('goals/index.json');names=(Array.isArray(idx)?idx:idx.files||[]).filter(n=>/\.json$/i.test(n));}catch(e){console.warn('index.json failed',e);}}
-  const out=[];for(const nm of names){try{const g=await fetchJSON('goals/'+encodeURIComponent(nm));if(g&&g.sport&&Array.isArray(g.metrics)){g.__file=nm;out.push(g);}}catch(e){console.warn('goal load failed',nm,e);}}
-  if(out.length||force){goals=out;store.set('goalsCache',{at:Date.now(),list:out});}
-  return out.length?'net':'none';}
-function goalsFor(s){return goals.filter(g=>g.sport===s);}
-const goalName=g=>g?(g.goal_name||g.title||g.goal_id||'目標'):'不比對目標';
-function planText(g){const sp=g&&g.session_plan;if(!sp)return '';
-  const end=sp.end_trigger==='count'?`做滿 ${sp.count_target} 下`:sp.duration_s?`記錄 ${fmtDur(sp.duration_s)}`:'';
-  return [end,sp.metronome&&sp.metronome_bpm?`節拍器 ${sp.metronome_bpm} bpm`:''].filter(Boolean).join('・');}
-function pickStoredGoal(){const f=store.get('goal.'+sport,null);goalSel=f?goalsFor(sport).find(g=>g.__file===f)||null:null;}
-function renderGoalList(){const list=goalsFor(sport),box=$('goalList');box.innerHTML='';
-  const opt=(g)=>{const b=document.createElement('button');b.className='goalopt';b.setAttribute('role','radio');b.setAttribute('aria-checked',(goalSel===g)+'');
-    const ctx=g&&g.athlete_context&&g.athlete_context!=='略'?g.athlete_context:'';
-    b.innerHTML=g?`<span class="dot"></span><span><b>${esc(goalName(g))}</b><small>${[ctx,`${(g.metrics||[]).length} 項指標`,planText(g)].filter(Boolean).map(esc).join('｜')}</small></span>`:`<span class="dot"></span><span><b>不比對目標</b><small>只記錄與統計</small></span>`;
-    b.onclick=()=>{goalSel=g;renderGoalList();};box.append(b);};
-  opt(null);list.forEach(opt);
-  $('goalNote').textContent=list.length?'':goals.length?'這個項目還沒有目標檔。':'尚未載入任何目標檔（goals 資料夾為空或無法連線）。';}
-$('btnReloadGoals').onclick=async()=>{$('goalNote').textContent='載入中…';const r=await loadGoals(true);pickStoredGoal();renderGoalList();showMsg(r==='net'?`已載入 ${goals.length} 個目標檔`:'找不到目標檔',r==='net'?'ok':'',3000);};
-
-/* ---------- welcome flow ---------- */
-function setSportUI(){const sp=SPORTS[sport],nm=sp.custom?(store.get('custom.'+sport,'')||sp.name):sp.name;
-  $('sportName').textContent=nm;$('goalName').textContent=goalName(goalSel);
-  for(const id of ['sportIcon','phIcon','w2Icon'])$(id).innerHTML=`<use href="#${sp.icon}"/>`;
-  document.querySelectorAll('.card-s').forEach(b=>b.setAttribute('aria-current',b.dataset.sport===sport||(b.dataset.sport==='custom'&&!!sp.custom)));}
-// U5: going full screen needs a tap, so ask for it when a sport card is tapped (skipped when already installed as a full-screen app)
-function goFull(){try{if(!document.fullscreenElement&&!matchMedia('(display-mode: fullscreen)').matches&&document.documentElement.requestFullscreen)document.documentElement.requestFullscreen({navigationUI:'hide'}).catch(()=>{});}catch(e){}}
-function pickSport(s){sport=s;store.set('sport',sport);loadSettings();pickStoredGoal();
-  const sp=SPORTS[sport];$('w2Sport').textContent=sp.custom?'未定義':sp.name;$('customWrap').hidden=!sp.custom;$('inCustom').value=store.get('custom.'+sport,'');
-  document.querySelectorAll('#resList .goalopt').forEach(b=>b.setAttribute('aria-checked',b.dataset.res===sport));
-  setSportUI();renderGoalList();}
-document.querySelectorAll('.card-s').forEach(b=>b.onclick=()=>{goFull();
-  pickSport(b.dataset.sport==='custom'?store.get('customRes','custom_hi'):b.dataset.sport);$('wStep1').hidden=true;$('wStep2').hidden=false;});
-// U2: one "undefined" card; the resolution is chosen inside
-document.querySelectorAll('#resList .goalopt').forEach(b=>b.onclick=()=>{const nm=$('inCustom').value;store.set('customRes',b.dataset.res);pickSport(b.dataset.res);if(nm)$('inCustom').value=nm;});
-$('w2Back').onclick=()=>{$('wStep2').hidden=true;$('wStep1').hidden=false;};
-$('w2Go').onclick=()=>{const sp=SPORTS[sport];
-  if(sp.custom){const v=$('inCustom').value.trim();if(!v){showMsg('請輸入動作名稱','err',3000);$('inCustom').focus();return;}store.set('custom.'+sport,v);}
-  const prev=store.get('goal.'+sport,null),changed=goalSel&&goalSel.__file!==prev;
-  store.set('goal.'+sport,goalSel?goalSel.__file:null);setSportUI();refreshBpmGoal();
-  $('welcome').hidden=true;$('wStep2').hidden=true;$('wStep1').hidden=false;
-  const applied=changed?applySessionPlan(goalSel):null;   // a newly chosen goal sets the recording defaults; later edits in 設定 are kept
-  if(applied)showMsg(`已套用目標建議：${applied}。可在設定中調整。`,'ok',5000);
-  else if(goalBpm(goalSel)&&profileOf(sport).metro)showMsg(`目標建議節拍器 ${goalBpm(goalSel)} bpm，可在設定中套用。`,'',4000);
-  if(mode!=='cam')startCamera();else{startCamera();if(!applied)showMsg(sp.tip,'',4000);}};
-$('btnSport').onclick=()=>{if(sess)return;$('welcome').hidden=false;$('wStep1').hidden=false;$('wStep2').hidden=true;};
-
-/* ---------- tabs & fullscreen ---------- */
-function showTab(t){const cap=t==='cap';$('vCap').hidden=!cap;$('vRec').hidden=cap;$('tabCap').setAttribute('aria-selected',cap);$('tabRec').setAttribute('aria-selected',!cap);if(!cap&&RP.res){sizeCharts();drawReplay();}}
-$('tabCap').onclick=()=>showTab('cap');$('tabRec').onclick=()=>showTab('rec');
-$('btnFull').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen({navigationUI:'hide'});}catch(e){showMsg('這個瀏覽器不支援全螢幕。','',3000);}};
-document.addEventListener('fullscreenchange',()=>{$('fullIcon').innerHTML=`<use href="#${document.fullscreenElement?'ic-unfull':'ic-full'}"/>`;$('btnFull').setAttribute('aria-label',document.fullscreenElement?'退出全螢幕':'全螢幕');});
-if(!document.documentElement.requestFullscreen)$('btnFull').hidden=true;
-
-/* ---------- tilt ---------- */
-window.addEventListener('devicemotion',e=>{const a=e.accelerationIncludingGravity;if(!a||a.x==null)return;
-  const g=Math.atan2(a.x,a.y)*180/Math.PI,roll=((g%90)+135)%90-45,pitch=Math.atan2(a.z,Math.hypot(a.x,a.y))*180/Math.PI;
-  tilt={roll:tilt?tilt.roll*0.8+roll*0.2:roll,pitch:tilt?tilt.pitch*0.8+pitch*0.2:pitch};});
-
-/* ---------- models & camera ---------- */
-async function ensureVision(){if(!vision){const mp=await import(`${MP_BASE}/vision_bundle.mjs`);window.__mp=mp;vision=await mp.FilesetResolver.forVisionTasks(`${MP_BASE}/wasm`);}return vision;}
-// A3: with numPoses 2 and only one person in view, MediaPipe re-runs the person detector on every frame (it keeps looking
-// for the 2nd person); numPoses 1 lets it track the person between frames, which is much lighter.
-async function ensureModel(){const kind=$('inModel').value,poses=+$('inPoses').value||1,key=kind+'/'+poses;if(landmarker&&modelKind===key)return landmarker;
-  $('phText').textContent='正在載入 AI 模型（第一次需下載約 6–10 MB）…';await ensureVision();
-  const {PoseLandmarker}=window.__mp;if(landmarker){try{landmarker.close();}catch(e){}}
-  const opts=d=>({baseOptions:{modelAssetPath:MODEL_URL[kind],delegate:d},runningMode:'VIDEO',numPoses:poses,minPoseDetectionConfidence:0.5,minPosePresenceConfidence:0.5,minTrackingConfidence:0.5});
-  try{landmarker=await PoseLandmarker.createFromOptions(vision,opts('GPU'));delegate='GPU';}catch(e){console.warn('GPU failed, CPU',e);landmarker=await PoseLandmarker.createFromOptions(vision,opts('CPU'));delegate='CPU';}
-  modelKind=key;detMs=NaN;return landmarker;}
-async function ensureObj(){if(objDet||objFail)return objDet;try{await ensureVision();const {ObjectDetector}=window.__mp;
-  objDet=await ObjectDetector.createFromOptions(vision,{baseOptions:{modelAssetPath:MODEL_URL.obj,delegate:'GPU'},runningMode:'VIDEO',scoreThreshold:0.15,maxResults:2,categoryAllowlist:['baseball bat']});}
-  catch(e){console.warn('object detector failed',e);objFail=true;showMsg('球棒偵測模型無法載入，本次只記錄骨架。','',4000);}return objDet;}
-async function startCamera(){
-  $('ph').hidden=false;$('btnCam').hidden=true;$('phText').textContent='正在開啟攝影機…';
-  if(!navigator.mediaDevices?.getUserMedia){$('phText').textContent='這個網址無法使用攝影機。請用 https:// 開頭的網址，並用 Chrome 開啟。';return;}
-  try{await ensureModel();if(profileOf(sport).bat)await ensureObj();stopSource();
-    const fr=Math.max(30,fpsTarget());
-    stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:facing,width:{ideal:960},height:{ideal:540},frameRate:{ideal:fr}}});
-    video.srcObject=stream;await video.play();mode='cam';begin();$('btnRec').disabled=false;
-    try{wakeLock=await navigator.wakeLock?.request('screen');}catch(e){}
-    if(typeof DeviceMotionEvent!=='undefined'&&typeof DeviceMotionEvent.requestPermission==='function'){try{await DeviceMotionEvent.requestPermission();}catch(e){}}
-  }catch(e){console.error(e);$('ph').hidden=false;$('btnCam').hidden=false;
-    $('phText').textContent=e.name==='NotAllowedError'?'攝影機權限被拒絕。請在網址列左側的網站設定允許攝影機，再按下方按鈕。':'無法開啟攝影機或載入模型：'+(e.message||e);}}
-$('btnCam').onclick=startCamera;
-function stopSource(){running=false;if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}video.pause();video.srcObject=null;
-  if(video.src){URL.revokeObjectURL(video.src);video.removeAttribute('src');video.load();}try{wakeLock?.release();}catch(e){}wakeLock=null;}
-$('btnFlip').onclick=()=>{if(sess)return;facing=facing==='environment'?'user':'environment';startCamera();};
-$('btnGuide').onclick=()=>{guides=!guides;$('btnGuide').classList.toggle('on',guides);$('btnGuide').setAttribute('aria-pressed',guides);};
-document.addEventListener('visibilitychange',async()=>{if(document.visibilityState==='visible'&&mode==='cam'&&!wakeLock){try{wakeLock=await navigator.wakeLock?.request('screen');}catch(e){}}});
-
-/* ---------- video file ---------- */
-$('inFile').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;$('setSheet').hidden=true;
-  try{await ensureModel();if(profileOf(sport).bat)await ensureObj();stopSource();video.src=URL.createObjectURL(file);video.muted=true;video.playbackRate=0.5;
-    await new Promise((ok,bad)=>{video.onloadedmetadata=ok;video.onerror=()=>bad(new Error('無法讀取此影片格式'));});
-    mode='file';facing='environment';const epoch0=(file.lastModified||Date.now())-video.duration*1000;
-    sess=newSession(video.duration+1,{source:'file',epoch0,fileName:file.name,waitSec:0});sess.phase='rec';sess.recStart=0;lockUI(true);$('btnRec').textContent='■ 停止並存檔';
-    await video.play();begin();showMsg('正在以 0.5 倍速分析影片，播完會自動存檔。影片不會上傳或另存。','',6000);
-    video.onended=()=>{if(sess)finishSession(false,'video_end');running=false;mode=null;startCamera();};
-  }catch(err){showMsg('影片分析失敗：'+err.message,'err');}e.target.value='';});
-
-/* ---------- main loop ---------- */
-function begin(){$('ph').hidden=true;running=true;prevHip=null;fpsT=[];camT=[];camFps=0;
-  const rv='requestVideoFrameCallback' in HTMLVideoElement.prototype;
-  const tick=(now,meta)=>{if(!running)return;let clock;
-    // frames the camera actually delivered (presentedFrames counts frames even when analysis skips them)
-    if(meta&&meta.presentedFrames!=null){const pn=performance.now();camT.push([pn,meta.presentedFrames]);while(camT.length>1&&camT[0][0]<pn-1000)camT.shift();
-      if(camT.length>1){const a=camT[0],b=camT.at(-1);camFps=b[0]>a[0]?(b[1]-a[1])*1000/(b[0]-a[0]):0;}}
-    if(mode==='file')clock=(meta?meta.mediaTime:video.currentTime)*1000;
-    else clock=(meta&&meta.captureTime)?meta.captureTime:(meta&&meta.expectedDisplayTime)?meta.expectedDisplayTime:performance.now();
-    processFrame(clock);rv?video.requestVideoFrameCallback(tick):requestAnimationFrame(tick);};
-  rv?video.requestVideoFrameCallback(tick):requestAnimationFrame(tick);}
-function pickMain(res,W,H){const poses=res.landmarks||[];if(!poses.length)return -1;let best=-1,bs=-1;
-  poses.forEach((lm,i)=>{let x0=1,y0=1,x1=0,y1=0;for(const p of lm){x0=Math.min(x0,p.x);y0=Math.min(y0,p.y);x1=Math.max(x1,p.x);y1=Math.max(y1,p.y);}
-    let sc=(x1-x0)*W*(y1-y0)*H;if(prevHip){const hx=(lm[23].x+lm[24].x)/2*W,hy=(lm[23].y+lm[24].y)/2*H;sc*=1/(1+8*Math.hypot(hx-prevHip.x,hy-prevHip.y)/Math.max(W,H));}
-    if(sc>bs){bs=sc;best=i;}});return best;}
-function frameInfo(lm,W,H){const core=[11,12,23,24,25,26,27,28];let v=0;for(const k of core)v+=lm[k].visibility??1;
-  const top=Math.min(lm[0].y,lm[15].y,lm[16].y),bot=Math.max(lm[29].y,lm[30].y,lm[31].y,lm[32].y);
-  return {valid:v/core.length>=0.45,bodyH:(bot-Math.min(lm[0].y-0.06,top))*H};}
-function batFrom(det,lm,W,H){ // bounding box → knob (end nearest the hands) and tip
-  const d=(det&&det.detections||[]).filter(x=>x.categories&&x.categories[0]).sort((a,b)=>b.categories[0].score-a.categories[0].score)[0];
-  if(!d)return null;const b=d.boundingBox,x0=b.originX/W,y0=b.originY/H,x1=(b.originX+b.width)/W,y1=(b.originY+b.height)/H;
-  const hx=lm?(lm[15].x+lm[16].x)/2:(x0+x1)/2,hy=lm?(lm[15].y+lm[16].y)/2:(y0+y1)/2;
-  const corners=[[x0,y0,x1,y1],[x1,y1,x0,y0],[x1,y0,x0,y1],[x0,y1,x1,y0]];let best=null,bd=Infinity;
-  for(const c of corners){const dd=Math.hypot(c[0]-hx,c[1]-hy);if(dd<bd){bd=dd;best=c;}}
-  return {kx:best[0],ky:best[1],tx:best[2],ty:best[3],score:d.categories[0].score};}
-function processFrame(clock){const W=video.videoWidth,H=video.videoHeight;if(!W||!H)return;
-  if(canvas.width!==W||canvas.height!==H){canvas.width=W;canvas.height=H;}
-  let ts=performance.now();if(ts<=lastDetTs)ts=lastDetTs+1;lastDetTs=ts;
-  let res;try{res=landmarker.detectForVideo(video,ts);}catch(e){console.warn(e);return;}
-  const dt=performance.now()-ts;detMs=Number.isFinite(detMs)?detMs*0.9+dt*0.1:dt;
-  const mirror=mode==='cam'&&facing==='user';ctx.setTransform(mirror?-1:1,0,0,1,mirror?W:0,0);ctx.drawImage(video,0,0,W,H);
-  const now=performance.now();fpsT.push(now);while(fpsT.length&&fpsT[0]<now-1000)fpsT.shift();
-  const i=pickMain(res,W,H);let fi=null,lm=null,wl=null;
-  if(i>=0){lm=res.landmarks[i];wl=res.worldLandmarks?.[i];prevHip={x:(lm[23].x+lm[24].x)/2*W,y:(lm[23].y+lm[24].y)/2*H};fi=frameInfo(lm,W,H);drawPose(lm,W,H);}
-  lastBat=null;if(objDet&&profileOf(sport).bat){try{lastBat=batFrom(objDet.detectForVideo(video,ts),lm,W,H);}catch(e){}
-    if(lastBat){ctx.strokeStyle='#ffffff';ctx.lineWidth=Math.max(4,W/120);ctx.lineCap='round';ctx.beginPath();ctx.moveTo(lastBat.kx*W,lastBat.ky*H);ctx.lineTo(lastBat.tx*W,lastBat.ty*H);ctx.stroke();}}
-  ctx.setTransform(1,0,0,1,0,0);if(guides&&!(sess&&sess.phase==='rec'))drawGuides(W,H);
-  if(sess)sessionFrame(clock,lm,wl,W,H);
-  updateHud(i>=0,fi,res.landmarks?.length||0,H);}
-function drawPose(lm,W,H){const lw=Math.max(3,W/170);ctx.lineCap='round';
-  for(const [a,b,s] of EDGES){if((lm[a].visibility??1)<0.3||(lm[b].visibility??1)<0.3)continue;ctx.strokeStyle=COL[s];ctx.lineWidth=lw;ctx.beginPath();ctx.moveTo(lm[a].x*W,lm[a].y*H);ctx.lineTo(lm[b].x*W,lm[b].y*H);ctx.stroke();}
-  for(const k of [11,12,13,14,15,16,23,24,25,26,27,28,29,30,31,32]){const p=lm[k];if((p.visibility??1)<0.3)continue;ctx.fillStyle=k%2?COL.l:COL.r;ctx.beginPath();ctx.arc(p.x*W,p.y*H,lw*1.1,0,7);ctx.fill();}}
-function drawGuides(W,H){const u=Math.max(1,W/400),g=SPORTS[sport].guide;ctx.save();ctx.lineWidth=u;ctx.setLineDash([8*u,6*u]);ctx.strokeStyle='rgba(255,255,255,.45)';
-  ctx.beginPath();ctx.moveTo(W/2,0);ctx.lineTo(W/2,H);ctx.moveTo(0,H/2);ctx.lineTo(W,H/2);ctx.stroke();
-  ctx.setLineDash([]);ctx.strokeStyle='rgba(255,255,255,.18)';ctx.beginPath();for(const f of [1/3,2/3]){ctx.moveTo(W*f,0);ctx.lineTo(W*f,H);ctx.moveTo(0,H*f);ctx.lineTo(W,H*f);}ctx.stroke();
-  ctx.fillStyle='rgba(198,244,50,.10)';ctx.fillRect(0,H*0.86,W,H*0.08);ctx.strokeStyle='rgba(198,244,50,.6)';ctx.beginPath();ctx.moveTo(0,H*0.9);ctx.lineTo(W,H*0.9);ctx.stroke();
-  ctx.strokeStyle='rgba(198,244,50,.4)';ctx.setLineDash([4*u,6*u]);ctx.beginPath();ctx.moveTo(0,H*0.1);ctx.lineTo(W,H*0.1);ctx.stroke();ctx.setLineDash([]);
-  ctx.font=`${Math.round(14*u)}px system-ui`;ctx.fillStyle='rgba(198,244,50,.9)';ctx.fillText(g.bottom,8*u,H*0.9-6*u);ctx.fillText(g.top,8*u,H*0.1-6*u);
-  if(tilt){const ok=Math.abs(tilt.roll)<=1,r=-tilt.roll*Math.PI/180,L=W*0.35;ctx.strokeStyle=ok?COL.good:COL.warn;ctx.lineWidth=3*u;ctx.beginPath();
-    ctx.moveTo(W/2-L*Math.cos(r),H/2-L*Math.sin(r));ctx.lineTo(W/2+L*Math.cos(r),H/2+L*Math.sin(r));ctx.stroke();ctx.beginPath();ctx.arc(W/2,H/2,6*u,0,7);ctx.stroke();}
-  ctx.restore();}
-function updateHud(found,fi,n,H){const ok=found&&fi&&fi.valid;
-  $('light').hidden=false;$('light').className='light'+(ok?' ok':'');$('lightTxt').textContent=!found?'找不到人物':(!fi.valid?'請全身入鏡':'偵測正常');
-  const chips=[],fps=fpsT.length,tgt=fpsTarget(),cf=Math.round(camFps);
-  if(mode==='cam'&&cf){const camLow=cf<Math.min(tgt,25)*0.95,anaLow=!camLow&&fps<cf*0.8;
-    chips.push(`<span class="chip ${camLow||anaLow?'warn':''}">相機 ${cf} ／ 分析 ${fps} fps${camLow?'（光線不足？）':anaLow?'（運算跟不上）':''}</span>`);}
-  else chips.push(`<span class="chip ${fps&&fps<Math.min(tgt,25)*0.8&&mode==='cam'?'warn':''}">${fps} fps</span>`);
-  if(Number.isFinite(detMs)&&!(sess&&sess.phase==='rec'))chips.push(`<span class="chip">偵測 ${Math.round(detMs)} ms・${delegate||''}</span>`);
-  if(profileOf(sport).bat&&objDet)chips.push(`<span class="chip ${lastBat?'ok':'warn'}">${lastBat?'球棒 ✓':'找不到球棒'}</span>`);
-  if(!(sess&&sess.phase==='rec')){
-    if(ok&&guides){const pc=fi.bodyH/H*100,good=pc>=55&&pc<=85;chips.push(`<span class="chip ${good?'ok':'warn'}">人物高度 ${pc.toFixed(0)}%${good?'':pc<55?'（靠近一點）':'（退後一點）'}</span>`);}
-    if(guides&&tilt){chips.push(`<span class="chip ${Math.abs(tilt.roll)<=1?'ok':'warn'}">左右傾斜 ${Math.abs(tilt.roll).toFixed(1)}°</span>`);chips.push(`<span class="chip ${Math.abs(tilt.pitch)<=5?'ok':'warn'}">前後仰角 ${Math.abs(tilt.pitch).toFixed(1)}°</span>`);}
-    if(n>1)chips.push(`<span class="chip">畫面中 ${n} 人，鎖定最大者</span>`);
-    if(mode==='cam'&&facing==='user')chips.push('<span class="chip">前鏡頭（鏡射顯示）</span>');}
-  $('hud').innerHTML=chips.join('');}
-
-/* ---------- session ---------- */
-function newSession(durSec,extra={}){const cap=Math.ceil((durSec+5)*65),em=extra.source==='file'?'time':endMode(),h=+$('inHeight').value||170;
-  return {phase:'wait',dur:durSec,buf:new Float32Array(cap*ROW),cap,n:0,recStart:null,lastRec:-1e9,W:0,H:0,beeped:{},sport,goal:goalSel,
-    customName:SPORTS[sport].custom?store.get('custom.'+sport,''):'',fps:fpsTarget(),
-    endMode:em,countTarget:Math.max(1,+$('inCount').value||10),counter:C.LIVE_COUNT[sport]?C.LIVE_COUNT[sport](h):null,countDoneAt:null,
-    dg:{cam:[],det:[]},numPoses:+$('inPoses').value||1,battingSide:sport==='bat'?$('inBatSide').value:null,
-    heightCm:h,recorder:$('inUser').value.trim(),model:$('inModel').value,facing,date:new Date(),source:'camera',waitSec:+$('inWait').value,...extra};}
-function lockUI(on){['btnSport','btnSet','btnFlip','tabRec'].forEach(id=>$(id).disabled=on);$('btnRec').className=on?'stop':'primary';if(!on)$('btnRec').textContent='● 開始';}
-$('btnRec').onclick=()=>{
-  if(sess){if(sess.phase==='rec')finishSession(true,'manual');else{sess=null;$('phase').hidden=true;lockUI(false);if($('inMauto').value==='1')metro.stop();showMsg('已取消，這次沒有記錄。');}return;}
-  audio();const w=+$('inWait').value,d=+$('inDur').value;sess=newSession(d);sess.waitEnd=performance.now()+w*1000;lockUI(true);
-  if($('inMauto').value==='1'&&profileOf(sport).metro&&!metro.on)metro.start();
-  if(w===0){sess.phase='rec';beep(1320,0.5);$('btnRec').textContent='■ 提前結束並存檔';}else $('btnRec').textContent='取消';};
-function sessionFrame(clock,lm,wl,W,H){const s=sess,now=performance.now();
-  if(s.phase==='wait'){const left=(s.waitEnd-now)/1000,sec=Math.ceil(left);
-    $('phase').hidden=false;$('phase').className='phase wait';$('phaseBig').textContent=sec<=5?String(Math.max(sec,0)):fmtDur(sec);$('phaseLbl').textContent='等待中，時間到自動開始記錄';
-    if(sec<=3&&sec>0&&!s.beeped[sec]){s.beeped[sec]=1;beep(880,0.12);}
-    if(left<=0){s.phase='rec';beep(1320,0.5);$('btnRec').textContent='■ 提前結束並存檔';}return;}
-  if(s.recStart===null){s.recStart=clock;s.epoch0=s.epoch0??(performance.timeOrigin+clock);s.W=W;s.H=H;}
-  const t=clock-s.recStart,minGap=1000/s.fps*0.9;
-  if(s.n<s.cap&&t-s.lastRec>=minGap){s.lastRec=t;const o=s.n*ROW,b=s.buf;b.fill(NaN,o,o+ROW);b[o]=t;
-    if(lm)for(let k=0;k<33;k++){const p=lm[k],q=o+1+k*7;b[q]=p.x;b[q+1]=p.y;b[q+2]=p.z;b[q+3]=p.visibility??NaN;if(wl){const w=wl[k];b[q+4]=w.x;b[q+5]=w.y;b[q+6]=w.z;}}
-    if(lastBat){const q=o+BAT_OFF;b[q]=lastBat.kx;b[q+1]=lastBat.ky;b[q+2]=lastBat.tx;b[q+3]=lastBat.ty;b[q+4]=lastBat.score;}
-    s.n++;}
-  if(Number.isFinite(detMs))s.dg.det.push(detMs);if(camFps)s.dg.cam.push(camFps);
-  // live rep count (always tracked when the sport has a counter; it ends the recording only in count mode)
-  if(s.counter){const before=s.counter.count,c=s.counter.push(t/1000,lm,W,H);if(c>before&&s.endMode==='count')beep(c>=s.countTarget?1320:660,0.08);
-    if(s.endMode==='count'&&c>=s.countTarget&&s.countDoneAt===null)s.countDoneAt=t;}
-  $('phase').hidden=false;$('phase').className='phase rec';
-  if(mode==='cam'){const left=s.dur-t/1000;
-    if(s.endMode==='count'){$('phaseBig').textContent=`${s.counter.count} / ${s.countTarget}`;$('phaseLbl').innerHTML=`● 記錄中（下）<div class="sub">上限剩 ${fmtDur(left)}</div>`;
-      if(s.countDoneAt!==null&&t-s.countDoneAt>=1500){finishSession(false,'count');return;}}   // keep 1.5 s so the last lowering is recorded
-    else{$('phaseBig').textContent=fmtDur(left);$('phaseLbl').textContent=s.counter?`● 記錄中・${s.counter.count} 下`:'● 記錄中';}
-    if(left<=0)finishSession(false,'time');}
-  else{$('phaseBig').textContent=fmtDur(t/1000);$('phaseLbl').textContent='● 分析影片中';}}
-async function finishSession(early,reason){const s=sess;if(!s)return;sess=null;$('phase').hidden=true;lockUI(false);beep(990,0.15);setTimeout(()=>beep(990,0.15),220);
-  if($('inMauto').value==='1')metro.stop();
-  if(s.n<20||s.buf[(s.n-1)*ROW]<3000){showMsg('記錄時間太短（少於 3 秒），沒有保存。');return;}
-  showMsg('正在整理封包…','',0);await new Promise(r=>setTimeout(r,30));
-  const flat=s.buf.slice(0,s.n*ROW),durSec=flat[(s.n-1)*ROW]/1000,d=s.date,p=n=>String(n).padStart(2,'0');
-  const sessionId=`${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`;
-  const meta={version:APP_VER,sport:s.sport,sportName:SPORTS[s.sport].name,customName:s.customName,recorder:s.recorder,sessionId,date:d.toISOString(),epoch0:s.epoch0,source:s.source,fileName:s.fileName||'',
-    heightCm:s.heightCm,model:s.model,facing:s.facing,W:s.W||video.videoWidth,H:s.H||video.videoHeight,frames:s.n,durationSec:+durSec.toFixed(2),
-    avgFps:+(s.n/Math.max(durSec,0.001)).toFixed(1),fpsTarget:s.fps,waitSec:s.waitSec,plannedSec:s.dur,early:!!early,tz:Intl.DateTimeFormat().resolvedOptions().timeZone,
-    metronome:metro.on?+$('inBpm').value:null,endMode:s.endMode,countTarget:s.countTarget,endReason:reason||(s.source==='file'?'video_end':early?'manual':'time'),
-    liveCount:s.counter?s.counter.count:null,numPoses:s.numPoses,battingSide:s.battingSide,diag:sessionDiag(s)};
-  const session={id:Date.now(),meta,goal:s.goal?JSON.parse(JSON.stringify(s.goal)):null,flat:flat.buffer};
-  let pk;try{pk=await makePackage(session);}catch(e){console.error(e);showMsg('整理失敗：'+e.message,'err');return;}
-  session.stats=pk.res.stats;session.evals=pk.evals;
-  const name=downloadBlob(pk.blob,pk.name);
-  try{await dbPut(session);await renderRecords();}catch(e){console.warn(e);}
-  renderSummary(session,pk);openReplay(session,pk.res);showTab('rec');$('sumCard').scrollIntoView({block:'start'});
-  showMsg(name?`已存封包：${pk.name}（手機「下載」資料夾）`:'自動下載被瀏覽器擋下，請在紀錄中按「下載」。',name?'ok':'',6000);
-  if($('inDriveAuto').value==='1'&&$('inDriveId').value.trim()&&drive.valid())drive.upload(pk.blob,pk.name).catch(e=>showMsg('Drive 上傳失敗：'+e.message,'err'));}
-// A3: what limited the frame rate — camera delivery (light) or analysis (compute)?
-function sessionDiag(s){const md=a=>a.length?Math.round(C.median(a)*10)/10:null,ts=stream&&stream.getVideoTracks()[0],cs=ts&&ts.getSettings?ts.getSettings():{};
-  return {cam_fps_median:md(s.dg.cam),detect_ms_median:md(s.dg.det),delegate,num_poses:s.numPoses,
-    camera_settings:cs.width?{width:cs.width,height:cs.height,frame_rate:cs.frameRate?Math.round(cs.frameRate):null}:null,
-    user_agent:navigator.userAgent.slice(0,160)};}
-const analyze=s=>C.analyzeSession(new Float32Array(s.flat),{W:s.meta.W,H:s.meta.H,heightCm:s.meta.heightCm,sport:s.meta.sport});
-async function makePackage(s){const res=analyze(s),prof={...profileOf(s.meta.sport)};
-  const {blob,evals}=await C.buildPackage(new Float32Array(s.flat),res,s.meta,prof,s.goal);
-  const nm=s.meta.customName?'_'+s.meta.customName.replace(/[\\/:*?"<>|\s]+/g,'-'):'';
-  return {blob,evals,res,name:`formlab_${s.meta.sport}${nm}_${s.meta.sessionId}.zip`};}
-function downloadBlob(blob,name){try{const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),20000);return name;}catch(e){console.warn(e);return null;}}
-async function shareBlob(blob,name){const f=new File([blob],name,{type:'application/zip'});
-  if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f],title:name});}catch(e){if(e.name!=='AbortError')showMsg('分享失敗：'+e.message,'err');}}
-  else showMsg('這個瀏覽器不支援分享檔案，請改用下載。','',4000);}
-
-/* ---------- Google Drive (drive.file scope; app-created folder) ---------- */
-const drive={token:null,exp:0,folderId:store.get('driveFolderId',null),folderName:store.get('driveFolderName',null),
-  valid(){return this.token&&Date.now()<this.exp-60000;},
-  async gis(){if(window.google?.accounts?.oauth2)return;await new Promise((ok,bad)=>{const s=document.createElement('script');s.src='https://accounts.google.com/gsi/client';s.onload=ok;s.onerror=()=>bad(new Error('無法載入 Google 登入元件'));document.head.append(s);});},
-  async login(){const id=$('inDriveId').value.trim();if(!id)throw new Error('請先在設定填入 OAuth 用戶端 ID');await this.gis();
-    return new Promise((ok,bad)=>{const tc=google.accounts.oauth2.initTokenClient({client_id:id,scope:'https://www.googleapis.com/auth/drive.file',
-      callback:r=>{if(r.error)bad(new Error(r.error_description||r.error));else{this.token=r.access_token;this.exp=Date.now()+(+r.expires_in||3600)*1000;ok(this.token);}},error_callback:e=>bad(new Error(e.message||e.type||'登入失敗'))});
-      tc.requestAccessToken({prompt:this.token?'':'consent'});});},
-  async api(url,opt={}){const r=await fetch(url,{...opt,headers:{...(opt.headers||{}),Authorization:'Bearer '+this.token}});if(!r.ok)throw new Error(`Drive ${r.status}: ${(await r.text()).slice(0,160)}`);return r.json();},
-  async folder(){const name=$('inDriveFolder').value.trim()||'FormLab 紀錄';if(this.folderId&&this.folderName===name)return this.folderId;
-    const q=encodeURIComponent(`name='${name.replace(/'/g,"\\'")}' and mimeType='application/vnd.google-apps.folder' and trashed=false`);
-    const l=await this.api(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id,name)&spaces=drive`);
-    let id=l.files&&l.files[0]&&l.files[0].id;
-    if(!id){const c=await this.api('https://www.googleapis.com/drive/v3/files?fields=id',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,mimeType:'application/vnd.google-apps.folder'})});id=c.id;}
-    this.folderId=id;this.folderName=name;store.set('driveFolderId',id);store.set('driveFolderName',name);return id;},
-  async upload(blob,name){if(!this.valid())await this.login();const parent=await this.folder();
-    const form=new FormData();form.append('metadata',new Blob([JSON.stringify({name,parents:[parent]})],{type:'application/json'}));form.append('file',blob);
-    showMsg('上傳到 Google Drive 中…','',0);const r=await this.api('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name',{method:'POST',body:form});
-    showMsg(`已上傳到 Google Drive「${this.folderName}」：${r.name}`,'ok',5000);return r;}};
-$('btnDriveLogin').onclick=async()=>{try{saveSettings();await drive.login();await drive.folder();showMsg(`已登入，封包會上傳到 Drive「${drive.folderName}」資料夾。`,'ok',5000);}catch(e){showMsg('Drive 設定失敗：'+e.message,'err',8000);}};
-
-/* ---------- summary ---------- */
-const ST={advanced_met:['達進階','ev-adv'],beginner_met:['達入門','ev-met'],not_met:['未達','ev-not'],no_data:['無數據','ev-na'],unsupported:['App 未支援','ev-na'],unknown:['無法判定','ev-na']};
-function renderSummary(s,pk){const m=s.meta,st=pk.res.stats,res=pk.res,evals=pk.evals||[];
-  const nm=m.customName?`${m.sportName}｜${esc(m.customName)}`:m.sportName;
-  const head=`<p class="note">${nm} · ${new Date(m.date).toLocaleString('zh-TW')} · 記錄 ${fmtDur(m.durationSec)}${m.early?'（提前結束）':''} · 平均 ${m.avgFps} fps（目標 ${m.fpsTarget}）· 有效畫面 ${(st.validFrac*100).toFixed(0)}%${m.recorder?' · '+esc(m.recorder):''}</p>`;
-  const kpi=(k,v,u,sub='')=>`<div class="kpi"><div class="k">${k}</div><div class="v">${v}<span>${u}</span></div><div class="s">${sub}</div></div>`;
-  let body='';
-  if(m.sport==='run')body=`<div class="kpis">${kpi('步頻',fmt(st.cadence),'步/分',`${st.steps} 步`)}${kpi('垂直振幅',fmt(st.vertOscCm.mean,1),'cm')}${kpi('觸地膝角',fmt(st.knee.mean),'°')}${kpi('跨步距',fmt(st.over.mean),'cm')}</div>`;
-  else if(m.sport==='walk')body=`<div class="kpis">${kpi('步頻',fmt(st.cadence),'步/分',`${st.steps} 步`)}${kpi('軀幹前傾',fmt(st.trunkDeg.mean,1),'°')}${kpi('髖伸展',fmt(st.hipExt.mean,1),'°','離地前')}${kpi('腳跟著地角',fmt(st.footStrike.mean,1),'°')}${kpi('手臂擺幅',fmt(st.armSwing.mean),'°')}</div>`;
-  else if(m.sport==='pullup')body=`<div class="kpis">${kpi('次數',st.reps,'下',`${m.liveCount!=null?`即時計次 ${m.liveCount}・`:''}上槓 ${st.muscleUps} 下`)}${kpi('拉引高度',fmt(st.topCm.mean),'cm','肩相對手腕')}${kpi('動作幅度',fmt(st.romCm.mean),'cm')}${kpi('上拉時間',fmt(st.upS.mean,1),'s')}</div>`;
-  else body=`<p class="note">此項目只記錄骨架（${m.frames} 格）；可用回放檢查拍攝品質。</p>`;
-  if(s.goal){const rows=evals.slice().sort((a,b)=>(a.priority??9)-(b.priority??9)).map(e=>{const t=e.target||{},bg=t.beginner||{},ad=t.advanced||{};const [lbl,cls]=ST[e.status]||['',''];
-      const rng=r=>r&&(r.min!=null||r.max!=null)?`${r.min??'…'}–${r.max??'…'}`:'—';
-      const U={deg:'°',spm:'步/分',count:'下',ratio:'',s:'秒',cm:'cm',ms:'ms'}[e.unit]??(e.unit||'');const val=e.value!=null?(Math.abs(e.value)>=20?Math.round(e.value):Math.round(e.value*10)/10):'--';
-      return `<tr><td>${esc(e.name)}</td><td>${val} ${esc(U)}</td><td class="${cls}">${lbl}${e.unit_pass_rate_beginner!=null?` <span class="note">(${Math.round(e.unit_pass_rate_beginner*100)}%)</span>`:''}</td><td>${rng(bg)}</td><td>${rng(ad)}</td></tr>`;}).join('');
-    const met=evals.filter(e=>e.status==='advanced_met'||e.status==='beginner_met').length,sup=evals.filter(e=>e.status!=='unsupported').length;
-    body+=`<h2 style="margin-top:6px">目標比對：${esc(goalName(s.goal))}</h2><p class="note">App 可判讀 ${sup}/${evals.length} 項，達標 ${met} 項。括號內是逐步／逐下達入門目標的比例。</p>
-      <div class="tbl"><table><tr><th>指標</th><th>本次</th><th>結果</th><th>入門</th><th>進階</th></tr>${rows}</table></div>`;}
-  $('sumBody').innerHTML=head+body+`<div class="controls"><button id="dlNow">下載封包</button><button id="shNow">分享…</button>${$('inDriveId').value.trim()?'<button id="drNow">上傳 Drive</button>':''}<button id="againNow" class="primary">再記錄一次</button></div>`;
-  $('sumCard').hidden=false;$('dlNow').onclick=()=>downloadBlob(pk.blob,pk.name);$('shNow').onclick=()=>shareBlob(pk.blob,pk.name);
-  if($('drNow'))$('drNow').onclick=()=>drive.upload(pk.blob,pk.name).catch(e=>showMsg('Drive 上傳失敗：'+e.message,'err',8000));
-  $('againNow').onclick=()=>showTab('cap');}
-
-/* ---------- IndexedDB ---------- */
-function db(){return new Promise((ok,bad)=>{const r=indexedDB.open('formlab-v3',1);r.onupgradeneeded=()=>r.result.createObjectStore('sessions',{keyPath:'id'});r.onsuccess=()=>ok(r.result);r.onerror=()=>bad(r.error);});}
-async function dbPut(s){const d=await db();return new Promise((ok,bad)=>{const tx=d.transaction('sessions','readwrite');tx.objectStore('sessions').put(s);tx.oncomplete=ok;tx.onerror=()=>bad(tx.error);});}
-async function dbAll(){const d=await db();return new Promise((ok,bad)=>{const q=d.transaction('sessions').objectStore('sessions').getAll();q.onsuccess=()=>ok(q.result);q.onerror=()=>bad(q.error);});}
-async function dbDel(id){const d=await db();return new Promise((ok,bad)=>{const tx=d.transaction('sessions','readwrite');tx.objectStore('sessions').delete(id);tx.oncomplete=ok;tx.onerror=()=>bad(tx.error);});}
-async function renderRecords(){let all=[];try{all=await dbAll();}catch(e){return;}const box=$('recList');
-  if(!all.length){box.innerHTML='<p class="note">還沒有紀錄。</p>';return;}all.sort((a,b)=>b.id-a.id);box.innerHTML='';
-  for(const s of all){const m=s.meta,d=document.createElement('div');d.className='rec-item';const st=s.stats||{};
-    const head=m.sport==='run'||m.sport==='walk'?`${fmt(st.cadence)} 步/分 · ${st.steps} 步`:m.sport==='pullup'?`${st.reps} 下`:`${m.frames} 格`;
-    d.innerHTML=`<div class="info"><b>${esc(m.customName||SPORTS[m.sport]?.name||m.sport)}｜${head}</b><div>${new Date(m.date).toLocaleString('zh-TW')} · ${fmtDur(m.durationSec)} · ${m.avgFps} fps${s.goal?' · 目標：'+esc(goalName(s.goal)):''}</div></div>`;
-    const mk=async()=>makePackage(s);
-    const b1=document.createElement('button');b1.textContent='回放';b1.onclick=async()=>{const pk=await mk();renderSummary(s,pk);openReplay(s,pk.res);$('sumCard').scrollIntoView({behavior:'smooth'});};
-    const b2=document.createElement('button');b2.textContent='下載';b2.onclick=async()=>{const pk=await mk();downloadBlob(pk.blob,pk.name);};
-    const b4=document.createElement('button');b4.textContent='分享';b4.onclick=async()=>{const pk=await mk();shareBlob(pk.blob,pk.name);};
-    const b3=document.createElement('button');b3.textContent='刪除';
-    b3.onclick=async()=>{if(b3.dataset.c){await dbDel(s.id);d.remove();if(!box.children.length)box.innerHTML='<p class="note">還沒有紀錄。</p>';}
-      else{b3.dataset.c=1;b3.textContent='確定刪除？';b3.className='stop';setTimeout(()=>{delete b3.dataset.c;b3.textContent='刪除';b3.className='';},3000);}};
-    d.append(b1,b2,b4,b3);box.append(d);}}
-
-/* ---------- replay ---------- */
-const RP={s:null,res:null,i:0,playing:false,last:0,series:null};
-const rpC=$('rpCanvas'),rx=rpC.getContext('2d'),chC=$('rpChart'),cx=chC.getContext('2d'),ovC=$('rpOverview'),ox=ovC.getContext('2d');
-function sportSeries(res,sp){const n=res.n,mk=f=>{const a=new Float64Array(n);for(let i=0;i<n;i++)a[i]=res.valid[i]?f(i):NaN;return a;};
-  if(sp==='walk')return {top:{name:'骨盆高度',arr:res.pelvis,inv:true,px:true},bot:{name:'膝角',L:res.knee.L,R:res.knee.R,lo:60,hi:185},ov:'cadence',cad:[60,150,[90,110,130]],
-    note:'上圖：前後 2.5 秒的骨盆高度與膝角；實線＝觸地（腳跟最前），點線＝離地（腳尖最後）。下圖：每一步的步頻，點一下可跳到該處。'};
-  if(sp==='run')return {top:{name:'骨盆高度',arr:res.pelvis,inv:true,px:true},bot:{name:'膝角',L:res.knee.L,R:res.knee.R,lo:60,hi:185},ov:'cadence',cad:[120,230,[150,175,200]],
-    note:'上圖：前後 2.5 秒的骨盆高度與膝角；實線＝觸地，點線＝離地。下圖：每一步的步頻，點一下可跳到該處。'};
-  if(sp==='pullup')return {top:{name:'肩相對手腕高度',arr:res.series.shoulderRel,inv:false,px:false},bot:{name:'手肘角度',L:res.elb.L,R:res.elb.R,lo:30,hi:185},ov:'top',
-    note:'上圖：前後 2.5 秒的「肩相對手腕高度」（0 以上＝肩膀高過單槓）與手肘角度；實線＝頂點，點線＝起始。下圖：整段高度變化，點一下可跳到該處。'};
-  return {top:{name:'手腕高度',arr:mk(i=>(res.Y[15][i]+res.Y[16][i])/2),inv:true,px:true},bot:{name:'手肘角度',L:res.elb.L,R:res.elb.R,lo:30,hi:185},ov:'top',
-    note:'上圖：前後 2.5 秒的手腕高度與手肘角度。下圖：整段手腕高度，點一下可跳到該處。'};}
-function openReplay(s,res){RP.s=s;RP.res=res;RP.i=0;RP.playing=false;$('rpPlay').textContent='播放';RP.series=sportSeries(res,s.meta.sport);$('rpNote').textContent=RP.series.note;
-  RP.flat=new Float32Array(s.flat);const hasU=(res.units||[]).length>0;$('rpPrevU').hidden=!hasU;$('rpNextU').hidden=!hasU;
-  const xs=[],ys=[];for(let i=0;i<res.n;i+=2){if(!res.valid[i])continue;for(const k of C.BODY){xs.push(res.X[k][i]);ys.push(res.Y[k][i]);}}
-  const q=(a,p)=>{const b=a.filter(Number.isFinite).sort((u,v)=>u-v);return b.length?b[Math.max(0,Math.min(b.length-1,Math.round(p*(b.length-1))))]:0;};
-  const x0=q(xs,0.005),x1=q(xs,0.995),y0=q(ys,0.003),y1=q(ys,0.997),pad=0.12*Math.max(1,y1-y0);
-  RP.box={x0:x0-pad,y0:y0-pad,w:Math.max(1,(x1-x0)+2*pad),h:Math.max(1,(y1-y0)+2*pad)};
-  rpC.height=720;rpC.width=Math.round(Math.max(360,Math.min(1000,720*RP.box.w/RP.box.h)));
-  const lows=[];for(let i=0;i<res.n;i++)if(res.valid[i])lows.push(Math.max(res.Y[29][i],res.Y[30][i],res.Y[31][i],res.Y[32][i]));
-  RP.ground=q(lows,0.85);$('rpSlider').max=res.n-1;$('rpSlider').value=0;$('rpCard').hidden=false;sizeCharts();drawReplay();}
-function sizeCharts(){const w=Math.round(chC.clientWidth*devicePixelRatio)||700;chC.width=w;chC.height=Math.round(300*devicePixelRatio);ovC.width=w;ovC.height=Math.round(90*devicePixelRatio);}
-window.addEventListener('resize',()=>{if(RP.res&&!$('vRec').hidden){sizeCharts();drawReplay();}});
-function drawReplay(){const {res}=RP;if(!res)return;const i=RP.i,W=rpC.width,H=rpC.height,b=RP.box,sc=H/b.h,P=k=>[(res.X[k][i]-b.x0)*sc,(res.Y[k][i]-b.y0)*sc];
-  rx.fillStyle='#0a0e10';rx.fillRect(0,0,W,H);
-  if(RP.s.meta.sport!=='pullup'){const gy=(RP.ground-b.y0)*sc;rx.strokeStyle='rgba(198,244,50,.4)';rx.lineWidth=2;rx.beginPath();rx.moveTo(0,gy);rx.lineTo(W,gy);rx.stroke();}
-  if(res.valid[i]){const near=res.near,order=near==='R'?['l','c','r']:['r','c','l'];
-    for(const side of order)for(const [a,c,sd] of EDGES){if(sd!==side)continue;const [x1,y1]=P(a),[x2,y2]=P(c);if(![x1,y1,x2,y2].every(Number.isFinite))continue;const far=(sd==='l'&&near==='R')||(sd==='r'&&near==='L');
-      rx.globalAlpha=far?0.55:1;rx.strokeStyle=COL[sd];rx.lineWidth=far?4:6;rx.lineCap='round';rx.beginPath();rx.moveTo(x1,y1);rx.lineTo(x2,y2);rx.stroke();}
-    rx.globalAlpha=1;const [hx,hy]=P(0);rx.fillStyle=COL.c;rx.beginPath();rx.arc(hx,hy,10,0,7);rx.fill();}
-  else{rx.fillStyle='#8fa1ab';rx.font='16px system-ui';rx.fillText('此格未偵測到人物',16,H/2);}
-  const bo=i*ROW+BAT_OFF,fl=RP.flat,W0=RP.s.meta.W,H0=RP.s.meta.H;
-  if(Number.isFinite(fl[bo])){rx.strokeStyle='#ffffff';rx.lineWidth=7;rx.lineCap='round';rx.beginPath();rx.moveTo((fl[bo]*W0-b.x0)*sc,(fl[bo+1]*H0-b.y0)*sc);rx.lineTo((fl[bo+2]*W0-b.x0)*sc,(fl[bo+3]*H0-b.y0)*sc);rx.stroke();}
-  const ev=res.events.get(i)||'';if(ev){rx.fillStyle='rgba(198,244,50,.9)';rx.font='bold 20px system-ui';rx.fillText(ev.replace(/_/g,' '),16,32);}
-  let read=`<span>${res.T[i].toFixed(2)} s · 第 ${i+1}/${res.n} 格</span><span>膝角 左 ${fmt(res.knee.L[i])}° / 右 ${fmt(res.knee.R[i])}°</span><span>手肘 左 ${fmt(res.elb.L[i])}° / 右 ${fmt(res.elb.R[i])}°</span>`;
-  const sp=RP.s.meta.sport,u=(res.units||[]).filter(x=>x.t<=res.T[i]+0.001).at(-1);
-  if(sp==='run'&&u)read+=`<span>最近一步 #${u.n}（${u.side==='L'?'左':'右'}腳）步頻 ${fmt(u.cadence)}、觸地膝角 ${fmt(u.kneeStrike)}°、跨步距 ${fmt(u.overstrideCm)} cm</span>`;
-  if(sp==='walk'&&u)read+=`<span>最近一步 #${u.n}（${u.side==='L'?'左':'右'}腳觸地）步頻 ${fmt(u.cadence)}、髖伸展 ${fmt(u.hipExt,1)}°、腳跟著地角 ${fmt(u.footStrike,1)}°、手臂擺幅 ${fmt(u.armSwing)}°</span>`;
-  if(sp==='pullup'){read+=`<span>肩相對手腕 ${fmt(res.series.shoulderRel[i],1)} cm</span>`;if(u)read+=`<span>最近一下 #${u.n}：高度 ${fmt(u.topCm)} cm、幅度 ${fmt(u.romCm)} cm${u.muscleUp?'、上槓 ✓':''}</span>`;}
-  $('rpRead').innerHTML=read;$('rpSlider').value=i;drawCharts();}
-function drawCharts(){const {res}=RP,sr=RP.series,i=RP.i,W=chC.width,H=chC.height,dpr=devicePixelRatio;cx.fillStyle='#1d2830';cx.fillRect(0,0,W,H);
-  const t0=res.T[i]-2.5,t1=res.T[i]+2.5,X=t=>(t-t0)/(t1-t0)*W,pad=10*dpr,h1=H*0.42,h2=H*0.42,top2=H*0.52;
-  for(const mk of res.marks||[]){if(mk.t<t0||mk.t>t1)continue;cx.strokeStyle=mk.side==='L'?COL.l:mk.side==='R'?COL.r:COL.acc;cx.globalAlpha=.6;cx.setLineDash(mk.kind==='dash'?[4*dpr,4*dpr]:[]);cx.lineWidth=1.5*dpr;cx.beginPath();cx.moveTo(X(mk.t),0);cx.lineTo(X(mk.t),H);cx.stroke();}
-  cx.setLineDash([]);cx.globalAlpha=1;const j0=Math.max(0,res.T.findIndex(t=>t>=t0));
-  const series=(arr,top,hh,lo,hi,col,inv)=>{cx.strokeStyle=col;cx.lineWidth=2*dpr;cx.beginPath();let on=false;for(let j=j0;j<res.n&&res.T[j]<=t1;j++){const v=arr[j];if(!Number.isFinite(v)){on=false;continue;}let r=(v-lo)/(hi-lo);if(inv)r=1-r;const y=top+pad+(1-r)*(hh-2*pad);on?cx.lineTo(X(res.T[j]),y):cx.moveTo(X(res.T[j]),y);on=true;}cx.stroke();};
-  let lo=Infinity,hi=-Infinity;for(let j=j0;j<res.n&&res.T[j]<=t1;j++){const v=sr.top.arr[j];if(Number.isFinite(v)){lo=Math.min(lo,v);hi=Math.max(hi,v);}}
-  if(hi>lo)series(sr.top.arr,0,h1,lo,hi,'#e8eef1',sr.top.inv);series(sr.bot.L,top2,h2,sr.bot.lo,sr.bot.hi,COL.l);series(sr.bot.R,top2,h2,sr.bot.lo,sr.bot.hi,COL.r);
-  cx.fillStyle='#8fa1ab';cx.font=`${12*dpr}px system-ui`;cx.fillText(sr.top.name,6*dpr,14*dpr);if(hi>lo)cx.fillText(`範圍 ${((hi-lo)*(sr.top.px?res.cmPerPx:1)).toFixed(1)} cm`,140*dpr,14*dpr);
-  cx.fillText(`${sr.bot.name}（${sr.bot.lo}°–${sr.bot.hi}°）`,6*dpr,top2+14*dpr);cx.strokeStyle='#c6f432';cx.lineWidth=1.5*dpr;cx.beginPath();cx.moveTo(W/2,0);cx.lineTo(W/2,H);cx.stroke();
-  const OW=ovC.width,OH=ovC.height,T=res.T[res.n-1]||1;ox.fillStyle='#1d2830';ox.fillRect(0,0,OW,OH);
-  if(sr.ov==='cadence'){const [c0,c1,grid]=sr.cad,cr=c1-c0;ox.strokeStyle='rgba(255,255,255,.12)';for(const v of grid){const y=OH-(v-c0)/cr*OH;ox.beginPath();ox.moveTo(0,y);ox.lineTo(OW,y);ox.stroke();ox.fillStyle='#8fa1ab';ox.font=`${10*dpr}px system-ui`;ox.fillText(v,2*dpr,y-2*dpr);}
-    for(const st of res.units){if(!Number.isFinite(st.cadence))continue;const x=st.t/T*OW,y=OH-(Math.max(c0,Math.min(c1,st.cadence))-c0)/cr*OH;ox.fillStyle=st.quality==='outlier'?'#ff6b6b':(st.side==='L'?COL.l:COL.r);ox.beginPath();ox.arc(x,y,2.2*dpr,0,7);ox.fill();}}
-  else{const a=sr.top.arr;let l=Infinity,h=-Infinity;for(const v of a)if(Number.isFinite(v)){l=Math.min(l,v);h=Math.max(h,v);}
-    if(h>l){const Y=v=>{let r=(v-l)/(h-l);if(sr.top.inv)r=1-r;return 4*dpr+(1-r)*(OH-8*dpr);};ox.strokeStyle='#e8eef1';ox.lineWidth=1.2*dpr;ox.beginPath();let on=false;
-      for(let j=0;j<res.n;j++){const v=a[j];if(!Number.isFinite(v)){on=false;continue;}const x=res.T[j]/T*OW;on?ox.lineTo(x,Y(v)):ox.moveTo(x,Y(v));on=true;}ox.stroke();
-      for(const u of res.units||[]){ox.fillStyle=u.muscleUp?COL.acc:'#8fa1ab';ox.beginPath();ox.arc(u.t/T*OW,Y(a[u.i]),3*dpr,0,7);ox.fill();}}}
-  ox.strokeStyle='#c6f432';ox.lineWidth=2*dpr;const px=res.T[i]/T*OW;ox.beginPath();ox.moveTo(px,0);ox.lineTo(px,OH);ox.stroke();}
-$('rpSlider').addEventListener('input',e=>{RP.i=+e.target.value;drawReplay();});
-$('rpPrev').onclick=()=>{RP.i=Math.max(0,RP.i-1);drawReplay();};
-$('rpNext').onclick=()=>{RP.i=Math.min(RP.res.n-1,RP.i+1);drawReplay();};
-$('rpPrevU').onclick=()=>{const t=RP.res.T[RP.i],u=RP.res.units.filter(x=>RP.res.T[x.jump]<t-0.01).at(-1);if(u){RP.i=u.jump;drawReplay();}};
-$('rpNextU').onclick=()=>{const t=RP.res.T[RP.i],u=RP.res.units.find(x=>RP.res.T[x.jump]>t+0.01);if(u){RP.i=u.jump;drawReplay();}};
-ovC.addEventListener('click',e=>{const r=ovC.getBoundingClientRect(),t=(e.clientX-r.left)/r.width*RP.res.T[RP.res.n-1];RP.i=Math.max(0,RP.res.T.findIndex(x=>x>=t));drawReplay();});
-$('rpPlay').onclick=()=>{RP.playing=!RP.playing;$('rpPlay').textContent=RP.playing?'暫停':'播放';RP.last=performance.now();RP.clock=RP.res.T[RP.i];if(RP.playing)requestAnimationFrame(rpTick);};
-function rpTick(now){if(!RP.playing)return;RP.clock+=(now-RP.last)/1000*+$('rpSpeed').value;RP.last=now;while(RP.i<RP.res.n-1&&RP.res.T[RP.i+1]<=RP.clock)RP.i++;
-  if(RP.i>=RP.res.n-1){RP.playing=false;$('rpPlay').textContent='播放';}drawReplay();if(RP.playing)requestAnimationFrame(rpTick);}
-
-/* ---------- boot ---------- */
-$('ver').textContent='V'+APP_VER.replace(/\.0$/,'');
-loadSettings();
-(async()=>{await loadGoals(false);if(!goals.length)await loadGoals(true);pickStoredGoal();setSportUI();refreshBpmGoal();if(!$('wStep2').hidden)renderGoalList();})();
-renderRecords();setSportUI();
-window.__app={RP,openReplay,renderSummary,showTab,analyze,makePackage,loadGoals,metro,drive,get goals(){return goals;},get sess(){return sess;},setGoal:g=>{goalSel=g;setSportUI();}};
-
-</script>
+<script src="src/core.js"></script>
+<script type="module" src="src/app.js"></script>
 </body>
 </html>
